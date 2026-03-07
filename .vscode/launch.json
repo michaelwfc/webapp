@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type":"node",
+      "request":"launch",
+      "name":"node debugger current file",
+      "program": "${file}",
+      "console": "integratedTerminal"
+
+    },
+
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "launch Charome on localhost",
+      "url": "http://localhost:8080",
+      // "file": "${workspaceFolder}${pathSeparator}src${pathSeparator}frontend${pathSeparator}src${pathSeparator}index.html",
+      "webRoot": "${workspaceFolder}${pathSeparator}src${pathSeparator}frontend${pathSeparator}src"
+    },
+    // chrome --remote-debugging-port=9222 --user-data-dir="D:\jslab\tmp"
+    {
+      "type": "chrome",
+      "request": "attach",
+      "name": "Attach to browser",
+      "port": 9222
+    },
+  ]
+}

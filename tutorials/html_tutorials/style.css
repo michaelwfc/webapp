@@ -1,0 +1,60 @@
+/* <style> */
+
+body {
+    display: grid;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 20px;
+
+    background-color:white;
+    color: #141888;
+    margin:8px;
+    border: 5px solid red; /* CSS Box Model */
+
+}
+
+
+h1 {
+    background-color: #c1abab;
+    color: #148837;
+    font-size: 40px;
+    width: 900px;
+    margin-top: 10px;
+    /* margin-bottom: 10px; */
+    border-bottom: 5px solid black;
+}
+
+
+ol { text-decoration: line-through; }
+
+li {
+    color: #edd207;
+}
+
+
+/* class selector: small*/
+.small {
+    background-color: #c1abab;
+}
+
+table {
+    background-color: #c1abab;
+    position: relative;
+    top: 0;
+    left: 50%;
+    width: 10%;
+    height: 10%;
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity 0.5s;
+}
+
+/* id selector:  */
+table:hover, #b01:hover {
+    background-color: #d70606;
+}
+
+a:link {color: rgb(229, 55, 11); }
+
+a:visited { color: green; }
+
+/* </style> */
