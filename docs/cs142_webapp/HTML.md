@@ -120,7 +120,8 @@ In summary, `HTML5` is the modern evolution of `HTML`, `XML` focuses on data str
 HTML supports the same tags, same features, but allows quirkier syntax:
 
 - Can skip some end tags, such as `</br>, </p>` 
-- Not all attributes have to have values: `<select multiple>` - - Elements can overlap: `<p><b>first</p><p>second</b> third</p>`
+- Not all attributes have to have values: `<select multiple>` 
+- Elements can overlap: `<p><b>first</p><p>second</b> third</p>`
 
 Early browsers tried to "do the right thing" even in the face of incorrect HTML: 
 - Ignore unknown tags 

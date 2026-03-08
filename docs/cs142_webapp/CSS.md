@@ -1,3 +1,7 @@
+
+
+
+
 # Cascading Style Sheets (CSS)
 
 ## Style sheets were added to address this:
@@ -63,7 +67,7 @@ Must ultimately turn into red, green, and blue intensities between 0 and 255:
 - Percentage intensities: rgb(80%,80%,100%)
 
 
-## CSS Box Model
+# CSS Box Model
 
 ![image](../../images/CSS_Box_Model.png)
 
@@ -71,6 +75,42 @@ Must ultimately turn into red, green, and blue intensities between 0 and 255:
 Total element width = width + left padding + right padding + left border + right border + left margin + right margin
 
 Margin & Padding Transparent
+
+Yes, the HTML does use the CSS Box Model! Let me explain it, then split the files.
+
+## What is the CSS Box Model?
+
+Every HTML element is a rectangular box made of **4 layers**:
+
+```
+┌─────────────────────────────┐
+│           MARGIN            │  ← Space outside the border (pushes other elements away)
+│  ┌───────────────────────┐  │
+│  │        BORDER         │  │  ← The visible edge/outline of the element
+│  │  ┌─────────────────┐  │  │
+│  │  │     PADDING     │  │  │  ← Space inside the border (between border and content)
+│  │  │  ┌───────────┐  │  │  │
+│  │  │  │  CONTENT  │  │  │  │  ← The actual text/image/child elements
+│  │  │  └───────────┘  │  │  │
+│  │  └─────────────────┘  │  │
+│  └───────────────────────┘  │
+└─────────────────────────────┘
+```
+
+| Layer | What it does | Example |
+|---|---|---|
+| `margin` | Space **outside** the box | `margin: 18px` |
+| `border` | The visible **edge** | `border: 1px solid red` |
+| `padding` | Space **inside** the box | `padding: 28px 32px` |
+| `content` | The actual **content area** | set by `width` / `height` |
+
+**`box-sizing: border-box`** — By default, `width` only counts the content. With `border-box`, `width` includes padding + border too, which is almost always what you want.
+
+---
+
+Now let me split into separate files:Both files are ready. Here's a summary of where the Box Model appears in the code:
+
+
 
 ## CSS distance units
 
@@ -138,17 +178,22 @@ Fixed position (0,0) is top left corner
 - visibility: visible; - Element is normally displayed
 
 ## Flexbox and Grid layout 
+
+## Flexbox 
+Layout one dimension (row or column) of elements 
 -  display: flex; (Flexbox) 
+- [Documents of Flexible_box_layout](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Flexible_box_layout)
+-  Items flex to fill additional space and shrink to fit into smaller spaces. 
+-  Useful for web app layout: 
+   -  Divide up the available space equally among a bunch of elements 
+   -  Align of different sizes easily 
+   -  Key to handling different window and display sizes 
+ 
+### Grid 
+Layout in two dimensions (rows and columns) of elements 
 -  display: grid; (Grid) newer layout method 
-   -  Items flex to fill additional space and shrink to fit into smaller spaces. 
-   -  Useful for web app layout: 
-       -  Divide up the available space equally among a bunch of elements 
-       -  Align of different sizes easily 
-       -  Key to handling different window and display sizes 
--  Flexbox - Layout one dimension (row or column) of elements 
--  Grid - Layout in two dimensions (rows and columns) of elements 
 -  Covered in discussion section
--  
+  
 
 ## Some other CSS issues 
 - Inheritance 

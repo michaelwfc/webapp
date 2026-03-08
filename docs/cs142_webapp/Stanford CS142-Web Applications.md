@@ -98,4 +98,12 @@ The MERN stack uses the JavaScript language in both the browser and the server-s
 - ECMAScript® Language Specification, the comprehensive JavaScript standard document.
 
 
+## Valiate
+
+- [Valiate your HTML](http://validator.w3.org) 
+Your HTML file must be a valid XHTML 1.0 document that passes validation at http://validator.w3.org. In addition, your HTML and CSS must be clean, readable, properly indented, and well-structured.
+
+- [Valiate your CSS](http://jigsaw.w3.org/css-validator/)
+
+
 
