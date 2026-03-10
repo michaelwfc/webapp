@@ -1,31 +1,22 @@
-Reference:
-[An intro to Webpack: what it is and how to use it](https://www.freecodecamp.org/news/an-intro-to-webpack-what-it-is-and-how-to-use-it-8304ecdc3c60/)
-[mobx-react之Provider和inject的原理与实现](https://juejin.cn/post/6913531148329025549)
+# Reference:
+- [NodeJS](https://nodejs.org/en/)
+- [An intro to Webpack: what it is and how to use it](https://www.freecodecamp.org/news/an-intro-to-webpack-what-it-is-and-how-to-use-it-8304ecdc3c60/)
+- [mobx-react之Provider和inject的原理与实现](https://juejin.cn/post/6913531148329025549)
 
 
-# npm setting
-# https://registry.npmjs.org/
-npm config set registry https://registry.npm.taobao.org
-npm i webpack@4 安装不同版本的包
-npm search webpack-cli
-npm install– 根据 package.json 中的 dependencies 在当前目录安装包
-npm install 包名– 在当前目录安装包
-npm install 包名 –g– 全局模式安装包
-npm install 文件路径– 从本地安装
-npm install 包名 –registry=地址– 从镜像源安装
-npm remove 包名 – 删除一个模块
-npm i @webpack-cli/configtest
-npm ls
 
-# Node.js dependency
+# Node.js Introduction
+
+## Node.js dependency
 - ReactJS is a UI library
 - axios
 - Webpack is a static module bundler
 - HTMLWebpackPlugin to generate an HTML file to be used for serving bundled JavaScript file/files
 - express
 
-# node command
-madir rebot
+## node command
+
+mkdir rebot
 <!-- create a starter package and add a package.json file -->
 npm init
 
@@ -50,21 +41,38 @@ npm install react react-dom axios webpack webpack-dev-server --save
 echarts ant antd emoji-js gh-pages mobx mobx-react prop-types socket.io-client d3 dagre dagre-d3 graphlib --save
 
 
-# nodejs 启动
+## nodejs 启动
 <!-- 在项目目录下输入启动命令： -->
-## Run your entry point file directly
+<!-- Run your entry point file directly -->
 node src/app.js
-## node start:
+
+<!-- node start: -->
 1. 在 package.json 文件夹中的 scripts 节点下添加启动配置
 "scripts":{
 "start":"node src/app.js"
 }
-2. npm start
-##
+1. npm start
 node run dev
 
 # npm
 npm install installs dependencies into the node_modules/ directory, for the node project you're working on.
+
+## npm setting
+https://registry.npmjs.org/
+```bash
+npm config set registry https://registry.npm.taobao.org
+npm i webpack@4 安装不同版本的包
+npm search webpack-cli
+npm install– 根据 package.json 中的 dependencies 在当前目录安装包
+npm install 包名– 在当前目录安装包
+npm install 包名 –g– 全局模式安装包
+npm install 文件路径– 从本地安装
+npm install 包名 –registry=地址– 从镜像源安装
+npm remove 包名 – 删除一个模块
+npm i @webpack-cli/configtest
+npm ls
+```
+
 
 ## npm run build
 命令会执行一系列的构建步骤，如编译代码，压缩文件，混淆代码等，以便将项目打包成生产环境下可用的代码。
@@ -72,7 +80,7 @@ npm install installs dependencies into the node_modules/ directory, for the node
 例如，如果 "build" 字段设置为 "webpack --config webpack.config.js"，那么执行 "npm run build" 命令就相当于在命令行中运行 "webpack --config webpack.config.js"。
 
 
-# issuse:
+## issuse:
 - Error message "error:0308010C:digital envelope routines::unsupported"
 export NODE_OPTIONS=--openssl-legacy-provider
 
