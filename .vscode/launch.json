@@ -9,6 +9,14 @@
       "console": "integratedTerminal"
 
     },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Project 2 Tests",
+      "program": "${workspaceFolder}/cs142_projects/project2/run-tests-using-node.js",
+      "cwd": "${workspaceFolder}/cs142_projects/project2",
+      "console": "integratedTerminal"
+    },
 
     {
       "type": "chrome",

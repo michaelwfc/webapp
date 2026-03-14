@@ -1,8 +1,8 @@
 {
   "workbench.colorTheme": "Default Dark+",
   "files.autoSave": "onFocusChange",
-  // "editor.formatOnSave": true,
-  // "terminal.integrated.defaultProfile.windows": "Ubuntu-22.04 (WSL)",
+  "editor.formatOnSave": true,
+  "terminal.integrated.defaultProfile.windows": "Git Bash",
 
   "window.zoomLevel": 1,
   "autoDocstring.docstringFormat": "google-notypes",
