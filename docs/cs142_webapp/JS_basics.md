@@ -19,6 +19,8 @@
 - Not particularly similar to Java: More like C crossed with Self/Scheme
   C-like statements with everything objects, closures, garbage collection, etc.
 - Also known as ECMAScript
+- Originally programming conventions (i.e. patterns) rather than language features 
+  - ECMAScript adding language features (e.g. class, => , etc.)
 
 ### Some thoughts about JavaScript
 
@@ -423,7 +425,7 @@ function foobar(x) {
     if (x <= 1) {        
         return 1;    
         }    
-        return x*foobar(x-1); 
+    return x*foobar(x-1); 
         } 
 typeof foobar == ‘function’;  
 foobar.name == 'foobar' 
@@ -437,6 +439,11 @@ foobar.name == 'foobar'
 
 
 ### "First class" function example 
+
+What does "First-Class" mean?
+A language has first-class functions when functions are treated like any other value — just like a number, string, or object. 
+
+
 ```javascript
 let aFuncVar = function (x) {                  
     console.log('Func called with', x);                  
@@ -474,7 +481,7 @@ retVal 11
 - Name can be any string:  
   `let x = { "": "empty", "---": "dashes"} `
 - Referenced either like a structure or like a hash table with string keys: 
-```javascript
+  ```javascript
   bar.name or bar["name"] 
   x["---"]   // have to use hash format for illegal names 
   foo.nonExistent == undefined 
@@ -1073,4 +1080,5 @@ By following these steps, you'll have a fully functional JavaScript development 
 
 
 ## Debug JavaScript
+
 
