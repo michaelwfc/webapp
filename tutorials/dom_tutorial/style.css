@@ -1,0 +1,11 @@
+#div1 {
+  position: absolute; /* required — lets left/top actually move it */
+  width: 100px;
+  height: 100px;
+  background-color: lightblue;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none; /* prevents text selection while dragging */
+}

@@ -2,12 +2,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type":"node",
-      "request":"launch",
-      "name":"node debugger current file",
+      "type": "node",
+      "request": "launch",
+      "name": "node debugger current file",
       "program": "${file}",
       "console": "integratedTerminal"
-
     },
     {
       "type": "node",
@@ -17,11 +16,25 @@
       "cwd": "${workspaceFolder}/cs142_projects/project2",
       "console": "integratedTerminal"
     },
-
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Dom Tutorial with Node",
+      "program": "${workspaceFolder}/tutorials/dom_tutorial/dom_basics.js",
+      "cwd": "${workspaceFolder}/tutorials/dom_tutorial",
+      "console": "integratedTerminal"
+    },
     {
       "type": "chrome",
       "request": "launch",
-      "name": "launch Charome on localhost",
+      "name": "Debug dom with Chrome",
+      "file": "${workspaceFolder}/tutorials/dom_tutorial/example.html",
+      "cwd": "${workspaceFolder}/tutorials/dom_tutorial"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Charome on localhost",
       "url": "http://localhost:8080",
       // "file": "${workspaceFolder}${pathSeparator}src${pathSeparator}frontend${pathSeparator}src${pathSeparator}index.html",
       "webRoot": "${workspaceFolder}${pathSeparator}src${pathSeparator}frontend${pathSeparator}src"
@@ -32,6 +45,6 @@
       "request": "attach",
       "name": "Attach to browser",
       "port": 9222
-    },
+    }
   ]
 }
