@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Problem 2: Template Processor (5 points)
 In your project2 directory, make a new file named cs142-template-processor.js. The code for your Template Processor will go in this file.
@@ -20,7 +21,6 @@ unbalanced brackets - {{bar}}}
 stray brackets in any property string - da{y or da}y
 
  */
-
 
 /**
 Regex explanation: /\{\{([^}]+)\}\}/g
@@ -57,9 +57,6 @@ str.replace(/\{\{([^}]+)\}\}/g, function(match, group1, offset, original) {
 });
  */
 
-
-
-
 /**
 
 // Define the regex — NOTE: no quotes! A regex literal uses / /, not " "
@@ -94,14 +91,13 @@ class Cs142TemplateProcessor {
  * 
  */
 
-
 /**
  * Cs142TemplateProcessor
  * Constructor function (prototype-based, not class keyword)
  * @param {string} template - the template string containing {{property}} placeholders
  */
-function Cs142TemplateProcessor(template) { 
-    this.template = template;
+function Cs142TemplateProcessor(template) {
+  this.template = template;
 }
 
 /**
@@ -112,22 +108,20 @@ function Cs142TemplateProcessor(template) {
  * @param {object} dictionary - key/value pairs to fill into template
  * @returns {string} - the filled-in string
  */
-Cs142TemplateProcessor.prototype.fillIn = function (dictionary) { 
-    const regex = /\{\{([^}]+)\}\}/g;
+Cs142TemplateProcessor.prototype.fillIn = function (dictionary) {
+  const regex = /\{\{([^}]+)\}\}/g;
 
-    function replace_match_group(match, property_name) {
-            if (dictionary[property_name]!== undefined){
-                return dictionary[property_name];
-            }else{
-                return "";
-            }
+  function replace_match_group(match, property_name) {
+    if (dictionary[property_name] !== undefined) {
+      return dictionary[property_name];
+    } else {
+      return "";
+    }
+  }
 
-        }
-
-    let result = this.template.replace(regex, replace_match_group);
-    return result;
+  const result = this.template.replace(regex, replace_match_group);
+  return result;
 };
-
 
 /**
 

@@ -24,7 +24,7 @@
   "python.linting.enabled": true,
   "python.linting.pylintEnabled": false,
   "python.formatting.provider": "yapf",
-  "python.linting.flake8Args": ["--max--line-length=248"],
+  "python.linting.flake8Args": ["--max--line-length=100"],
 
   "[python]": {
     "editor.formatOnType": true

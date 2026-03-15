@@ -1,13 +1,11 @@
 {
-  "extends": [
-    "eslint:recommended",
-    "eslint-config-airbnb-base"
-  ],
+  "extends": ["eslint:recommended", "eslint-config-airbnb-base"],
   "parserOptions": {
     "sourceType": "script" // We do not use ES6/ES2015 modules
   },
   "rules": {
     // CS 142 rules
+    "max-len": ["error", { "code": 100, "ignoreComments": true }],
     "no-console": 0,
     "no-empty": ["error", { "allowEmptyCatch": true }],
     "no-restricted-syntax": [

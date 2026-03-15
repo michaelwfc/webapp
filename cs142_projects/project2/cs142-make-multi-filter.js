@@ -52,7 +52,7 @@ function cs142MakeMultiFilter(originalArray) {
       //  to originalArray
       //  so inside callback:  this === originalArray
     }
-    
+
     // Return itself to allow chaining
     // allows: filter(...).filter(...).filter(...)
     return arrayFilterer;
@@ -60,8 +60,6 @@ function cs142MakeMultiFilter(originalArray) {
 
   return arrayFilterer;
 }
-
-
 
 /**
 
