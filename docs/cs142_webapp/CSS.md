@@ -146,7 +146,7 @@ Here is the CSS distance units information rewritten as a Markdown table:
 - border-left-width
 - border-right-color
 - border-right-style
-- border-right-width
+- border-right-widthc
   etc.
 
 ## Position property

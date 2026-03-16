@@ -34,8 +34,15 @@
     {
       "type": "chrome",
       "request": "launch",
-      "name": "Debug project3 with Chrome",
+      "name": "Debug project3-problem1 with Chrome",
       "file": "${workspaceFolder}/cs142_projects/project3/datepicker.html",
+      "cwd": "${workspaceFolder}/cs142_projects/project3"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug project3-problem2 with Chrome",
+      "file": "${workspaceFolder}/cs142_projects/project3/cs142-test-table.html",
       "cwd": "${workspaceFolder}/cs142_projects/project3"
     },
 
