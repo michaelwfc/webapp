@@ -27,10 +27,18 @@
     {
       "type": "chrome",
       "request": "launch",
-      "name": "Debug dom with Chrome",
+      "name": "Debug dom_tutorial with Chrome",
       "file": "${workspaceFolder}/tutorials/dom_tutorial/example.html",
       "cwd": "${workspaceFolder}/tutorials/dom_tutorial"
     },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug project3 with Chrome",
+      "file": "${workspaceFolder}/cs142_projects/project3/datepicker.html",
+      "cwd": "${workspaceFolder}/cs142_projects/project3"
+    },
+
     {
       "type": "chrome",
       "request": "launch",

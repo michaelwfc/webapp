@@ -1,0 +1,46 @@
+.calendar {
+  width: 320px;
+  font-family: Arial;
+}
+
+.calendar-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+/* 
+.weekdays div and .calendar-grid div are CSS descendant selectors. 
+They apply styles to div elements inside specific parent elements
+
+.weekdays div：Select all <div> elements inside an element with class weekdays.
+.calendar-grid div： Select all <div> elements inside .calendar-grid.
+ */
+.weekdays,
+.calendar-grid {
+  display: grid;
+  /* 7 equal columns 
+  This single line is what makes the calendar automatically align perfectly into weeks without any manual positioning.
+  */
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.weekdays div {
+  text-align: center;
+  font-weight: bold;
+}
+
+.calendar-grid div {
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.other-month {
+  color: #bbb;
+}
+
+.current-month:hover {
+  background: #eee;
+}
