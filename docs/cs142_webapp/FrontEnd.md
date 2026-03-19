@@ -164,3 +164,4 @@ _Examples: React.js, Vue.js, Angular (v2)_
 - **Virtual DOM**
   - Renders the view into a DOM-like data structure (not the real DOM)
   - Benefits: performance, server-side rendering, native apps
+
