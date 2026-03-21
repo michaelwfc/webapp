@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+  <title>chat app</title>
+  <link rel="stylesheet" href="./style.css"></link>
+</head>
+
+
+  <body>
+    <h1>Michael Chat Bot</h1>
+    <div id="chat-history"></div>
+   
+    <div id="input-area">
+      <!-- 
+      <input> is the correct tag for single-line text entry.
+      id="user-input"  → so JS can find it with getElementById()
+      type="text"      → plain text keyboard input
+      placeholder      → grey hint text when empty
+      -->
+      <input id="user-input" type="text" placeholder="Type a message..."/>
+      
+      <!-- onclick calls sendMessage() in script.js when clicked -->
+      <button onclick="sendMessage()">Send</button>
+
+    </div>
+        
+    <script src="script.js"></script>
+  </body>
+</html>

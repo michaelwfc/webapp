@@ -1,0 +1,89 @@
+/* ── Reset & page layout ───────────────────────── */
+* {
+  box-sizing: border-box;
+  margin: 10px;
+  padding: 10px;
+}
+
+body {
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column; /* stack children vertically */
+  width: 50vw;
+  height: 90vh; /* full viewport height */
+  /* 90% means 90% of the parent element's height. The parent of body is html, which has no explicit height set — so 90% computes to nothing, and the body collapses. 
+  100vh means 100% of the viewport height which is always what you want. */
+  background: #f0f0f0;
+}
+
+h1 {
+  text-align: center;
+  color: blue;
+}
+
+#chat-history {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* take up all remaining space between h1 and input */
+  overflow-y: auto; /* scroll when messages overflow */
+  gap: 10px; /* space between messages */
+}
+
+#input-area {
+  display: flex;
+  gap: 10px;
+  background: white;
+  border-top: 1px solid #ccc;
+}
+#user-input {
+  /* border: 1px solid black; */
+  flex: 1; /* take up all width except button */
+  background: #fff;
+  border: 1px solid black;
+  color: rgb(0, 8, 0);
+  /* outline: none; */
+}
+
+#use-input:focus {
+  border-color: yellow;
+}
+
+button {
+  background-color: rgb(11, 227, 11);
+  color: rgb(227, 11, 11);
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: blue;
+}
+
+/* ── Each message bubble ───────────────────────── */
+.message {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  line-height: 1.5;
+  font-size: 15px;
+  white-space: pre-wrap; /* preserve line breaks in bot responses */
+}
+
+/* User bubble: right side, blue */
+.user-message {
+  background: #4a90d9;
+  color: white;
+  align-self: flex-end; /* push to right */
+  border-bottom-right-radius: 4px;
+}
+
+/* Bot bubble: left side, white */
+.bot-message {
+  background: white;
+  color: #333;
+  align-self: flex-start; /* push to left */
+  border-bottom-left-radius: 4px;
+  border: 1px solid #ddd;
+}
