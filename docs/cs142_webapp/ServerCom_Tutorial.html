@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controller/Server Communication Tutorial</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a25;
+    --border: #2a2a3a;
+    --accent: #6af0c8;
+    --accent2: #f06a8e;
+    --accent3: #a06af0;
+    --accent4: #f0c86a;
+    --text: #e8e8f0;
+    --muted: #7070a0;
+    --code-bg: #0d0d15;
+    --radius: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(106,240,200,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(106,240,200,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .layout {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-logo .label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .sidebar-logo h2 {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .nav-section {
+    padding: 16px 16px 0;
+  }
+
+  .nav-section-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 8px;
+    margin-bottom: 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    margin-bottom: 2px;
+  }
+
+  .nav-item:hover {
+    color: var(--text);
+    background: var(--surface2);
+  }
+
+  .nav-item.active {
+    color: var(--accent);
+    background: rgba(106,240,200,0.07);
+    border-color: rgba(106,240,200,0.15);
+  }
+
+  .nav-item .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    width: 20px;
+    flex-shrink: 0;
+  }
+
+  .nav-item.active .nav-num { color: var(--accent); }
+
+  .progress-bar-wrap {
+    margin: auto 16px 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .progress-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    border-radius: 99px;
+    transition: width 0.5s ease;
+  }
+
+  /* MAIN CONTENT */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    min-width: 0;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 60px 60px 50px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 350px; height: 350px;
+    background: radial-gradient(circle, rgba(106,240,200,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(106,240,200,0.25);
+    padding: 5px 12px;
+    border-radius: 99px;
+  }
+
+  .hero h1 {
+    font-size: 46px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 18px;
+    background: linear-gradient(135deg, #e8e8f0 30%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 600px;
+    line-height: 1.7;
+  }
+
+  .hero-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  /* SECTION */
+  .section {
+    display: none;
+    padding: 50px 60px;
+    animation: fadeIn 0.35s ease;
+  }
+
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(106,240,200,0.08);
+    border: 1px solid rgba(106,240,200,0.2);
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  .section h2 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover { border-color: rgba(106,240,200,0.2); }
+
+  .card h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card p, .card li {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  .card ul { padding-left: 20px; }
+  .card li { margin-bottom: 6px; }
+  .card li strong { color: var(--text); }
+
+  /* CODE BLOCKS */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin: 20px 0;
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+
+  .copy-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .copy-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .code-block pre {
+    padding: 20px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #c8d3e6;
+  }
+
+  .kw { color: #a06af0; }
+  .fn { color: #6af0c8; }
+  .str { color: #f0c86a; }
+  .cm { color: #505070; font-style: italic; }
+  .num { color: #f06a8e; }
+  .prop { color: #a8d0f0; }
+
+  /* STATE TABLE */
+  .state-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 16px 0;
+  }
+
+  .state-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    background: rgba(106,240,200,0.04);
+  }
+
+  .state-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--muted);
+  }
+
+  .state-table td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent4);
+  }
+
+  .state-table td:nth-child(2) {
+    color: var(--accent2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* CALLOUT */
+  .callout {
+    padding: 16px 20px;
+    border-radius: var(--radius);
+    margin: 20px 0;
+    font-size: 14px;
+    line-height: 1.6;
+    border-left: 3px solid;
+  }
+
+  .callout.info {
+    background: rgba(106,240,200,0.05);
+    border-color: var(--accent);
+    color: #a0d0c0;
+  }
+
+  .callout.warn {
+    background: rgba(240,200,106,0.05);
+    border-color: var(--accent4);
+    color: #c0b080;
+  }
+
+  .callout.tip {
+    background: rgba(160,106,240,0.05);
+    border-color: var(--accent3);
+    color: #b0a0d0;
+  }
+
+  .callout strong { color: var(--text); }
+
+  /* TWO COL */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+
+  /* PYRAMID VIZ */
+  .pyramid-viz {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin: 20px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pyramid-viz::before {
+    content: '⚠ Pyramid of Doom';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 10px;
+    color: var(--accent4);
+    letter-spacing: 1px;
+  }
+
+  .pyramid-line { color: var(--muted); transition: color 0.3s; }
+  .pyramid-line:hover { color: var(--text); }
+  .indent-1 { margin-left: 20px; }
+  .indent-2 { margin-left: 40px; }
+  .indent-3 { margin-left: 60px; }
+  .indent-4 { margin-left: 80px; }
+  .pyramid-key { color: #a06af0; }
+  .pyramid-fn { color: #6af0c8; }
+  .pyramid-str { color: #f0c86a; }
+
+  /* QUIZ */
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-top: 30px;
+  }
+
+  .quiz-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent4);
+    margin-bottom: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  .quiz-q {
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .quiz-option {
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--muted);
+    transition: all 0.2s;
+    background: var(--code-bg);
+  }
+
+  .quiz-option:hover:not(.answered) {
+    border-color: rgba(106,240,200,0.3);
+    color: var(--text);
+  }
+
+  .quiz-option.correct {
+    border-color: var(--accent);
+    background: rgba(106,240,200,0.08);
+    color: var(--accent);
+  }
+
+  .quiz-option.wrong {
+    border-color: var(--accent2);
+    background: rgba(240,106,142,0.08);
+    color: var(--accent2);
+  }
+
+  .quiz-feedback {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--muted);
+    display: none;
+    line-height: 1.6;
+  }
+
+  .quiz-feedback.visible { display: block; }
+  .quiz-feedback.correct-fb { color: var(--accent); }
+  .quiz-feedback.wrong-fb { color: var(--accent2); }
+
+  /* FLOW DIAGRAM */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 20px 0;
+    overflow-x: auto;
+    padding: 4px;
+  }
+
+  .flow-step {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    flex-shrink: 0;
+    text-align: center;
+    min-width: 120px;
+  }
+
+  .flow-step .step-icon { font-size: 20px; margin-bottom: 4px; }
+  .flow-step .step-name { font-size: 12px; color: var(--text); font-weight: 600; }
+  .flow-step .step-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .flow-arrow {
+    color: var(--accent);
+    font-size: 18px;
+    padding: 0 8px;
+    flex-shrink: 0;
+  }
+
+  /* NAV BUTTONS */
+  .nav-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 40px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 11px 22px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0a0a0f;
+  }
+
+  .btn-primary:hover {
+    background: #8af8d8;
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .section-intro {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.75;
+    margin-bottom: 28px;
+    max-width: 700px;
+  }
+
+  /* CRUD TABLE */
+  .crud-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .crud-cell {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 14px;
+    text-align: center;
+  }
+
+  .crud-method {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .crud-op {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .m-get { color: #6af0c8; }
+  .m-post { color: #f0c86a; }
+  .m-put { color: #a06af0; }
+  .m-delete { color: #f06a8e; }
+
+  /* Transport comparison */
+  .transport-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+
+  .transport-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .transport-card h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .transport-card ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .transport-card li {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 3px 0;
+    padding-left: 14px;
+    position: relative;
+  }
+
+  .transport-card li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    font-size: 10px;
+  }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="label">CS142 — Web Apps</div>
+      <h2>Controller/Server Communication</h2>
+    </div>
+
+    <div style="padding: 16px; flex: 1; overflow-y: auto;">
+      <div class="nav-section-label" style="padding: 0 8px; margin-bottom: 10px;">Sections</div>
+
+      <div class="nav-item active" onclick="goTo(0)">
+        <span class="nav-num">01</span> Introduction & AJAX
+      </div>
+      <div class="nav-item" onclick="goTo(1)">
+        <span class="nav-num">02</span> XMLHttpRequest
+      </div>
+      <div class="nav-item" onclick="goTo(2)">
+        <span class="nav-num">03</span> REST APIs
+      </div>
+      <div class="nav-item" onclick="goTo(3)">
+        <span class="nav-num">04</span> Axios & Fetch
+      </div>
+      <div class="nav-item" onclick="goTo(4)">
+        <span class="nav-num">05</span> Promises
+      </div>
+      <div class="nav-item" onclick="goTo(5)">
+        <span class="nav-num">06</span> async / await
+      </div>
+      <div class="nav-item" onclick="goTo(6)">
+        <span class="nav-num">07</span> Transports & RPC
+      </div>
+      <div class="nav-item" onclick="goTo(7)">
+        <span class="nav-num">08</span> GraphQL
+      </div>
+      <div class="nav-item" onclick="goTo(8)">
+        <span class="nav-num">09</span> Quiz
+      </div>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-label">
+        <span>Progress</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-eyebrow">📡 CS142 Lecture Notes</div>
+      <h1>Controller/Server<br>Communication</h1>
+      <p>Master how controllers fetch models from servers — covering AJAX, REST, Promises, async/await, WebSockets, RPC, and GraphQL.</p>
+      <div class="hero-tags">
+        <span class="tag">XMLHttpRequest</span>
+        <span class="tag">REST</span>
+        <span class="tag">Axios</span>
+        <span class="tag">Promises</span>
+        <span class="tag">async/await</span>
+        <span class="tag">WebSockets</span>
+        <span class="tag">GraphQL</span>
+      </div>
+    </div>
+
+    <!-- SECTION 0: INTRODUCTION -->
+    <div class="section active" id="sec-0">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <h2>Introduction & AJAX</h2>
+      </div>
+      <p class="section-intro">
+        The Controller in MVC needs to fetch model data from the server. The browser is already talking to a web server — so why not use that connection?
+      </p>
+
+      <div class="card">
+        <h3>🧩 Controller's Role</h3>
+        <ul>
+          <li>Primary job: <strong>fetch the model</strong> for the view</li>
+          <li>May also handle authentication and other server communication</li>
+          <li>The browser is already connected to a web server — reuse that!</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>📜 History of AJAX</h3>
+        <ul>
+          <li>Early approach: use HTTP requests from JavaScript for the model</li>
+          <li>Microsoft added a DOM extension — because they liked XML, it was named <strong>XMLHttpRequest</strong></li>
+          <li>Allows JavaScript to do HTTP requests <em>without</em> inserting DOM elements</li>
+          <li>Became wildly popular as <strong>AJAX</strong> — Asynchronous JavaScript and XML</li>
+          <li>Despite the name, AJAX can carry XML or <em>anything else</em> — most often <strong>JSON</strong></li>
+        </ul>
+      </div>
+
+      <div class="flow">
+        <div class="flow-step">
+          <div class="step-icon">🖥</div>
+          <div class="step-name">View</div>
+          <div class="step-sub">Needs data</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="step-icon">⚙️</div>
+          <div class="step-name">Controller</div>
+          <div class="step-sub">Fetches model</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="step-icon">📡</div>
+          <div class="step-name">AJAX Request</div>
+          <div class="step-sub">XMLHttpRequest</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="step-icon">🗄</div>
+          <div class="step-name">Web Server</div>
+          <div class="step-sub">Returns JSON</div>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <strong>Key Insight:</strong> AJAX (XMLHttpRequest) is just a regular HTTP request made by JavaScript in the background — no page reload required.
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-primary" onclick="goTo(1)">Next: XMLHttpRequest →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 1: XHR -->
+    <div class="section" id="sec-1">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <h2>XMLHttpRequest</h2>
+      </div>
+      <p class="section-intro">
+        <code style="color:var(--accent); background:var(--code-bg); padding:2px 6px; border-radius:4px; font-family:JetBrains Mono,monospace;">XMLHttpRequest</code> is the low-level API that enables HTTP requests from JavaScript. It uses an event-based model.
+      </p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">JAVASCRIPT — Sending a Request</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="kw">var</span> xhr = <span class="kw">new</span> <span class="fn">XMLHttpRequest</span>();
+xhr.<span class="prop">onreadystatechange</span> = xhrHandler;
+xhr.<span class="fn">open</span>(<span class="str">"GET"</span>, url);   <span class="cm">// Any HTTP method works: GET, POST, PUT, DELETE</span>
+xhr.<span class="fn">send</span>();           <span class="cm">// Fires the request</span></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">JAVASCRIPT — Event Handler</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="kw">function</span> <span class="fn">xhrHandler</span>(event) {
+  <span class="cm">// "this" is the xhr object</span>
+  <span class="kw">if</span> (<span class="kw">this</span>.<span class="prop">readyState</span> != <span class="num">4</span>) { <span class="cm">// 4 = DONE</span>
+    <span class="kw">return</span>;
+  }
+  <span class="kw">if</span> (<span class="kw">this</span>.<span class="prop">status</span> != <span class="num">200</span>) {   <span class="cm">// 200 = OK</span>
+    <span class="kw">return</span>; <span class="cm">// Handle error...</span>
+  }
+
+  <span class="kw">let</span> text = <span class="kw">this</span>.<span class="prop">responseText</span>;
+  <span class="kw">let</span> data = JSON.<span class="fn">parse</span>(text);   <span class="cm">// Modern: parse as JSON</span>
+}</pre>
+      </div>
+
+      <div class="card">
+        <h3>📊 readyState Values</h3>
+        <table class="state-table">
+          <tr>
+            <th>State</th><th>Code</th><th>Description</th>
+          </tr>
+          <tr><td>UNSENT</td><td>0</td><td>open() not called yet</td></tr>
+          <tr><td>OPENED</td><td>1</td><td>send() has been called</td></tr>
+          <tr><td>HEADERS_RECEIVED</td><td>2</td><td>Headers and status available</td></tr>
+          <tr><td>LOADING</td><td>3</td><td>Downloading — responseText has partial data</td></tr>
+          <tr><td>DONE</td><td>4</td><td>Operation complete ✓</td></tr>
+        </table>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <h3>📥 Response Formats</h3>
+          <ul>
+            <li><strong>responseText</strong> — raw string</li>
+            <li><strong>responseXML</strong> — XML document</li>
+            <li>Can also set/read request/response headers</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🔗 Encoding the Model in the Request</h3>
+          <ul>
+            <li><strong>URL path:</strong> <code style="color:var(--accent4); font-family:monospace;">/userModel/78237489/fullname</code></li>
+            <li><strong>Query params:</strong> <code style="color:var(--accent4); font-family:monospace;">?id=78237489</code></li>
+            <li><strong>Request body:</strong> POST with form-encoded data</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <strong>Old-school AJAX patterns to avoid:</strong> Setting <code>elem.innerHTML = xhr.responseText</code> (HTML response) or using <code>eval(xhr.responseText)</code> (JS response). The modern way: parse JSON with <code>JSON.parse()</code>.
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" onclick="goTo(0)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(2)">Next: REST APIs →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 2: REST -->
+    <div class="section" id="sec-2">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <h2>REST APIs</h2>
+      </div>
+      <p class="section-intro">
+        REST (Representational State Transfer) provides design guidelines for web app-to-server communication. Introduced in a 2000 PhD dissertation, it became the dominant API style.
+      </p>
+
+      <div class="card">
+        <h3>🏛 Core REST Principles</h3>
+        <ul>
+          <li>Server exports <strong>resources</strong> with unique names (URIs)</li>
+          <li>Servers should be <strong>stateless</strong> — enables load balancing and caching</li>
+          <li>HTTP methods map to <strong>CRUD</strong> operations on resources</li>
+          <li>Collection URI: <code style="color:var(--accent4); font-family:monospace;">http://example.com/photo/</code></li>
+          <li>Resource URI: <code style="color:var(--accent4); font-family:monospace;">http://example.com/photo/78237489</code></li>
+        </ul>
+      </div>
+
+      <div class="crud-grid">
+        <div class="crud-cell">
+          <div class="crud-method m-get">GET</div>
+          <div class="crud-op">Read</div>
+        </div>
+        <div class="crud-cell">
+          <div class="crud-method m-post">POST</div>
+          <div class="crud-op">Create</div>
+        </div>
+        <div class="crud-cell">
+          <div class="crud-method m-put">PUT</div>
+          <div class="crud-op">Update</div>
+        </div>
+        <div class="crud-cell">
+          <div class="crud-method m-delete">DELETE</div>
+          <div class="crud-op">Delete</div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">REST API Examples</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="cm">// Read a collection</span>
+GET  /photos              → <span class="cm">List all photos</span>
+
+<span class="cm">// Read a specific resource</span>
+GET  /photos/<span class="num">78237489</span>     → <span class="cm">Get photo 78237489</span>
+
+<span class="cm">// Create a new resource</span>
+POST /photos              → <span class="cm">Create a new photo</span>
+
+<span class="cm">// Update a resource</span>
+PUT  /photos/<span class="num">78237489</span>     → <span class="cm">Update photo 78237489</span>
+
+<span class="cm">// Delete a resource</span>
+DELETE /photos/<span class="num">78237489</span>  → <span class="cm">Delete photo 78237489</span></pre>
+      </div>
+
+      <div class="card">
+        <h3>📐 REST API Design Process</h3>
+        <ul>
+          <li><strong>Step 1:</strong> Define the resources (Photos, Users, Comments…)</li>
+          <li><strong>Step 2:</strong> Give them unique URIs</li>
+          <li><strong>Step 3:</strong> Map CRUD operations to HTTP methods</li>
+          <li><strong>Step 4:</strong> Extend where needed (e.g. transactions across resources)</li>
+        </ul>
+      </div>
+
+      <div class="callout tip">
+        <strong>Honest Assessment:</strong> REST has good ideas but doesn't work for everything. It works best for straightforward resource operations. Complex operations (fetching many resources at once, transactions) often need to extend or break REST conventions.
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" onclick="goTo(1)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(3)">Next: Axios & Fetch →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 3: AXIOS -->
+    <div class="section" id="sec-3">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <h2>Axios & Fetch</h2>
+      </div>
+      <p class="section-intro">
+        React frameworks prefer higher-level HTTP clients over raw XMLHttpRequest. Axios is the most popular — a Promise-based wrapper that's cleaner and more powerful.
+      </p>
+
+      <div class="card">
+        <h3>⚡ Why Axios?</h3>
+        <ul>
+          <li>Promise-based — no callback nesting</li>
+          <li>Automatically serializes/deserializes JSON</li>
+          <li>Works in browser and Node.js</li>
+          <li>Similar browser-native API: <code style="color:var(--accent4); font-family:monospace;">fetch()</code></li>
+        </ul>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">JAVASCRIPT — Axios CRUD Methods</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="cm">// REST Read (GET)</span>
+<span class="kw">let</span> result = axios.<span class="fn">get</span>(URL);
+
+<span class="cm">// REST Create (POST) — object is JSON-encoded into body</span>
+<span class="kw">let</span> result = axios.<span class="fn">post</span>(URL, object);
+
+<span class="cm">// REST Update (PUT)</span>
+<span class="kw">let</span> result = axios.<span class="fn">put</span>(URL, object);
+
+<span class="cm">// REST Delete (DELETE)</span>
+<span class="kw">let</span> result = axios.<span class="fn">delete</span>(URL);</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">JAVASCRIPT — Handling Responses</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre>axios.<span class="fn">get</span>(URL)
+  .<span class="fn">then</span>((response) => {
+    <span class="cm">// response.status     → e.g. 200</span>
+    <span class="cm">// response.statusText → e.g. "OK"</span>
+    <span class="cm">// response.data       → parsed JSON body</span>
+    console.<span class="fn">log</span>(response.<span class="prop">data</span>);
+  })
+  .<span class="fn">catch</span>((err) => {
+    <span class="cm">// Non-2xx: err.response.{status, data, headers}</span>
+    <span class="cm">// No reply: inspect err.request</span>
+    console.<span class="fn">error</span>(err);
+  });</pre>
+      </div>
+
+      <div class="callout info">
+        <strong>Note:</strong> <code>axios.get(URL)</code> returns a <strong>Promise</strong> — no callback is specified inline. You chain <code>.then()</code> to handle the result. This brings us to the next section: Promises.
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" onclick="goTo(2)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(4)">Next: Promises →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 4: PROMISES -->
+    <div class="section" id="sec-4">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <h2>Promises</h2>
+      </div>
+      <p class="section-intro">
+        Callbacks are the traditional way to handle async code — but they have serious problems. Promises are a cleaner alternative.
+      </p>
+
+      <div class="card">
+        <h3>😤 Problems with Callbacks</h3>
+        <ul>
+          <li><strong>Out-of-order execution</strong> — code runs in non-obvious order</li>
+          <li><strong>Pyramid of Doom</strong> — deeply nested callbacks are hard to read</li>
+          <li><strong>Scattered control flow</strong> — logic jumps between functions</li>
+        </ul>
+      </div>
+
+      <div class="pyramid-viz">
+        <div class="pyramid-line"><span class="pyramid-fn">fs.ReadFile</span>(fileName, <span class="kw">function</span>(error, fileData) {</div>
+        <div class="pyramid-line indent-1"><span class="pyramid-fn">doSomethingOnData</span>(fileData, <span class="kw">function</span>(tempData1) {</div>
+        <div class="pyramid-line indent-2"><span class="pyramid-fn">doSomethingMoreOnData</span>(tempData1, <span class="kw">function</span>(tempData2) {</div>
+        <div class="pyramid-line indent-3"><span class="pyramid-fn">finalizeData</span>(tempData2, <span class="kw">function</span>(result) {</div>
+        <div class="pyramid-line indent-4"><span class="pyramid-fn">doneCallback</span>(result); <span class="cm">// ← buried 4 levels deep!</span></div>
+        <div class="pyramid-line indent-3">}); });</div>
+        <div class="pyramid-line indent-2">});</div>
+        <div class="pyramid-line">});</div>
+      </div>
+
+      <div class="card">
+        <h3>💡 The Promise Idea</h3>
+        <p>Instead of passing a callback, return a <em>promise</em> that will be filled in when done:</p>
+        <div style="margin-top:12px;">
+          <div class="code-block" style="margin:0;">
+            <div class="code-header">
+              <span class="code-lang">BEFORE (callback)</span>
+            </div>
+            <pre><span class="fn">doSomething</span>(args, doneCallback);</pre>
+          </div>
+          <div style="text-align:center; padding:8px; color:var(--accent); font-size:20px;">↓</div>
+          <div class="code-block" style="margin:0;">
+            <div class="code-header">
+              <span class="code-lang">AFTER (promise)</span>
+            </div>
+            <pre><span class="kw">let</span> donePromise = <span class="fn">doSomething</span>(args);
+<span class="cm">// Filled in when operation completes</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">JAVASCRIPT — Chaining Promises (No Pyramid!)</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="kw">return</span> <span class="fn">myReadFile</span>(fileName)
+  .<span class="fn">then</span>((fileData) => <span class="fn">doSomethingOnData</span>(fileData))
+  .<span class="fn">then</span>((data)     => <span class="fn">finalizeData</span>(data))
+  .<span class="fn">catch</span>(errorHandlingFunc);</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">JAVASCRIPT — Converting Callback to Promise</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="kw">function</span> <span class="fn">myReadFile</span>(filename) {
+  <span class="kw">return new</span> <span class="fn">Promise</span>(<span class="kw">function</span>(fulfill, reject) {
+    fs.<span class="fn">readFile</span>(filename, <span class="kw">function</span>(err, res) {
+      <span class="kw">if</span> (err)
+        <span class="fn">reject</span>(err);
+      <span class="kw">else</span>
+        <span class="fn">fulfill</span>(res);
+    });
+  });
+}</pre>
+      </div>
+
+      <div class="callout tip">
+        <strong>Promise → Callback:</strong> Easy — just call <code>.then(callbackFunc)</code><br>
+        <strong>Callback → Promise:</strong> Wrap with <code>new Promise(function(fulfill, reject) {...})</code>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" onclick="goTo(3)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(5)">Next: async/await →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 5: ASYNC/AWAIT -->
+    <div class="section" id="sec-5">
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <h2>async / await</h2>
+      </div>
+      <p class="section-intro">
+        The <code style="color:var(--accent); background:var(--code-bg); padding:2px 6px; border-radius:4px; font-family:monospace;">async</code> and <code style="color:var(--accent); background:var(--code-bg); padding:2px 6px; border-radius:4px; font-family:monospace;">await</code> keywords are syntactic sugar over Promises, making async code look and read like synchronous code.
+      </p>
+
+      <div class="two-col">
+        <div class="card">
+          <h3>🔑 async keyword</h3>
+          <p>Declares a function to return a Promise automatically.</p>
+          <div class="code-block" style="margin-top:12px;">
+            <pre><span class="kw">async function</span> <span class="fn">returnOne</span>() {
+  <span class="kw">return</span> <span class="num">1</span>;   <span class="cm">// returns a Promise!</span>
+}</pre>
+          </div>
+        </div>
+        <div class="card">
+          <h3>⏳ await keyword</h3>
+          <p>Resolves the Promise and returns its value. Only valid inside <code>async</code> functions.</p>
+          <div class="code-block" style="margin-top:12px;">
+            <pre><span class="kw">let</span> one = <span class="kw">await</span> <span class="fn">returnOne</span>();
+console.<span class="fn">log</span>(one); <span class="cm">// 1</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">JAVASCRIPT — Before: Promise Chaining</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="kw">return</span> <span class="fn">myReadFile</span>(fileName)
+  .<span class="fn">then</span>((fileData) => <span class="fn">doSomethingOnData</span>(fileData))
+  .<span class="fn">then</span>((data)     => <span class="fn">finalizeData</span>(data))
+  .<span class="fn">catch</span>(errorHandlingFunc);</pre>
+      </div>
+
+      <div style="text-align:center; padding:8px; color:var(--accent); font-size:24px;">↓</div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">JAVASCRIPT — After: async/await (clean!)</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="kw">async function</span> <span class="fn">doIt</span>(fileName) {
+  <span class="kw">let</span> file     = <span class="kw">await</span> <span class="fn">ReadFile</span>(fileName);
+  <span class="kw">let</span> data     = <span class="kw">await</span> <span class="fn">doSomethingOnData</span>(file);
+  <span class="kw">let</span> moreData = <span class="kw">await</span> <span class="fn">doSomethingMoreOnData</span>(data);
+  <span class="kw">return</span> <span class="fn">finalizeData</span>(moreData);
+  <span class="cm">// file, data, moreData are regular variables!</span>
+  <span class="cm">// doIt() itself returns a Promise</span>
+}</pre>
+      </div>
+
+      <div class="callout info">
+        <strong>Under the hood:</strong> <code>async/await</code> still uses Promises and breaks the function into internal callbacks at each <code>await</code> point. It's purely syntactic sugar — but much easier to read and reason about.
+      </div>
+
+      <div class="card">
+        <h3>✅ async/await with Axios</h3>
+        <div class="code-block" style="margin-top:12px;">
+          <pre><span class="kw">async function</span> <span class="fn">fetchUser</span>(id) {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> response = <span class="kw">await</span> axios.<span class="fn">get</span>(`/users/<span class="str">${id}</span>`);
+    <span class="kw">return</span> response.<span class="prop">data</span>;
+  } <span class="kw">catch</span> (err) {
+    console.<span class="fn">error</span>(<span class="str">'Failed:'</span>, err);
+  }
+}</pre>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" onclick="goTo(4)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(6)">Next: Transports & RPC →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 6: TRANSPORTS -->
+    <div class="section" id="sec-6">
+      <div class="section-header">
+        <span class="section-num">07</span>
+        <h2>Other Transports & RPC</h2>
+      </div>
+      <p class="section-intro">
+        Beyond standard HTTP requests, the web platform offers WebSockets for real-time bidirectional communication and the classic Remote Procedure Call pattern.
+      </p>
+
+      <div class="transport-grid">
+        <div class="transport-card">
+          <h4 style="color:var(--accent);">🔄 XMLHttpRequest / fetch</h4>
+          <ul>
+            <li>Standard HTTP request/response</li>
+            <li>Works over HTTP/HTTPS</li>
+            <li>Request-initiated by client</li>
+            <li>Good for REST APIs</li>
+            <li>Supported everywhere</li>
+          </ul>
+        </div>
+        <div class="transport-card">
+          <h4 style="color:var(--accent3);">⚡ WebSockets</h4>
+          <ul>
+            <li>Full TCP connection</li>
+            <li>Bidirectional pipes</li>
+            <li>Server can push data</li>
+            <li>Good for real-time apps</li>
+            <li>Uses ws:// or wss://</li>
+          </ul>
+        </div>
+        <div class="transport-card">
+          <h4 style="color:var(--accent2);">📞 RPC</h4>
+          <ul>
+            <li>Call functions on server</li>
+            <li>Handles complex operations</li>
+            <li>Fewer round trips</li>
+            <li>Over HTTP or WebSockets</li>
+            <li>Requires API docs</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">JAVASCRIPT — WebSocket Example</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="kw">let</span> socket = <span class="kw">new</span> <span class="fn">WebSocket</span>(<span class="str">"ws://www.example.com/socketserver"</span>);
+
+socket.<span class="prop">onopen</span> = <span class="kw">function</span>(event) {
+  socket.<span class="fn">send</span>(JSON.<span class="fn">stringify</span>(request)); <span class="cm">// Send JSON message</span>
+};
+
+socket.<span class="prop">onmessage</span> = <span class="kw">function</span>(event) {
+  <span class="kw">let</span> data = JSON.<span class="fn">parse</span>(event.<span class="prop">data</span>); <span class="cm">// Receive JSON message</span>
+};</pre>
+      </div>
+
+      <div class="card">
+        <h3>📞 Remote Procedure Call (RPC)</h3>
+        <ul>
+          <li>Browser <strong>packages arguments</strong> into a message to the web server</li>
+          <li>Function is invoked <strong>on the server</strong> with those arguments</li>
+          <li>Return value is <strong>sent back</strong> to the browser</li>
+          <li>Handles complex, multi-resource operations</li>
+          <li>Reduces round-trip messages and simplifies failure handling</li>
+          <li>Tradeoff: more complex interface — requires documented API</li>
+          <li>Can run over <strong>HTTP (POST)</strong> or <strong>WebSockets</strong></li>
+        </ul>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" onclick="goTo(5)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(7)">Next: GraphQL →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 7: GRAPHQL -->
+    <div class="section" id="sec-7">
+      <div class="section-header">
+        <span class="section-num">08</span>
+        <h2>GraphQL</h2>
+      </div>
+      <p class="section-intro">
+        GraphQL is a trending alternative to REST, created by Facebook. It addresses several REST limitations — especially the need to fetch entire models in one query.
+      </p>
+
+      <div class="two-col">
+        <div class="card">
+          <h3>✅ Like REST</h3>
+          <ul>
+            <li>Server exports resources that the client can fetch</li>
+            <li>Client/server separation</li>
+            <li>Stateless communication</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>⚡ Unlike REST</h3>
+          <ul>
+            <li>Server exports a <strong>schema</strong> describing resources and queries</li>
+            <li>Client specifies <strong>exactly which fields</strong> it needs</li>
+            <li>Fetch from <strong>multiple resources</strong> in a single request</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">GRAPHQL — Example Query</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="cm"># Fetch user + their photos in ONE request</span>
+query {
+  user(id: <span class="str">"78237489"</span>) {
+    name
+    email
+    photos {
+      id
+      url
+      caption
+    }
+  }
+}</pre>
+      </div>
+
+      <div class="card">
+        <h3>📈 Why GraphQL is Gaining Popularity</h3>
+        <ul>
+          <li><strong>No over-fetching</strong> — client asks for exactly what it needs</li>
+          <li><strong>No under-fetching</strong> — get related resources in one request</li>
+          <li>Mutations provide an <strong>RPC-like interface</strong> for updates</li>
+          <li>Self-documenting via the exported schema</li>
+          <li>Gives a program-accessible backend — a proper API</li>
+        </ul>
+      </div>
+
+      <div class="callout info">
+        <strong>Summary — API Styles Compared:</strong><br>
+        <strong>REST:</strong> Simple CRUD on resources. Works for most cases.<br>
+        <strong>RPC:</strong> Call server functions. Great for complex ops.<br>
+        <strong>GraphQL:</strong> Query exactly what you need from any resource combination.
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" onclick="goTo(6)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(8)">Next: Quiz →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 8: QUIZ -->
+    <div class="section" id="sec-8">
+      <div class="section-header">
+        <span class="section-num">09</span>
+        <h2>Knowledge Check</h2>
+      </div>
+      <p class="section-intro">Test what you've learned about Controller/Server Communication.</p>
+
+      <div id="quiz-container"></div>
+
+      <div class="nav-buttons" style="margin-top:20px;">
+        <button class="btn btn-secondary" onclick="goTo(7)">← Back</button>
+        <button class="btn btn-primary" onclick="resetQuiz()">↺ Restart Quiz</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  const TOTAL_SECTIONS = 9;
+  let currentSection = 0;
+  let visited = new Set([0]);
+
+  const quizData = [
+    {
+      q: "What does AJAX stand for?",
+      options: ["Advanced JavaScript and XML", "Asynchronous JavaScript and XML", "Automatic JavaScript and XHTML", "Async JSON and XMLHttpRequest"],
+      answer: 1,
+      feedback: "AJAX = Asynchronous JavaScript and XML. Despite the name, it's most commonly used with JSON, not XML."
+    },
+    {
+      q: "What readyState value means a request is DONE?",
+      options: ["0", "2", "3", "4"],
+      answer: 3,
+      feedback: "readyState 4 = DONE. State 0=UNSENT, 1=OPENED, 2=HEADERS_RECEIVED, 3=LOADING."
+    },
+    {
+      q: "Which HTTP method maps to the 'Read' operation in REST CRUD?",
+      options: ["POST", "PUT", "GET", "DELETE"],
+      answer: 2,
+      feedback: "GET → Read. POST → Create. PUT → Update. DELETE → Delete."
+    },
+    {
+      q: "What does axios.get(URL) return?",
+      options: ["The response data directly", "A callback function", "A Promise", "An XMLHttpRequest object"],
+      answer: 2,
+      feedback: "axios.get() returns a Promise — no callback is specified. You chain .then() to handle the result."
+    },
+    {
+      q: "What is the 'Pyramid of Doom'?",
+      options: ["A REST API anti-pattern", "Deeply nested callback functions", "A GraphQL schema issue", "An over-use of async/await"],
+      answer: 1,
+      feedback: "Callback hell — where multiple nested callbacks create a triangular/pyramidal indentation in the code, making it hard to read and maintain."
+    },
+    {
+      q: "The await keyword can be used outside of an async function.",
+      options: ["True", "False"],
+      answer: 1,
+      feedback: "False — await is only valid inside async functions. Using it elsewhere is a syntax error."
+    },
+    {
+      q: "What transport does HTML5 WebSockets use?",
+      options: ["HTTP long-polling", "TCP — bidirectional pipes", "UDP datagrams", "XMLHttpRequest"],
+      answer: 1,
+      feedback: "WebSockets create a full TCP connection from JavaScript to the server, enabling true bidirectional communication — the server can push data without a client request."
+    },
+    {
+      q: "Which GraphQL feature lets you fetch data from multiple resources in a single request?",
+      options: ["Mutations", "Resolvers", "Queries", "Schema federation"],
+      answer: 2,
+      feedback: "GraphQL queries let clients specify exactly which properties they want from any number of resources, all in one network request."
+    }
+  ];
+
+  let answered = [];
+
+  function buildQuiz() {
+    answered = new Array(quizData.length).fill(null);
+    const container = document.getElementById('quiz-container');
+    container.innerHTML = quizData.map((q, i) => `
+      <div class="quiz-card" id="quiz-${i}">
+        <h3>Question ${i+1} of ${quizData.length}</h3>
+        <div class="quiz-q">${q.q}</div>
+        <div class="quiz-options" id="opts-${i}">
+          ${q.options.map((opt, j) => `
+            <div class="quiz-option" onclick="answer(${i}, ${j})">${opt}</div>
+          `).join('')}
+        </div>
+        <div class="quiz-feedback" id="fb-${i}"></div>
+      </div>
+    `).join('');
+  }
+
+  function answer(qIndex, optIndex) {
+    if (answered[qIndex] !== null) return;
+    answered[qIndex] = optIndex;
+
+    const opts = document.getElementById(`opts-${qIndex}`).children;
+    const fb = document.getElementById(`fb-${qIndex}`);
+    const q = quizData[qIndex];
+    const correct = optIndex === q.answer;
+
+    for (let i = 0; i < opts.length; i++) {
+      opts[i].classList.add('answered');
+      if (i === q.answer) opts[i].classList.add('correct');
+      else if (i === optIndex && !correct) opts[i].classList.add('wrong');
+    }
+
+    fb.textContent = (correct ? '✓ Correct! ' : '✗ Not quite. ') + q.feedback;
+    fb.className = `quiz-feedback visible ${correct ? 'correct-fb' : 'wrong-fb'}`;
+  }
+
+  function resetQuiz() {
+    buildQuiz();
+  }
+
+  function goTo(i) {
+    document.getElementById(`sec-${currentSection}`).classList.remove('active');
+    document.querySelectorAll('.nav-item')[currentSection].classList.remove('active');
+
+    currentSection = i;
+    visited.add(i);
+
+    document.getElementById(`sec-${i}`).classList.add('active');
+    document.querySelectorAll('.nav-item')[i].classList.add('active');
+
+    const pct = Math.round((visited.size / TOTAL_SECTIONS) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-pct').textContent = pct + '%';
+
+    document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+
+  // Init
+  buildQuiz();
+</script>
+</body>
+</html>

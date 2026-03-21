@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ReactJS Interactive Tutorial</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --color-bg: #ffffff; --color-bg-2: #f7f7f5; --color-bg-3: #f0efea;
+    --color-text: #1a1a18; --color-text-2: #6b6b67;
+    --color-border: rgba(0,0,0,0.12); --color-border-2: rgba(0,0,0,0.22);
+    --r-md: 8px; --r-lg: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-bg: #1a1a18; --color-bg-2: #242422; --color-bg-3: #2e2e2b;
+      --color-text: #f0efe8; --color-text-2: #a0a09a;
+      --color-border: rgba(255,255,255,0.1); --color-border-2: rgba(255,255,255,0.2);
+    }
+  }
+  body { font-family: var(--font-sans); background: var(--color-bg-3); color: var(--color-text); min-height: 100vh; padding: 2rem 1rem; }
+  .wrapper { max-width: 820px; margin: 0 auto; }
+  .app-header { text-align: center; margin-bottom: 2rem; }
+  .app-header h1 { font-size: 24px; font-weight: 500; margin-bottom: 6px; }
+  .app-header p { font-size: 14px; color: var(--color-text-2); }
+  .progress-bar-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+  .progress-track { flex: 1; height: 4px; background: var(--color-border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #534AB7; border-radius: 2px; transition: width 0.4s ease; }
+  .progress-label { font-size: 13px; color: var(--color-text-2); white-space: nowrap; }
+  .chapter-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .chapter-tab { padding: 5px 12px; font-size: 12px; border-radius: var(--r-md); border: 0.5px solid var(--color-border); background: var(--color-bg); color: var(--color-text-2); cursor: pointer; transition: all 0.15s; font-family: var(--font-sans); }
+  .chapter-tab:hover { border-color: var(--color-border-2); color: var(--color-text); }
+  .chapter-tab.active { background: #EEEDFE; color: #3C3489; border-color: #AFA9EC; font-weight: 500; }
+  .chapter-tab.done { color: #0F6E56; border-color: #9FE1CB; background: #E1F5EE; }
+  .slide-card { background: var(--color-bg); border: 0.5px solid var(--color-border); border-radius: var(--r-lg); padding: 1.75rem; margin-bottom: 1rem; }
+  .slide-tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: var(--r-md); margin-bottom: 10px; background: #EEEDFE; color: #3C3489; border: 0.5px solid #AFA9EC; }
+  .slide-tag.green { background: #E1F5EE; color: #0F6E56; border-color: #9FE1CB; }
+  .slide-tag.amber { background: #FAEEDA; color: #633806; border-color: #FAC775; }
+  .slide-tag.coral { background: #FAECE7; color: #712B13; border-color: #F0997B; }
+  .slide-title { font-size: 20px; font-weight: 500; margin-bottom: 12px; line-height: 1.35; }
+  .slide-body { font-size: 15px; color: var(--color-text-2); line-height: 1.7; margin-bottom: 1rem; }
+  .slide-body strong { color: var(--color-text); font-weight: 500; }
+  .slide-body code { font-family: var(--font-mono); font-size: 13px; background: var(--color-bg-2); padding: 1px 5px; border-radius: 4px; border: 0.5px solid var(--color-border); }
+  pre { background: var(--color-bg-2); border: 0.5px solid var(--color-border); border-radius: var(--r-md); padding: 1.1rem 1.25rem; font-family: var(--font-mono); font-size: 13px; line-height: 1.65; overflow-x: auto; color: var(--color-text); margin-bottom: 1rem; white-space: pre; }
+  .hl-purple { color: #534AB7; } .hl-green { color: #0F6E56; } .hl-amber { color: #854F0B; } .hl-coral { color: #993C1D; }
+  @media (prefers-color-scheme: dark) {
+    .hl-purple { color: #AFA9EC; } .hl-green { color: #5DCAA5; } .hl-amber { color: #FAC775; } .hl-coral { color: #F0997B; }
+  }
+  .note-box { background: var(--color-bg-2); border-left: 3px solid #534AB7; border-radius: 0 var(--r-md) var(--r-md) 0; padding: 10px 14px; font-size: 14px; color: var(--color-text-2); margin-bottom: 1rem; line-height: 1.6; }
+  .note-box.green { border-left-color: #1D9E75; } .note-box.amber { border-left-color: #BA7517; }
+  .key-points { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
+  .key-point { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; background: var(--color-bg-2); border-radius: var(--r-md); font-size: 14px; color: var(--color-text-2); border: 0.5px solid var(--color-border); line-height: 1.5; }
+  .key-point-dot { width: 7px; height: 7px; border-radius: 50%; background: #534AB7; flex-shrink: 0; margin-top: 6px; }
+  .key-point-dot.green { background: #1D9E75; }
+  .compare-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 1rem; }
+  .compare-card { background: var(--color-bg-2); border: 0.5px solid var(--color-border); border-radius: var(--r-md); padding: 12px; }
+  .compare-card-title { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+  .compare-card-body { font-size: 12px; color: var(--color-text-2); line-height: 1.6; }
+  .lifecycle-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 1rem; }
+  .lifecycle-phase { border-radius: var(--r-md); padding: 12px; text-align: center; border: 0.5px solid var(--color-border); }
+  .lifecycle-phase.mount { background: #E1F5EE; border-color: #9FE1CB; }
+  .lifecycle-phase.update { background: #EEEDFE; border-color: #AFA9EC; }
+  .lifecycle-phase.unmount { background: #FAECE7; border-color: #F0997B; }
+  .lifecycle-title { font-size: 12px; font-weight: 500; margin-bottom: 6px; }
+  .lifecycle-phase.mount .lifecycle-title { color: #085041; }
+  .lifecycle-phase.update .lifecycle-title { color: #26215C; }
+  .lifecycle-phase.unmount .lifecycle-title { color: #4A1B0C; }
+  .lifecycle-method { font-size: 11px; font-family: var(--font-mono); margin: 3px 0; }
+  .lifecycle-phase.mount .lifecycle-method { color: #0F6E56; }
+  .lifecycle-phase.update .lifecycle-method { color: #3C3489; }
+  .lifecycle-phase.unmount .lifecycle-method { color: #712B13; }
+  .quiz-section { margin-top: 1.25rem; }
+  .quiz-label { font-size: 14px; font-weight: 500; margin-bottom: 10px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt { padding: 10px 14px; border-radius: var(--r-md); border: 0.5px solid var(--color-border); background: var(--color-bg); font-size: 14px; color: var(--color-text-2); cursor: pointer; transition: all 0.15s; text-align: left; font-family: var(--font-sans); }
+  .quiz-opt:hover:not(:disabled) { border-color: var(--color-border-2); color: var(--color-text); }
+  .quiz-opt.correct { background: #E1F5EE; border-color: #5DCAA5; color: #085041; }
+  .quiz-opt.wrong { background: #FCEBEB; border-color: #F09595; color: #501313; }
+  .quiz-opt:disabled { cursor: default; }
+  .quiz-feedback { margin-top: 10px; font-size: 13px; padding: 8px 12px; border-radius: var(--r-md); line-height: 1.5; background: #E1F5EE; color: #085041; }
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; gap: 12px; flex-wrap: wrap; }
+  .nav-btn { padding: 8px 20px; border-radius: var(--r-md); border: 0.5px solid var(--color-border-2); background: var(--color-bg); font-size: 14px; font-weight: 500; color: var(--color-text); cursor: pointer; transition: all 0.15s; font-family: var(--font-sans); }
+  .nav-btn:hover:not(:disabled) { background: var(--color-bg-2); }
+  .nav-btn.primary { background: #534AB7; color: #EEEDFE; border-color: #534AB7; }
+  .nav-btn.primary:hover { background: #3C3489; border-color: #3C3489; }
+  .nav-btn:disabled { opacity: 0.35; cursor: default; }
+  .slide-counter { font-size: 13px; color: var(--color-text-2); }
+  .done-banner { text-align: center; padding: 1.5rem; background: #E1F5EE; border-radius: var(--r-lg); margin-bottom: 1rem; border: 0.5px solid #9FE1CB; }
+  .done-banner h2 { font-size: 18px; font-weight: 500; color: #085041; margin-bottom: 6px; }
+  .done-banner p { font-size: 14px; color: #0F6E56; }
+  @media (max-width: 500px) {
+    .lifecycle-row { grid-template-columns: 1fr; }
+    .compare-grid { grid-template-columns: 1fr; }
+    body { padding: 1rem 0.75rem; }
+    .slide-card { padding: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="app-header">
+    <h1>ReactJS Interactive Tutorial</h1>
+    <p>Based on CS142 Lecture Notes — Mendel Rosenblum &nbsp;·&nbsp; 20 slides across 6 chapters</p>
+  </div>
+  <div id="app"></div>
+</div>
+<script>
+const chapters=[{label:"Overview",slides:[0,1,2]},{label:"Components",slides:[3,4,5,6]},{label:"State & Events",slides:[7,8,9,10]},{label:"JSX Patterns",slides:[11,12,13,14]},{label:"Lifecycle & Hooks",slides:[15,16,17]},{label:"Advanced",slides:[18,19]}];
+const slides=[
+{tag:"Overview",tagColor:"",title:"What is ReactJS?",body:"ReactJS is a JavaScript framework for building web applications that run in the browser. Unlike server-rendered apps, React gives you <strong>snappy, app-like responsiveness</strong> without full page reloads.",points:["Runs entirely in the browser — no server round-trip needed","Uses the Model-View-Controller (MVC) pattern","Focuses on reusable, testable components","Less opinionated than AngularJS — only handles the view layer"],quiz:{q:"What does React primarily handle?",opts:["Database queries","The view layer","Server routing","CSS styling"],ans:1,explain:"React is focused on rendering the view and handling user interactions. It doesn't dictate how you manage your server or database."}},
+{tag:"Overview",tagColor:"",title:"The ReactJS tool chain",body:"React apps are built with two key tools that transform your modern code into something every browser can run.",compare:[{title:"Babel",body:"Transpiles modern JavaScript (ES6+) and JSX syntax into plain JavaScript that all browsers understand."},{title:"Webpack",body:"Bundles all your modules, CSS, and images into a single bundle.js file loaded with one &lt;script&gt; tag."}],note:"JSX is not valid JavaScript — Babel converts it to React.createElement() calls before the browser ever sees it.",noteColor:"amber"},
+{tag:"Overview",tagColor:"",title:"The HTML entry point",body:"Every React app starts with a plain HTML file. React injects its entire UI into a single <code>div</code> — the rest is JavaScript.",code:`&lt;!doctype html&gt;\n&lt;html&gt;\n  &lt;body&gt;\n    &lt;div id="reactapp"&gt;&lt;/div&gt;\n    &lt;script src="./webpackOutput/reactApp.bundle.js"&gt;&lt;/script&gt;\n  &lt;/body&gt;\n&lt;/html&gt;`,note:'The div with id="reactapp" is the mount point. React writes the entire application view into this single element.'},
+{tag:"Components",tagColor:"",title:"Your first React component",body:"A React component is an <strong>ES6 class</strong> that extends <code>React.Component</code>. Every component must have a <code>render()</code> method that returns a tree of React elements.",code:`<span class="hl-amber">import</span> React <span class="hl-amber">from</span> <span class="hl-green">'react'</span>;\n\n<span class="hl-amber">class</span> <span class="hl-purple">ReactAppView</span> <span class="hl-amber">extends</span> React.Component {\n  constructor(props) {\n    <span class="hl-amber">super</span>(props);\n  }\n  render() {\n    <span class="hl-amber">return</span> ...;\n  }\n}\n\n<span class="hl-amber">export default</span> ReactAppView;`,points:["Inherits from React.Component","props contains all attributes passed to the component","render() is required — it describes what to show"],quiz:{q:"What is required in every React class component?",opts:["a constructor","a render() method","a state object","an export statement"],ans:1,explain:"render() is the one required method. It must return a React element tree describing what to display."}},
+{tag:"Components",tagColor:"",title:"React.createElement under the hood",body:"Before JSX, you created elements by calling <code>React.createElement(type, props, ...children)</code>. Understanding this helps you understand what JSX compiles to.",code:`render() {\n  <span class="hl-amber">return</span> React.createElement(\n    <span class="hl-green">'div'</span>, <span class="hl-amber">null</span>,\n    React.createElement(<span class="hl-green">'label'</span>, <span class="hl-amber">null</span>, <span class="hl-green">'Name: '</span>),\n    React.createElement(<span class="hl-green">'input'</span>,\n      { type: <span class="hl-green">'text'</span>, value: <span class="hl-purple">this</span>.state.yourName }),\n    React.createElement(<span class="hl-green">'h1'</span>, <span class="hl-amber">null</span>,\n      <span class="hl-green">'Hello '</span>, <span class="hl-purple">this</span>.state.yourName, <span class="hl-green">'!'</span>)\n  );\n}`,note:"type = HTML tag or Component, props = attributes object (or null), children = nested elements or text."},
+{tag:"Components",tagColor:"",title:"JSX: the readable shorthand",body:"JSX lets you write HTML-like syntax directly in JavaScript. Babel compiles it to <code>React.createElement()</code> calls automatically.",code:`render() {\n  <span class="hl-amber">return</span> (\n    &lt;<span class="hl-purple">div</span>&gt;\n      &lt;<span class="hl-purple">label</span>&gt;Name: &lt;/<span class="hl-purple">label</span>&gt;\n      &lt;<span class="hl-purple">input</span>\n        type=<span class="hl-green">"text"</span>\n        value={<span class="hl-purple">this</span>.state.yourName}\n        onChange={(e) =&gt; <span class="hl-purple">this</span>.handleChange(e)}\n      /&gt;\n      &lt;<span class="hl-purple">h1</span>&gt;Hello {<span class="hl-purple">this</span>.state.yourName}!&lt;/<span class="hl-purple">h1</span>&gt;\n    &lt;/<span class="hl-purple">div</span>&gt;\n  );\n}`,note:"Curly braces {} inside JSX let you embed any JavaScript expression.",quiz:{q:"What does Babel do with JSX?",opts:["Sends it to the server","Compiles it to React.createElement() calls","Minifies the HTML","Adds CSS classes automatically"],ans:1,explain:"Babel transforms JSX into React.createElement() calls. The browser never sees JSX — only plain JavaScript."}},
+{tag:"Components",tagColor:"",title:"Rendering into the DOM",body:"To mount your root component into the HTML page, call <code>ReactDOM.render()</code>. This bridges React's virtual world and the real browser DOM.",code:`<span class="hl-amber">import</span> React <span class="hl-amber">from</span> <span class="hl-green">'react'</span>;\n<span class="hl-amber">import</span> ReactDOM <span class="hl-amber">from</span> <span class="hl-green">'react-dom'</span>;\n<span class="hl-amber">import</span> ReactAppView <span class="hl-amber">from</span> <span class="hl-green">'./components/ReactAppView'</span>;\n\n<span class="hl-amber">let</span> viewTree = React.createElement(ReactAppView, <span class="hl-amber">null</span>);\n<span class="hl-amber">let</span> where = document.getElementById(<span class="hl-green">'reactapp'</span>);\nReactDOM.render(viewTree, where);`,points:["ReactDOM.render() mounts the component tree into a real DOM node","Only called once for the root — React manages all subsequent updates"]},
+{tag:"State & Events",tagColor:"green",title:"Component state",body:"State is a component's <strong>private, mutable data</strong>. Initialize it in the constructor and update it with <code>this.setState()</code>. React automatically re-renders when state changes.",code:`<span class="hl-amber">class</span> <span class="hl-purple">ReactAppView</span> <span class="hl-amber">extends</span> React.Component {\n  constructor(props) {\n    <span class="hl-amber">super</span>(props);\n    <span class="hl-purple">this</span>.state = { yourName: <span class="hl-green">""</span> };\n  }\n  handleChange(event) {\n    <span class="hl-purple">this</span>.setState({        <span class="hl-green">// triggers re-render</span>\n      yourName: event.target.value\n    });\n  }\n}`,note:"Never mutate this.state directly. Always use setState() so React knows to re-render.",noteColor:"amber",quiz:{q:"What happens when you call this.setState()?",opts:["State is mutated silently","React re-renders the component","The page reloads","Props are updated"],ans:1,explain:"setState() triggers React's reconciliation: it updates the state object and calls render() again with the new values."}},
+{tag:"State & Events",tagColor:"green",title:"One-way data binding",body:"React uses <strong>one-way binding</strong>: data flows from state into the view, and user input flows back through event handlers.",points:["User types 'D' → onChange fires → handleChange called with event.target.value = 'D'","handleChange calls setState({ yourName: 'D' })","React sees the state change and calls render() again","The h1 now shows 'Hello D!' — highly efficient re-rendering"],note:"React only re-renders what actually changed in the virtual DOM. This makes updates very fast even for complex UIs.",noteColor:"green"},
+{tag:"State & Events",tagColor:"green",title:"The 'this' problem with event handlers",body:"Passing a method as an event handler breaks the <code>this</code> context. There are three standard workarounds.",compare:[{title:"Bind in constructor",body:"this.handleChange = this.handleChange.bind(this);\nSafe and explicit. Best for class components."},{title:"Arrow class field",body:"handleChange = (event) => { ... }\nAutomatic binding. Cleanest syntax."},{title:"Arrow in JSX",body:"onChange={(e) => this.handleChange(e)}\nCreates a new function each render — OK for most cases."}],quiz:{q:"Why doesn't onChange={this.handleChange} work without binding?",opts:["JSX doesn't support methods","'this' is undefined inside the callback","handleChange must be async","onChange only accepts arrow functions"],ans:1,explain:"When you pass a method reference, the browser calls it without the correct 'this' context. Binding ensures 'this' always refers to the component instance."}},
+{tag:"State & Events",tagColor:"green",title:"camelCase in JSX",body:"HTML attributes are case-insensitive, but JavaScript is not. JSX is embedded in JavaScript, so React uses <strong>camelCase</strong> for all event attributes.",compare:[{title:"HTML attribute",body:"onclick, onchange, class, tabindex"},{title:"JSX attribute",body:"onClick, onChange, className, tabIndex"}],note:"Use className= instead of class= to avoid conflict with the JavaScript 'class' keyword. Same for htmlFor= instead of for=.",noteColor:"amber"},
+{tag:"JSX Patterns",tagColor:"amber",title:"JSX rules: expressions only",body:"Inside JSX curly braces <code>{}</code>, you can only use <strong>expressions</strong> — things that evaluate to a value. Statements like <code>if</code> and <code>for</code> don't work inline.",code:`<span class="hl-green">// Valid: expression</span>\n&lt;div&gt;{foo}&lt;/div&gt;\n&lt;div&gt;{count + 1}&lt;/div&gt;\n\n<span class="hl-coral">// Invalid: 'if' is a statement</span>\n&lt;div&gt;{if (flag) { ... }}&lt;/div&gt;\n\n<span class="hl-green">// Workaround: ternary</span>\n&lt;div&gt;{flag ? &lt;<span class="hl-purple">A</span>/&gt; : &lt;<span class="hl-purple">B</span>/&gt;}&lt;/div&gt;`,quiz:{q:"Which of these is valid inside JSX curly braces?",opts:["{if (x) { return y; }}","{for (let i=0; ...) {}}","{x > 5 ? 'big' : 'small'}","{let greeting = 'hi';}"],ans:2,explain:"The ternary operator (? :) is an expression — it evaluates to a value. if/for/let are statements and cannot appear directly in JSX."}},
+{tag:"JSX Patterns",tagColor:"amber",title:"Conditional rendering",body:"Since JSX requires expressions, there are two clean patterns for conditional rendering.",code:`<span class="hl-green">// Pattern 1: Ternary operator (inline)</span>\n&lt;div&gt;\n  {<span class="hl-purple">this</span>.state.useSpanish\n    ? &lt;<span class="hl-purple">b</span>&gt;Hola&lt;/<span class="hl-purple">b</span>&gt;\n    : <span class="hl-green">"Hello"</span>}\n&lt;/div&gt;\n\n<span class="hl-green">// Pattern 2: Variable (cleaner for complex logic)</span>\n<span class="hl-amber">let</span> greeting;\n<span class="hl-amber">if</span> (useSpanish) { greeting = &lt;<span class="hl-purple">b</span>&gt;Hola&lt;/<span class="hl-purple">b</span>&gt;; }\n<span class="hl-amber">else</span>             { greeting = <span class="hl-green">"Hello"</span>; }\n\n<span class="hl-amber">return</span> &lt;<span class="hl-purple">div</span>&gt;{greeting}&lt;/<span class="hl-purple">div</span>&gt;;`},
+{tag:"JSX Patterns",tagColor:"amber",title:"Rendering lists with map()",body:"To render a list of items, use <code>.map()</code> to transform an array into JSX elements. Always include a <code>key=</code> prop for efficiency.",code:`<span class="hl-green">// Using map (functional, preferred)</span>\n<span class="hl-amber">return</span> (\n  &lt;<span class="hl-purple">ul</span>&gt;\n    {data.map((d) =&gt; (\n      &lt;<span class="hl-purple">li</span> key={d}&gt;Data Value {d}&lt;/<span class="hl-purple">li</span>&gt;\n    ))}\n  &lt;/<span class="hl-purple">ul</span>&gt;\n);\n\n<span class="hl-green">// Using a for loop (also valid)</span>\n<span class="hl-amber">let</span> items = [];\n<span class="hl-amber">for</span> (<span class="hl-amber">let</span> i = 0; i &lt; data.length; i++) {\n  items.push(&lt;<span class="hl-purple">li</span> key={data[i]}&gt;{data[i]}&lt;/<span class="hl-purple">li</span>&gt;);\n}\n<span class="hl-amber">return</span> &lt;<span class="hl-purple">ul</span>&gt;{items}&lt;/<span class="hl-purple">ul</span>&gt;;`,note:"The key= prop helps React identify which items changed, improving re-render performance. Keys must be unique among siblings.",quiz:{q:"Why is the key= prop important in lists?",opts:["It adds a CSS id","React uses it to track which items changed","It prevents duplicate items","It's required for map() to work"],ans:1,explain:"React uses keys to match elements between renders. Without keys, React may unnecessarily re-create DOM nodes when the list changes."}},
+{tag:"JSX Patterns",tagColor:"amber",title:"Styling in React",body:"React components can import CSS files directly (processed by Webpack). Use <code>className=</code> instead of <code>class=</code> to apply CSS classes.",code:`<span class="hl-green">// In your component file:</span>\n<span class="hl-amber">import</span> <span class="hl-green">'./ReactAppView.css'</span>;\n\nrender() {\n  <span class="hl-amber">return</span> (\n    &lt;<span class="hl-purple">span</span> className=<span class="hl-green">"cs142-code-name"</span>&gt;\n      Hello!\n    &lt;/<span class="hl-purple">span</span>&gt;\n  );\n}\n\n<span class="hl-green">/* In ReactAppView.css: */</span>\n.cs142-code-name {\n  font-family: Courier New, monospace;\n}`,note:"Use className= (not class=) — 'class' is a reserved keyword in JavaScript.",noteColor:"amber"},
+{tag:"Lifecycle & Hooks",tagColor:"coral",title:"Component lifecycle",body:"Class components go through three lifecycle phases. React calls specific methods at each phase, giving you hooks to run code at the right moment.",lifecycle:true,points:["componentDidMount — great for starting timers or fetching data","componentDidUpdate — runs after every re-render (check what changed!)","componentWillUnmount — clean up timers, subscriptions, listeners"],quiz:{q:"When should you start a timer in a class component?",opts:["In the constructor","In render()","In componentDidMount","In componentWillUnmount"],ans:2,explain:"componentDidMount runs after the component is first added to the DOM — the right place to start timers, fetch data, or set up subscriptions."}},
+{tag:"Lifecycle & Hooks",tagColor:"coral",title:"Stateless (function) components",body:"If a component only depends on <code>props</code> and has no state or lifecycle logic, write it as a plain function — much more concise!",code:`<span class="hl-green">// Class component (verbose)</span>\n<span class="hl-amber">class</span> <span class="hl-purple">MyComponent</span> <span class="hl-amber">extends</span> React.Component {\n  render() {\n    <span class="hl-amber">return</span> &lt;<span class="hl-purple">div</span>&gt;My name is {<span class="hl-purple">this</span>.props.name}&lt;/<span class="hl-purple">div</span>&gt;;\n  }\n}\n\n<span class="hl-green">// Function component (concise)</span>\n<span class="hl-amber">function</span> <span class="hl-purple">MyComponent</span>(props) {\n  <span class="hl-amber">return</span> &lt;<span class="hl-purple">div</span>&gt;My name is {props.name}&lt;/<span class="hl-purple">div</span>&gt;;\n}\n\n<span class="hl-green">// With destructuring (even cleaner)</span>\n<span class="hl-amber">function</span> <span class="hl-purple">MyComponent</span>({ name }) {\n  <span class="hl-amber">return</span> &lt;<span class="hl-purple">div</span>&gt;My name is {name}&lt;/<span class="hl-purple">div</span>&gt;;\n}`},
+{tag:"Lifecycle & Hooks",tagColor:"coral",title:"React Hooks: useState & useEffect",body:"Hooks let function components use state and lifecycle features. <code>useState</code> adds state; <code>useEffect</code> replaces lifecycle methods.",code:`<span class="hl-amber">import</span> React, { useState, useEffect } <span class="hl-amber">from</span> <span class="hl-green">'react'</span>;\n\n<span class="hl-amber">function</span> <span class="hl-purple">Counter</span>() {\n  <span class="hl-green">// [currentValue, setter] = useState(initialValue)</span>\n  <span class="hl-amber">const</span> [count, setCount] = useState(0);\n\n  useEffect(() =&gt; {\n    document.title = \`Clicks: \${count}\`;\n  }, [count]);\n\n  <span class="hl-amber">return</span> (\n    &lt;<span class="hl-purple">button</span> onClick={() =&gt; setCount(count + 1)}&gt;\n      Clicked {count} times\n    &lt;/<span class="hl-purple">button</span>&gt;\n  );\n}`,note:"[] = run once on mount. [count] = run when count changes. No array = run after every render.",noteColor:"green",quiz:{q:"What does useState(0) return?",opts:["The number 0","A setter function","An array: [currentValue, setterFn]","A React element"],ans:2,explain:"useState returns a two-element array. The first element is the current state value, the second is the function to update it (which triggers a re-render)."}},
+{tag:"Advanced",tagColor:"",title:"Communicating between components",body:"React has clear patterns for passing data between parent and child components.",compare:[{title:"Parent → Child (props)",body:"&lt;ChildComponent param={data} /&gt;\nChild reads it via props.param"},{title:"Child → Parent (callback)",body:"Parent passes a function as a prop. Child calls it with data to send info upward."},{title:"Across the tree (Context)",body:"React.createContext() provides a global value to any component in a subtree — avoids prop drilling."}],code:`<span class="hl-green">// Parent passes callback</span>\n<span class="hl-amber">this</span>.parentCallback = (info) =&gt; {\n  <span class="hl-purple">this</span>.setState({ received: info });\n};\n&lt;<span class="hl-purple">ChildComponent</span> callback={<span class="hl-purple">this</span>.parentCallback} /&gt;\n\n<span class="hl-green">// Child calls it</span>\nprops.callback(<span class="hl-green">"hello from child"</span>);`},
+{tag:"Advanced",tagColor:"",title:"Tutorial complete!",body:"You now understand the core concepts of ReactJS. Here's what you've covered:",points:["React components, JSX, and the createElement API","State management with setState and React Hooks","Event handling and the 'this' binding problem","Conditional rendering, list rendering, and styling","Component lifecycle: mounting, updating, unmounting","Parent-child communication with props and callbacks"],note:"Next steps: explore React Router for navigation, Redux or Context API for global state, and try building a small project!",noteColor:"green"}
+];
+
+let current=0,answered=new Set();
+function getChapterIdx(si){for(let i=0;i<chapters.length;i++)if(chapters[i].slides.includes(si))return i;return 0;}
+function render(){
+  const slide=slides[current],chapterIdx=getChapterIdx(current),pct=Math.round((current/(slides.length-1))*100),isLast=current===slides.length-1;
+  let html=`<div class="progress-bar-wrap"><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div><span class="progress-label">${current+1} / ${slides.length}</span></div><div class="chapter-tabs">`;
+  chapters.forEach((ch,i)=>{const done=ch.slides[ch.slides.length-1]<current,active=i===chapterIdx,cls=active?'active':done?'done':'';html+=`<button class="chapter-tab ${cls}" onclick="jumpChapter(${i})">${ch.label}</button>`;});
+  html+=`</div>`;
+  if(isLast)html+=`<div class="done-banner"><h2>All done!</h2><p>You've completed all ${slides.length} slides of the ReactJS tutorial.</p></div>`;
+  const tc=slide.tagColor||'';
+  html+=`<div class="slide-card"><div class="slide-tag ${tc}">${slide.tag}</div><div class="slide-title">${slide.title}</div>`;
+  if(slide.body)html+=`<div class="slide-body">${slide.body}</div>`;
+  if(slide.lifecycle)html+=`<div class="lifecycle-row"><div class="lifecycle-phase mount"><div class="lifecycle-title">Mounting</div><div class="lifecycle-method">constructor</div><div class="lifecycle-method">render()</div><div class="lifecycle-method">componentDidMount</div></div><div class="lifecycle-phase update"><div class="lifecycle-title">Updating</div><div class="lifecycle-method">new props / setState</div><div class="lifecycle-method">render()</div><div class="lifecycle-method">componentDidUpdate</div></div><div class="lifecycle-phase unmount"><div class="lifecycle-title">Unmounting</div><div class="lifecycle-method">componentWillUnmount</div></div></div>`;
+  if(slide.compare){html+=`<div class="compare-grid">`;slide.compare.forEach(c=>{html+=`<div class="compare-card"><div class="compare-card-title">${c.title}</div><div class="compare-card-body">${c.body.replace(/\n/g,'<br>')}</div></div>`;});html+=`</div>`;}
+  if(slide.code)html+=`<pre>${slide.code}</pre>`;
+  if(slide.points){html+=`<div class="key-points">`;slide.points.forEach(p=>{const dc=slide.tagColor==='green'?'green':'';html+=`<div class="key-point"><div class="key-point-dot ${dc}"></div><span>${p}</span></div>`;});html+=`</div>`;}
+  if(slide.note)html+=`<div class="note-box ${slide.noteColor||''}">${slide.note}</div>`;
+  if(slide.quiz){const q=slide.quiz,wasAnswered=answered.has(current);html+=`<div class="quiz-section"><div class="quiz-label">Quick check: ${q.q}</div><div class="quiz-options">`;q.opts.forEach((opt,i)=>{const cls=wasAnswered?(i===q.ans?'correct':''):'',dis=wasAnswered?'disabled':'';html+=`<button class="quiz-opt ${cls}" onclick="answer(${i})" ${dis}>${opt}</button>`;});html+=`</div>`;if(wasAnswered)html+=`<div class="quiz-feedback">${q.explain}</div>`;html+=`</div>`;}
+  html+=`<div class="nav-row"><button class="nav-btn" onclick="go(-1)" ${current===0?'disabled':''}>← Back</button><span class="slide-counter">Slide ${current+1} of ${slides.length}</span>${isLast?`<button class="nav-btn" onclick="restart()">Start over</button>`:`<button class="nav-btn primary" onclick="go(1)">Next →</button>`}</div></div>`;
+  document.getElementById('app').innerHTML=html;
+}
+function go(dir){current=Math.max(0,Math.min(slides.length-1,current+dir));render();}
+function restart(){current=0;answered=new Set();render();}
+function jumpChapter(idx){current=chapters[idx].slides[0];render();}
+function answer(idx){answered.add(current);render();const opts=document.querySelectorAll('.quiz-opt'),correctIdx=slides[current].quiz.ans;opts.forEach((btn,i)=>{if(i===correctIdx)btn.classList.add('correct');else if(i===idx&&i!==correctIdx)btn.classList.add('wrong');});}
+render();
+</script>
+</body>
+</html>

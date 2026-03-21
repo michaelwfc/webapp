@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Single Page Applications — Interactive Tutorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #1a1a25;
+    --bg4: #22223a;
+    --border: rgba(120,120,200,0.15);
+    --border2: rgba(120,120,200,0.28);
+    --accent: #6c63ff;
+    --accent2: #a78bfa;
+    --accent3: #38bdf8;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --text: #e8e8f0;
+    --text2: #9090b0;
+    --text3: #5a5a80;
+    --mono: 'DM Mono', monospace;
+    --sans: 'Inter', sans-serif;
+    --display: 'Syne', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* LAYOUT */
+  .layout { display: flex; min-height: 100vh; }
+  aside {
+    width: 240px;
+    min-width: 240px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 2rem 0 2rem;
+    flex-shrink: 0;
+  }
+  aside .logo {
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  aside nav { padding: 0 0.5rem; }
+  aside nav a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 13px;
+    color: var(--text2);
+    transition: background 0.15s, color 0.15s;
+    border-left: 2px solid transparent;
+  }
+  aside nav a:hover { background: var(--bg3); color: var(--text); }
+  aside nav a.active { background: rgba(108,99,255,0.12); color: var(--accent2); border-left-color: var(--accent); }
+  aside nav a .num {
+    font-family: var(--mono);
+    font-size: 10px;
+    background: var(--bg4);
+    color: var(--text3);
+    padding: 1px 5px;
+    border-radius: 4px;
+    min-width: 20px;
+    text-align: center;
+  }
+  aside nav a.active .num { background: rgba(108,99,255,0.25); color: var(--accent2); }
+
+  main { flex: 1; min-width: 0; }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #0d0d1a 0%, #111128 50%, #0d1a2a 100%);
+    padding: 5rem 4rem 4rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -120px; right: -120px;
+    width: 480px; height: 480px;
+    background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 20%;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(56,189,248,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    background: rgba(108,99,255,0.12);
+    border: 1px solid rgba(108,99,255,0.3);
+    border-radius: 20px;
+    padding: 4px 14px;
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 {
+    font-family: var(--display);
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #fff 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.2rem;
+  }
+  .hero p {
+    font-size: 1.05rem;
+    color: var(--text2);
+    max-width: 580px;
+    margin-bottom: 2rem;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 2rem;
+    font-size: 13px;
+    color: var(--text3);
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 5px; }
+  .hero-meta strong { color: var(--text2); }
+  .progress-bar {
+    margin-top: 2rem;
+    height: 3px;
+    background: var(--bg4);
+    border-radius: 2px;
+    max-width: 400px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  /* SECTIONS */
+  .sections { padding: 0 4rem 6rem; }
+  .section {
+    padding: 3.5rem 0;
+    border-bottom: 1px solid var(--border);
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .section.visible { opacity: 1; transform: none; }
+  .section:last-child { border-bottom: none; }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.2rem;
+    margin-bottom: 1.8rem;
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(108,99,255,0.1);
+    border: 1px solid rgba(108,99,255,0.25);
+    border-radius: 6px;
+    padding: 4px 8px;
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+  .section h2 {
+    font-family: var(--display);
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .section p { color: var(--text2); margin-bottom: 1rem; max-width: 700px; }
+  .section p strong { color: var(--text); font-weight: 500; }
+
+  /* CARDS */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .card h3 {
+    font-family: var(--display);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card p { font-size: 13.5px; color: var(--text2); margin: 0; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green { background: var(--green); }
+  .dot-red { background: var(--red); }
+  .dot-amber { background: var(--amber); }
+  .dot-blue { background: var(--accent3); }
+  .dot-purple { background: var(--accent2); }
+
+  /* CODE */
+  .code-block {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+    font-family: var(--mono);
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 1rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  .code-lang {
+    font-family: var(--mono);
+    color: var(--accent2);
+    font-size: 10px;
+  }
+  pre {
+    padding: 1.2rem;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-x: auto;
+    color: var(--text);
+  }
+  .kw { color: #c792ea; }
+  .fn { color: #82aaff; }
+  .str { color: #c3e88d; }
+  .cmt { color: var(--text3); font-style: italic; }
+  .tag { color: #f07178; }
+  .attr { color: #ffcb6b; }
+  .val { color: #c3e88d; }
+  .var { color: #89ddff; }
+
+  /* CALLOUT */
+  .callout {
+    border-left: 3px solid;
+    border-radius: 0 10px 10px 0;
+    padding: 1rem 1.2rem;
+    margin: 1.5rem 0;
+    font-size: 14px;
+  }
+  .callout-info { border-color: var(--accent3); background: rgba(56,189,248,0.06); color: var(--text2); }
+  .callout-warn { border-color: var(--amber); background: rgba(251,191,36,0.06); color: var(--text2); }
+  .callout-success { border-color: var(--green); background: rgba(52,211,153,0.06); color: var(--text2); }
+  .callout strong { color: var(--text); }
+
+  /* URL DEMO */
+  .url-bar {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text2);
+    transition: all 0.3s;
+    cursor: pointer;
+    user-select: none;
+    margin: 0.4rem 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .url-bar:hover { border-color: var(--accent); }
+  .url-bar .scheme { color: var(--text3); }
+  .url-bar .host { color: var(--accent3); }
+  .url-bar .path { color: var(--text); }
+  .url-bar .hash { color: var(--accent2); }
+  .url-bar .query { color: var(--amber); }
+
+  /* INTERACTIVE DEMO */
+  .demo-box {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+  .demo-toolbar {
+    background: var(--bg3);
+    padding: 10px 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .demo-toolbar .fake-url {
+    flex: 1;
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text2);
+  }
+  .btn-nav {
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text2);
+    padding: 5px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-nav:hover:not(:disabled) { background: var(--bg3); color: var(--text); }
+  .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+  .demo-content { padding: 1.5rem; min-height: 180px; }
+  .demo-nav {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .demo-nav button {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text2);
+    padding: 6px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--sans);
+  }
+  .demo-nav button:hover { background: var(--bg4); color: var(--text); border-color: var(--accent); }
+  .demo-nav button.active {
+    background: rgba(108,99,255,0.15);
+    color: var(--accent2);
+    border-color: rgba(108,99,255,0.4);
+  }
+
+  /* VIEW CONTENT */
+  .view { display: none; }
+  .view.active { display: block; }
+  .view h3 { font-family: var(--display); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text); }
+  .view p { font-size: 14px; color: var(--text2); }
+  .view .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 0.8rem;
+  }
+  .badge-green { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+  .badge-purple { background: rgba(167,139,250,0.15); color: var(--accent2); border: 1px solid rgba(167,139,250,0.3); }
+  .badge-blue { background: rgba(56,189,248,0.15); color: var(--accent3); border: 1px solid rgba(56,189,248,0.3); }
+
+  /* COMPARISON TABLE */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin: 1.5rem 0;
+  }
+  .compare-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-family: var(--display);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border2);
+  }
+  .compare-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table td:first-child { color: var(--text); font-weight: 500; font-size: 13px; }
+  .compare-table .yes { color: var(--green); font-size: 13px; }
+  .compare-table .no { color: var(--red); font-size: 13px; }
+  .compare-table .maybe { color: var(--amber); font-size: 13px; }
+
+  /* APPROACH CARDS */
+  .approach {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.4rem;
+    margin-bottom: 0.8rem;
+    transition: border-color 0.2s;
+  }
+  .approach:hover { border-color: var(--border2); }
+  .approach-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem; }
+  .approach h4 { font-family: var(--display); font-size: 1rem; font-weight: 600; color: var(--text); }
+  .approach .pros { margin-top: 0.5rem; }
+  .approach .pro {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 3px;
+  }
+  .approach .pro::before { content: '+'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+  /* ROUTE PROPS */
+  .prop-tabs { display: flex; gap: 0.5rem; margin-bottom: 0; flex-wrap: wrap; }
+  .prop-tab {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px 8px 0 0;
+    border-bottom: none;
+    padding: 7px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text3);
+    transition: all 0.15s;
+  }
+  .prop-tab.active { background: var(--bg2); color: var(--accent2); border-color: var(--border2); }
+  .prop-panel {
+    display: none;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 0 10px 10px 10px;
+    padding: 1.2rem;
+  }
+  .prop-panel.active { display: block; }
+  .prop-panel p { font-size: 13.5px; color: var(--text2); margin-bottom: 0.8rem; }
+  .prop-panel ul { list-style: none; padding: 0; }
+  .prop-panel li {
+    font-size: 13px;
+    color: var(--text2);
+    padding: 3px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .prop-panel li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
+
+  /* QUIZ */
+  .quiz {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    padding: 1.8rem;
+    margin: 2rem 0;
+  }
+  .quiz h3 { font-family: var(--display); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; }
+  .quiz-q { font-size: 15px; color: var(--text); margin-bottom: 1rem; }
+  .quiz-opts { display: flex; flex-direction: column; gap: 0.5rem; }
+  .quiz-opt {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    font-family: var(--sans);
+  }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--text); }
+  .quiz-opt.correct { background: rgba(52,211,153,0.1); border-color: var(--green); color: var(--green); }
+  .quiz-opt.wrong { background: rgba(248,113,113,0.1); border-color: var(--red); color: var(--red); }
+  .quiz-feedback { margin-top: 1rem; font-size: 13.5px; display: none; padding: 10px 14px; border-radius: 8px; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.good { background: rgba(52,211,153,0.08); color: var(--green); border: 1px solid rgba(52,211,153,0.2); }
+  .quiz-feedback.bad { background: rgba(248,113,113,0.08); color: #fca5a5; border: 1px solid rgba(248,113,113,0.2); }
+  .quiz-next { display: none; margin-top: 1rem; background: rgba(108,99,255,0.12); border: 1px solid rgba(108,99,255,0.35); border-radius: 8px; padding: 8px 18px; font-size: 13px; color: var(--accent2); cursor: pointer; font-family: var(--sans); transition: all 0.15s; }
+  .quiz-next:hover { background: rgba(108,99,255,0.2); }
+  .quiz-next.show { display: inline-block; }
+
+  /* CHECKLIST */
+  .checklist { margin: 1.2rem 0; }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--text2);
+    transition: color 0.15s;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item:hover { color: var(--text); }
+  .check-box {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border2);
+    border-radius: 5px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+  .check-item.checked .check-box {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+  .check-item.checked { text-decoration: line-through; color: var(--text3); }
+
+  /* TAGS */
+  .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+  .tag-pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    background: var(--bg3);
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text3);
+  }
+  footer a { color: var(--accent2); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+
+  @media (max-width: 900px) {
+    aside { display: none; }
+    .hero, .sections, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside>
+    <div class="logo">SPA Tutorial</div>
+    <nav id="sidebar-nav">
+      <a href="#intro" class="active"><span class="num">01</span> Introduction</a>
+      <a href="#web-browsers"><span class="num">02</span> Web &amp; Browsers</a>
+      <a href="#problem"><span class="num">03</span> The Problem</a>
+      <a href="#url"><span class="num">04</span> URL Without Reload</a>
+      <a href="#deep-linking"><span class="num">05</span> Deep Linking</a>
+      <a href="#react-router"><span class="num">06</span> React Router</a>
+      <a href="#params"><span class="num">07</span> Route Parameters</a>
+      <a href="#route-props"><span class="num">08</span> Route Props</a>
+      <a href="#url-design"><span class="num">09</span> URL State Design</a>
+      <a href="#quiz"><span class="num">10</span> Knowledge Check</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-tag">CS142 — Mendel Rosenblum</div>
+      <h1>Single Page<br>Applications</h1>
+      <p>Master the art of building seamless, navigation-aware web applications that feel native — without ever reloading a page.</p>
+      <div class="hero-meta">
+        <span>📖 <strong>9 sections</strong></span>
+        <span>⏱ <strong>~25 min</strong></span>
+        <span>🧪 <strong>Interactive demos</strong></span>
+        <span>✅ <strong>Knowledge check</strong></span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+      </div>
+    </div>
+
+    <!-- SECTIONS -->
+    <div class="sections">
+
+      <!-- 01 INTRO -->
+      <section class="section" id="intro">
+        <div class="section-header">
+          <span class="section-num">01</span>
+          <h2>What is a Single Page Application?</h2>
+        </div>
+        <p>A <strong>Single Page Application (SPA)</strong> is a web app that loads one HTML document and dynamically updates content in the browser without performing a full page reload. The JavaScript runtime persists across views — giving users the experience of a fast, native-like app.</p>
+        <p>Unlike traditional multi-page apps that fetch a new HTML page from the server on every navigation, SPAs intercept navigation events, update only what's needed, and manage history entirely on the client.</p>
+        <div class="card-grid">
+          <div class="card">
+            <h3><span class="dot dot-red"></span> Traditional MPA</h3>
+            <p>Every click triggers a full HTTP request. Server sends back a new HTML page. JS environment is torn down and restarted. State is lost.</p>
+          </div>
+          <div class="card">
+            <h3><span class="dot dot-green"></span> Single Page App</h3>
+            <p>One initial load. All subsequent navigation is handled in JS. DOM updates dynamically. State, network connections, and timers persist.</p>
+          </div>
+        </div>
+        <div class="callout callout-info">
+          <strong>Key insight:</strong> The "single page" refers to the server's perspective — it serves one HTML document. From the user's point of view, the app has many screens.
+        </div>
+        <div class="tags">
+          <span class="tag-pill">react</span>
+          <span class="tag-pill">angular</span>
+          <span class="tag-pill">vue</span>
+          <span class="tag-pill">client-side-routing</span>
+          <span class="tag-pill">history-api</span>
+          <span class="tag-pill">hash-routing</span>
+        </div>
+      </section>
+
+      <!-- 02 WEB & BROWSERS -->
+      <section class="section" id="web-browsers">
+        <div class="section-header">
+          <span class="section-num">02</span>
+          <h2>Web Apps &amp; Browser Expectations</h2>
+        </div>
+        <p>Web apps run in browsers, and users have deeply ingrained expectations about how browsers behave. Understanding these is the foundation of SPA design.</p>
+        <div class="card-grid">
+          <div class="card">
+            <h3><span class="dot dot-blue"></span> URL History</h3>
+            <p>Browsers maintain a visited-URL history. The <strong>back button</strong> navigates to the previous URL, and the <strong>forward button</strong> moves ahead.</p>
+          </div>
+          <div class="card">
+            <h3><span class="dot dot-purple"></span> Page Navigation</h3>
+            <p>Users navigate by typing in the location bar, selecting bookmarks, clicking links, or hitting the <strong>refresh button</strong>.</p>
+          </div>
+          <div class="card">
+            <h3><span class="dot dot-amber"></span> JS Environment</h3>
+            <p>When the browser navigates to a new URL, it <strong>discards the current JavaScript environment</strong>. Only the URL and cookies survive.</p>
+          </div>
+        </div>
+        <div class="callout callout-warn">
+          <strong>The core problem:</strong> JS frameworks build state in memory. Browser navigation destroys that state. SPAs need to bridge this gap — mapping application state to the URL so state can survive navigation.
+        </div>
+      </section>
+
+      <!-- 03 THE PROBLEM -->
+      <section class="section" id="problem">
+        <div class="section-header">
+          <span class="section-num">03</span>
+          <h2>The Problem with Early Web Apps</h2>
+        </div>
+        <p>Early web apps evolved through two phases, both with painful trade-offs for users and developers.</p>
+
+        <div class="approach">
+          <div class="approach-header">
+            <h4>Phase 1 — Server-Rendered Multi-Page</h4>
+            <span class="badge badge-blue">Pre-JS era</span>
+          </div>
+          <p style="font-size:13.5px; color: var(--text2);">Each page had a distinct URL. Navigation fetched a new HTML page from the server. Clean URL story, but zero shared JS state — every click was a cold start.</p>
+        </div>
+
+        <div class="approach">
+          <div class="approach-header">
+            <h4>Phase 2 — Single URL JavaScript Apps</h4>
+            <span class="badge badge-purple">Early JS era</span>
+          </div>
+          <p style="font-size:13.5px; color: var(--text2);">Website became a single URL with JavaScript rendering everything. No more cold starts — but navigating away or refreshing destroyed all user state.</p>
+          <div class="pros">
+            <div class="pro" style="color: var(--red);">The dreaded "All will be lost!" warning on page unload.</div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <span class="code-lang">JavaScript — the panic guard</span>
+          </div>
+          <pre><span class="cmt">// Warn users before accidentally navigating away</span>
+<span class="var">window</span>.<span class="fn">onbeforeunload</span> = <span class="kw">function</span>(e) {
+  <span class="kw">return</span> <span class="str">'All will be lost!'</span>;
+};</pre>
+        </div>
+
+        <p>Users <em>expect</em> their apps to behave correctly in the browser. A proper SPA must support all of these:</p>
+        <div class="checklist" id="expectations-list">
+          <div class="check-item" onclick="toggleCheck(this)"><span class="check-box"></span>Navigate with forward and back buttons</div>
+          <div class="check-item" onclick="toggleCheck(this)"><span class="check-box"></span>Navigate away and return to the same state</div>
+          <div class="check-item" onclick="toggleCheck(this)"><span class="check-box"></span>Bookmark a specific place in the app</div>
+          <div class="check-item" onclick="toggleCheck(this)"><span class="check-box"></span>Copy the URL and share it with someone</div>
+          <div class="check-item" onclick="toggleCheck(this)"><span class="check-box"></span>Push the page refresh button safely</div>
+        </div>
+        <p style="font-size:12px; color: var(--text3); margin-top: 0.5rem;">↑ Click each item to check off what your app already handles.</p>
+      </section>
+
+      <!-- 04 URL WITHOUT RELOAD -->
+      <section class="section" id="url">
+        <div class="section-header">
+          <span class="section-num">04</span>
+          <h2>Changing the URL Without Reloading</h2>
+        </div>
+        <p>The key technique behind SPAs is updating the browser's URL without triggering a page reload. There are two mechanisms for this.</p>
+
+        <h3 style="font-family: var(--display); font-size:1.1rem; margin-bottom:0.8rem; margin-top:1.5rem;">Mechanism 1 — Hash Fragments</h3>
+        <p>The hash portion of a URL (<code style="font-family:var(--mono); color:var(--accent2)">#fragment</code>) can be changed freely without a reload. The browser doesn't send it to the server — it's purely client-side.</p>
+
+        <div style="margin: 1rem 0;">
+          <div class="url-bar"><span class="scheme">http://</span><span class="host">example.com</span></div>
+          <div class="url-bar"><span class="scheme">http://</span><span class="host">example.com</span><span class="hash">#/profile</span></div>
+          <div class="url-bar"><span class="scheme">http://</span><span class="host">example.com</span><span class="query">?id=3535</span></div>
+          <div class="url-bar"><span class="scheme">http://</span><span class="host">example.com</span><span class="query">?id=3535</span><span class="hash">#/settings</span></div>
+        </div>
+
+        <h3 style="font-family: var(--display); font-size:1.1rem; margin-bottom:0.8rem; margin-top:1.8rem;">Mechanism 2 — HTML5 History API</h3>
+        <p>HTML5 gave JavaScript full control over the browser's history stack via <code style="font-family:var(--mono); color:var(--accent2)">window.history</code>. This allows changing the URL path without sending any request to the server.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <span class="code-lang">JavaScript — History API</span>
+          </div>
+          <pre><span class="cmt">// Push a new URL into history (no reload!)</span>
+<span class="var">window</span>.history.<span class="fn">pushState</span>(
+  { page: <span class="str">'profile'</span> },  <span class="cmt">// state object</span>
+  <span class="str">'Profile'</span>,           <span class="cmt">// title (ignored by most browsers)</span>
+  <span class="str">'/user/profile'</span>       <span class="cmt">// new URL path</span>
+);
+
+<span class="cmt">// Replace current history entry</span>
+<span class="var">window</span>.history.<span class="fn">replaceState</span>(state, title, url);
+
+<span class="cmt">// Listen for back/forward navigation</span>
+<span class="var">window</span>.<span class="fn">addEventListener</span>(<span class="str">'popstate'</span>, (e) => {
+  <span class="var">console</span>.<span class="fn">log</span>(e.state); <span class="cmt">// restore app state from URL</span>
+});</pre>
+        </div>
+
+        <div class="callout callout-success">
+          <strong>React Router uses both:</strong> <code style="font-family:var(--mono)">HashRouter</code> uses the hash fragment approach (works without server config). <code style="font-family:var(--mono)">BrowserRouter</code> uses the HTML5 History API (requires server to serve the app for all routes).
+        </div>
+      </section>
+
+      <!-- 05 DEEP LINKING -->
+      <section class="section" id="deep-linking">
+        <div class="section-header">
+          <span class="section-num">05</span>
+          <h2>Deep Linking</h2>
+        </div>
+        <p><strong>Deep linking</strong> means the URL encodes enough context that directing a browser to that URL will restore the app to the exact same state. This enables bookmarking, sharing, and refreshing.</p>
+
+        <div class="callout callout-info">
+          <strong>Core concept:</strong> "The URL should capture the web app's context so that directing the browser to the URL will result in the app's execution resuming at that context."
+        </div>
+
+        <p style="margin-top:1.2rem;">There are <strong>two approaches</strong> to implementing deep linking:</p>
+
+        <div class="approach">
+          <div class="approach-header">
+            <h4>Approach 1 — Context State in the URL</h4>
+            <span class="badge badge-green">Automatic</span>
+          </div>
+          <div class="pros">
+            <div class="pro">Works for browser back/forward navigation and refresh</div>
+            <div class="pro">User can copy URL from the location bar at any time</div>
+            <div class="pro">No explicit user action needed — every state is linkable</div>
+          </div>
+        </div>
+
+        <div class="approach">
+          <div class="approach-header">
+            <h4>Approach 2 — Share Button Generates URL</h4>
+            <span class="badge badge-blue">On-demand</span>
+          </div>
+          <div class="pros">
+            <div class="pro">App only generates a shareable URL when user explicitly requests it</div>
+            <div class="pro">Keeps the location bar clean and human-readable</div>
+            <div class="pro">Allows separating "shareable" state from ephemeral navigation</div>
+          </div>
+        </div>
+
+        <div class="callout callout-warn">
+          <strong>Either way:</strong> the app must be able to <em>initialize itself</em> from a deep-linked URL. When a user arrives at <code style="font-family:var(--mono)">/Book/Moby/ch/3</code>, the app must parse that URL and render the correct content — even on a cold start.
+        </div>
+
+        <h3 style="font-family:var(--display); font-size:1.05rem; margin-top:1.8rem; margin-bottom:0.8rem;">Ugly URLs — a UX concern</h3>
+        <p>Deep linking doesn't have to mean ugly URLs. Compare:</p>
+        <div class="url-bar"><span class="scheme">http://</span><span class="host">www.example.org</span><span class="path">/dirmod</span><span class="query">?sid=789AB8&amp;type=gen&amp;mod=CorePages&amp;gid=A6CD4967199</span></div>
+        <div style="text-align:center; font-size:12px; color:var(--text3); margin: 6px 0;">versus</div>
+        <div class="url-bar"><span class="scheme">http://</span><span class="host">www.example.org</span><span class="path">/show/A6CD4967199</span></div>
+        <p style="margin-top:0.8rem; font-size:13.5px;">Use clean, semantic URL patterns. They're shareable, memorable, and communicate intent. This is one reason the <code style="font-family:var(--mono); color:var(--accent2)">BrowserRouter</code> approach is preferred when server configuration allows it.</p>
+      </section>
+
+      <!-- 06 REACT ROUTER -->
+      <section class="section" id="react-router">
+        <div class="section-header">
+          <span class="section-num">06</span>
+          <h2>ReactJS &amp; React Router</h2>
+        </div>
+        <p>React has <strong>no built-in opinion on routing</strong> — it's a view library. For SPA routing, you need a third-party package. The most popular choice is <strong>React Router</strong>.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <span class="code-lang">Terminal — install React Router</span>
+          </div>
+          <pre>npm install react-router-dom</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <span class="code-lang">JavaScript — import React Router V5</span>
+          </div>
+          <pre><span class="kw">import</span> { HashRouter, Route, Link, Redirect }
+  <span class="kw">from</span> <span class="str">'react-router-dom'</span>;</pre>
+        </div>
+
+        <h3 style="font-family:var(--display); font-size:1.05rem; margin-top:1.8rem; margin-bottom:1rem;">Interactive SPA Demo</h3>
+        <p>Click the nav buttons below to simulate SPA navigation. Notice how the URL updates without a page reload, and each view renders instantly.</p>
+
+        <div class="demo-box">
+          <div class="demo-toolbar">
+            <button class="btn-nav" id="btn-back" disabled onclick="historyBack()">&#8592;</button>
+            <button class="btn-nav" id="btn-fwd" disabled onclick="historyForward()">&#8594;</button>
+            <div class="fake-url" id="demo-url">example.com/#/home</div>
+            <button class="btn-nav" onclick="refreshDemo()">&#8635;</button>
+          </div>
+          <div class="demo-content">
+            <div class="view active" id="view-home">
+              <span class="badge badge-green">/ home</span>
+              <h3>Welcome to MyApp</h3>
+              <p>This is the home view. The JS environment is alive and persistent. Navigate to other views — your state stays.</p>
+            </div>
+            <div class="view" id="view-states">
+              <span class="badge badge-blue">/ states</span>
+              <h3>US States</h3>
+              <p>This view lists states. Rendered by a &lt;Route path="/states" /&gt; — no round-trip to the server.</p>
+            </div>
+            <div class="view" id="view-profile">
+              <span class="badge badge-purple">/ profile</span>
+              <h3>User Profile</h3>
+              <p>Profile page. Notice the URL changed in the bar above. The back button will take you to the previous view.</p>
+            </div>
+            <div class="view" id="view-settings">
+              <span class="badge badge-blue">/ settings</span>
+              <h3>Settings</h3>
+              <p>App settings. All rendered without a page reload — this is the SPA experience.</p>
+            </div>
+          </div>
+          <div class="demo-nav">
+            <button class="active" onclick="navigateTo('home', this)">Home</button>
+            <button onclick="navigateTo('states', this)">States</button>
+            <button onclick="navigateTo('profile', this)">Profile</button>
+            <button onclick="navigateTo('settings', this)">Settings</button>
+          </div>
+        </div>
+
+        <div class="code-block" style="margin-top:1.5rem;">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <span class="code-lang">JSX — React Router V5 structure</span>
+          </div>
+          <pre><span class="tag">&lt;HashRouter&gt;</span>
+  <span class="tag">&lt;div&gt;</span>
+    <span class="cmt">/* Navigation Links */</span>
+    <span class="tag">&lt;Link</span> <span class="attr">to=</span><span class="val">"/states"</span><span class="tag">&gt;</span>States<span class="tag">&lt;/Link&gt;</span>
+    <span class="tag">&lt;Link</span> <span class="attr">to=</span><span class="val">"/profile"</span><span class="tag">&gt;</span>Profile<span class="tag">&lt;/Link&gt;</span>
+
+    <span class="cmt">/* Route declarations */</span>
+    <span class="tag">&lt;Route</span> <span class="attr">path=</span><span class="val">"/states"</span>  <span class="attr">component=</span><span class="val">{States}</span>  <span class="tag">/&gt;</span>
+    <span class="tag">&lt;Route</span> <span class="attr">path=</span><span class="val">"/profile"</span> <span class="attr">component=</span><span class="val">{Profile}</span> <span class="tag">/&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/HashRouter&gt;</span></pre>
+        </div>
+
+        <div class="card-grid">
+          <div class="card">
+            <h3><span class="dot dot-purple"></span> HashRouter</h3>
+            <p>Uses the URL hash (<code style="font-family:var(--mono);font-size:12px">#/path</code>). No server config required. Hash changes are never sent to the server.</p>
+          </div>
+          <div class="card">
+            <h3><span class="dot dot-blue"></span> BrowserRouter</h3>
+            <p>Uses the HTML5 History API. Clean URLs (<code style="font-family:var(--mono);font-size:12px">/path</code>). Requires server to serve <code style="font-family:var(--mono);font-size:12px">index.html</code> for all routes.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 07 ROUTE PARAMS -->
+      <section class="section" id="params">
+        <div class="section-header">
+          <span class="section-num">07</span>
+          <h2>Passing Parameters via Routes</h2>
+        </div>
+        <p>Routes can contain <strong>dynamic segments</strong> — parts of the URL path that act as parameters. React Router captures these and passes them to the component as <code style="font-family:var(--mono); color:var(--accent2)">props.match.params</code>.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <span class="code-lang">JSX — Route with URL parameters</span>
+          </div>
+          <pre><span class="cmt">// Define the route — :book and :chapter are params</span>
+<span class="tag">&lt;Route</span>
+  <span class="attr">path=</span><span class="val">"/Book/:book/ch/:chapter"</span>
+  <span class="attr">component=</span><span class="val">{BookChapterComponent}</span>
+<span class="tag">/&gt;</span>
+
+<span class="cmt">// Link that populates the params</span>
+<span class="tag">&lt;Link</span> <span class="attr">to=</span><span class="val">"/Book/Moby/ch/1"</span><span class="tag">&gt;</span>Moby Dick, Ch 1<span class="tag">&lt;/Link&gt;</span>
+<span class="cmt">// Renders: &lt;a href="#/Book/Moby/ch/1"&gt;...&lt;/a&gt;</span></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <span class="code-lang">JSX — Component receiving route params</span>
+          </div>
+          <pre><span class="cmt">// Destructure match from props</span>
+<span class="kw">function</span> <span class="fn">BookChapterComponent</span>({ match }) {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;h3&gt;</span>Book: {match.params.<span class="var">book</span>}<span class="tag">&lt;/h3&gt;</span>
+      <span class="tag">&lt;h3&gt;</span>Chapter: {match.params.<span class="var">chapter</span>}<span class="tag">&lt;/h3&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  );
+}</pre>
+        </div>
+
+        <p>Given the URL <code style="font-family:var(--mono); color:var(--accent2)">/Book/Moby/ch/1</code>, the <code style="font-family:var(--mono)">match.params</code> object will be:</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <span class="code-lang">JSON — match.params</span>
+          </div>
+          <pre>{
+  <span class="attr">"book"</span>:    <span class="str">"Moby"</span>,
+  <span class="attr">"chapter"</span>: <span class="str">"1"</span>
+}</pre>
+        </div>
+
+        <div class="callout callout-info">
+          <strong>Tip:</strong> URL params are always strings. If you need a number, parse with <code style="font-family:var(--mono)">parseInt(match.params.chapter)</code> or the unary <code style="font-family:var(--mono)">+</code> operator.
+        </div>
+      </section>
+
+      <!-- 08 ROUTE PROPS -->
+      <section class="section" id="route-props">
+        <div class="section-header">
+          <span class="section-num">08</span>
+          <h2>Route Props: component, render, children</h2>
+        </div>
+        <p>React Router's <code style="font-family:var(--mono); color:var(--accent2)">&lt;Route&gt;</code> supports three rendering props with different semantics. Understanding the difference is key to getting the right behaviour.</p>
+
+        <div class="prop-tabs">
+          <button class="prop-tab active" onclick="showProp('component', this)">component=</button>
+          <button class="prop-tab" onclick="showProp('render', this)">render=</button>
+          <button class="prop-tab" onclick="showProp('children', this)">children=</button>
+        </div>
+
+        <div class="prop-panel active" id="prop-component">
+          <p>Pass a React component class or function. React Router will instantiate it when the path matches.</p>
+          <div class="code-block" style="margin-top:0.8rem; margin-bottom:0.8rem;">
+            <pre><span class="tag">&lt;Route</span> <span class="attr">path=</span><span class="val">"/book"</span> <span class="attr">component=</span><span class="val">{BookComponent}</span> <span class="tag">/&gt;</span></pre>
+          </div>
+          <ul>
+            <li>Mounts the component when URL matches, unmounts when it doesn't</li>
+            <li>Passes a <code style="font-family:var(--mono)">match</code> object with <code style="font-family:var(--mono)">params</code>, <code style="font-family:var(--mono)">url</code>, and <code style="font-family:var(--mono)">history</code></li>
+            <li>Use when you want a fresh component instance on each route match</li>
+          </ul>
+        </div>
+
+        <div class="prop-panel" id="prop-render">
+          <p>Pass an inline render function. Useful for passing extra props without causing unnecessary remounts.</p>
+          <div class="code-block" style="margin-top:0.8rem; margin-bottom:0.8rem;">
+            <pre><span class="tag">&lt;Route</span>
+  <span class="attr">path=</span><span class="val">"/book"</span>
+  <span class="attr">render=</span><span class="val">{props =&gt; (</span>
+    <span class="tag">&lt;BookComponent</span>
+      <span class="attr">book=</span><span class="val">{props.match.params.book}</span>
+      <span class="attr">onFavorite=</span><span class="val">{handleFavorite}</span>
+    <span class="tag">/&gt;</span>
+  <span class="val">)}</span>
+<span class="tag">/&gt;</span></pre>
+          </div>
+          <ul>
+            <li>Calls the function with route props (including match) when URL matches</li>
+            <li>Does <em>not</em> unmount/remount the component on URL change — updates instead</li>
+            <li>Preferred when you need to pass extra props alongside route params</li>
+          </ul>
+        </div>
+
+        <div class="prop-panel" id="prop-children">
+          <p>Like <code style="font-family:var(--mono)">render=</code> but the function is called <em>regardless</em> of whether the URL matches.</p>
+          <div class="code-block" style="margin-top:0.8rem; margin-bottom:0.8rem;">
+            <pre><span class="tag">&lt;Route</span>
+  <span class="attr">path=</span><span class="val">"/book"</span>
+  <span class="attr">children=</span><span class="val">{({ match }) =&gt; (</span>
+    <span class="tag">&lt;li</span> <span class="attr">className=</span><span class="val">{match ? 'active' : ''}</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;Link</span> <span class="attr">to=</span><span class="val">"/book"</span><span class="tag">&gt;</span>Books<span class="tag">&lt;/Link&gt;</span>
+    <span class="tag">&lt;/li&gt;</span>
+  <span class="val">)}</span>
+<span class="tag">/&gt;</span></pre>
+          </div>
+          <ul>
+            <li><code style="font-family:var(--mono)">match</code> is <code style="font-family:var(--mono)">null</code> when the URL doesn't match</li>
+            <li>Useful for nav items that are always rendered but styled differently when active</li>
+            <li>Always runs, even when the path doesn't match</li>
+          </ul>
+        </div>
+
+        <div class="callout callout-info" style="margin-top:1rem;">
+          <strong>Precedence order:</strong> When multiple render props are present, React Router uses: <code style="font-family:var(--mono)">component</code> &gt; <code style="font-family:var(--mono)">render</code> &gt; <code style="font-family:var(--mono)">children</code>. Use <code style="font-family:var(--mono)">&lt;Switch&gt;</code> to render only the <em>first</em> matching route.
+        </div>
+
+        <div class="code-block" style="margin-top:1.2rem;">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <span class="code-lang">JSX — Switch renders first match only</span>
+          </div>
+          <pre><span class="tag">&lt;Switch&gt;</span>
+  <span class="tag">&lt;Route</span> <span class="attr">exact</span> <span class="attr">path=</span><span class="val">"/"</span>       <span class="attr">component=</span><span class="val">{Home}</span>    <span class="tag">/&gt;</span>
+  <span class="tag">&lt;Route</span> <span class="attr">path=</span><span class="val">"/book/:id"</span>  <span class="attr">component=</span><span class="val">{BookDetail}</span> <span class="tag">/&gt;</span>
+  <span class="tag">&lt;Route</span> <span class="attr">path=</span><span class="val">"/book"</span>     <span class="attr">component=</span><span class="val">{BookList}</span>  <span class="tag">/&gt;</span>
+  <span class="tag">&lt;Route</span>                   <span class="attr">component=</span><span class="val">{NotFound}</span>  <span class="tag">/&gt;</span>
+<span class="tag">&lt;/Switch&gt;</span></pre>
+        </div>
+      </section>
+
+      <!-- 09 URL STATE DESIGN -->
+      <section class="section" id="url-design">
+        <div class="section-header">
+          <span class="section-num">09</span>
+          <h2>Designing URL State</h2>
+        </div>
+        <p>Not everything belongs in the URL. Choosing <em>what</em> to encode in the URL is a design decision that affects shareability, bookmarkability, and user expectations.</p>
+
+        <h3 style="font-family:var(--display); font-size:1.05rem; margin: 1.5rem 0 0.8rem;">The Decision Framework</h3>
+
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>UI State</th>
+              <th>In URL?</th>
+              <th>Rationale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Current page / view</td><td class="yes">✓ Yes</td><td>Core navigational state — always shareable</td></tr>
+            <tr><td>Selected item (e.g. book ID)</td><td class="yes">✓ Yes</td><td>User expects this to survive a refresh</td></tr>
+            <tr><td>Search query</td><td class="yes">✓ Yes</td><td>Shareable search results are expected</td></tr>
+            <tr><td>Sort column &amp; direction</td><td class="maybe">~ Maybe</td><td>Depends on use case — share vs. personal pref</td></tr>
+            <tr><td>Table page / viewport offset</td><td class="maybe">~ Maybe</td><td>Useful for sharing but can clutter the URL</td></tr>
+            <tr><td>Open modal / dialog</td><td class="no">✗ No</td><td>Ephemeral interaction — not a shareable context</td></tr>
+            <tr><td>Hover / focus state</td><td class="no">✗ No</td><td>Transient UI state — meaningless in a URL</td></tr>
+            <tr><td>Unsaved form values</td><td class="no">✗ No</td><td>Too volatile; use local state instead</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-success">
+          <strong>Rule of thumb:</strong> Put in the URL what you'd want to restore on a browser refresh or share with someone. Leave out what is purely ephemeral UI interaction state.
+        </div>
+
+        <h3 style="font-family:var(--display); font-size:1.05rem; margin: 1.8rem 0 0.8rem;">Example: Data Table URL Design</h3>
+        <p>Consider a sortable, paginated data table. What state should live in the URL? Think through the user scenarios:</p>
+
+        <div class="card-grid">
+          <div class="card">
+            <h3><span class="dot dot-green"></span> Bookmarking for Self</h3>
+            <p>Sort column + direction and current page could be valuable — you'd want to return to exactly where you were.</p>
+          </div>
+          <div class="card">
+            <h3><span class="dot dot-blue"></span> Sharing with Others</h3>
+            <p>Search query and filter state are almost certainly shareable. But your current scroll position is not.</p>
+          </div>
+          <div class="card">
+            <h3><span class="dot dot-amber"></span> Nav Away &amp; Back</h3>
+            <p>The browser back button should restore the table view — consider using the History API's state object for this.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 QUIZ -->
+      <section class="section" id="quiz">
+        <div class="section-header">
+          <span class="section-num">10</span>
+          <h2>Knowledge Check</h2>
+        </div>
+        <p>Test what you've learned. Select the best answer for each question.</p>
+
+        <div class="quiz" id="quiz-1">
+          <h3>Question 1 of 4</h3>
+          <div class="quiz-q">When a browser navigates to a new URL, what happens to the current JavaScript environment?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="checkAnswer(this, false, 'quiz-1')">It is paused and resumed when the user returns.</button>
+            <button class="quiz-opt" onclick="checkAnswer(this, true, 'quiz-1')">It is discarded. Only the URL and cookies survive.</button>
+            <button class="quiz-opt" onclick="checkAnswer(this, false, 'quiz-1')">It continues running in a background tab.</button>
+            <button class="quiz-opt" onclick="checkAnswer(this, false, 'quiz-1')">It is serialized to localStorage automatically.</button>
+          </div>
+          <div class="quiz-feedback" id="fb-quiz-1"></div>
+          <button class="quiz-next" id="next-quiz-1" onclick="scrollTo('#quiz-2')">Next question →</button>
+        </div>
+
+        <div class="quiz" id="quiz-2">
+          <h3>Question 2 of 4</h3>
+          <div class="quiz-q">What is the main difference between <code style="font-family:var(--mono)">HashRouter</code> and <code style="font-family:var(--mono)">BrowserRouter</code> in React Router?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="checkAnswer(this, false, 'quiz-2')">HashRouter is faster because it doesn't touch the DOM.</button>
+            <button class="quiz-opt" onclick="checkAnswer(this, false, 'quiz-2')">BrowserRouter requires a CDN, HashRouter doesn't.</button>
+            <button class="quiz-opt" onclick="checkAnswer(this, true, 'quiz-2')">HashRouter uses the URL hash fragment; BrowserRouter uses the HTML5 History API.</button>
+            <button class="quiz-opt" onclick="checkAnswer(this, false, 'quiz-2')">HashRouter supports parameters; BrowserRouter doesn't.</button>
+          </div>
+          <div class="quiz-feedback" id="fb-quiz-2"></div>
+          <button class="quiz-next" id="next-quiz-2" onclick="scrollTo('#quiz-3')">Next question →</button>
+        </div>
+
+        <div class="quiz" id="quiz-3">
+          <h3>Question 3 of 4</h3>
+          <div class="quiz-q">In React Router V5, where are URL route parameters available inside a component?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="checkAnswer(this, false, 'quiz-3')">In <code style="font-family:var(--mono)">window.location.params</code></button>
+            <button class="quiz-opt" onclick="checkAnswer(this, true, 'quiz-3')">In <code style="font-family:var(--mono)">props.match.params</code></button>
+            <button class="quiz-opt" onclick="checkAnswer(this, false, 'quiz-3')">In <code style="font-family:var(--mono)">this.state.params</code></button>
+            <button class="quiz-opt" onclick="checkAnswer(this, false, 'quiz-3')">In <code style="font-family:var(--mono)">props.router.query</code></button>
+          </div>
+          <div class="quiz-feedback" id="fb-quiz-3"></div>
+          <button class="quiz-next" id="next-quiz-3" onclick="scrollTo('#quiz-4')">Next question →</button>
+        </div>
+
+        <div class="quiz" id="quiz-4">
+          <h3>Question 4 of 4</h3>
+          <div class="quiz-q">A user has a delete confirmation dialog open in your app. Should the URL encode this dialog's open state?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="checkAnswer(this, false, 'quiz-4')">Yes — all UI state should be in the URL for deep linking.</button>
+            <button class="quiz-opt" onclick="checkAnswer(this, true, 'quiz-4')">No — dialogs are ephemeral interaction state and shouldn't be in the URL.</button>
+            <button class="quiz-opt" onclick="checkAnswer(this, false, 'quiz-4')">Only if the app uses BrowserRouter.</button>
+            <button class="quiz-opt" onclick="checkAnswer(this, false, 'quiz-4')">Yes, but only using the hash fragment.</button>
+          </div>
+          <div class="quiz-feedback" id="fb-quiz-4"></div>
+          <button class="quiz-next" id="next-quiz-4" onclick="showComplete()">See results →</button>
+        </div>
+
+        <div id="quiz-complete" style="display:none; background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.25); border-radius: 12px; padding:1.8rem; text-align:center; margin-top:1.5rem;">
+          <div style="font-size:2.5rem; margin-bottom:0.8rem;">🎉</div>
+          <h3 style="font-family:var(--display); font-size:1.3rem; color:var(--green); margin-bottom:0.5rem;">Tutorial Complete!</h3>
+          <p style="color:var(--text2); font-size:14px; max-width:440px; margin:0 auto;">You've covered the core concepts of Single Page Applications — from browser history mechanics to React Router's routing model and URL state design.</p>
+          <p style="color:var(--text3); font-size:12px; margin-top:1rem;">Score: <span id="final-score" style="color:var(--green); font-family:var(--mono)">0/4</span></p>
+        </div>
+      </section>
+
+    </div><!-- end sections -->
+
+    <footer>
+      <span>CS142 Lecture Notes — Single Page Applications · Mendel Rosenblum</span>
+      <span>Built from <a href="#">SPA.md</a> source</span>
+    </footer>
+  </main>
+</div>
+
+<script>
+  // ---- QUIZ LOGIC ----
+  let quizScore = 0;
+  const feedbacks = {
+    'quiz-1': { good: 'Correct! When navigating to a new URL, the browser tears down the entire JS runtime. This is why SPAs must encode state in the URL — it\'s the only thing that survives.', bad: 'Not quite. The browser completely discards the JS environment. Only the URL itself (and cookies) are preserved.' },
+    'quiz-2': { good: 'Correct! HashRouter encodes routes as URL fragments (e.g. #/path) — no server config needed. BrowserRouter uses the HTML5 pushState API for clean URLs but requires the server to serve index.html for all routes.', bad: 'Not quite. The key distinction is the URL encoding strategy: hash fragments vs. HTML5 pushState.' },
+    'quiz-3': { good: 'Correct! React Router injects a `match` object into the component\'s props. Route parameters defined with `:name` syntax are accessible at `props.match.params.name`.', bad: 'Not quite. React Router passes route params through `props.match.params` when using the `component=` prop.' },
+    'quiz-4': { good: 'Correct! A delete confirmation dialog is ephemeral UI state — it doesn\'t represent a shareable or bookmarkable context. Putting it in the URL would mean sharing a URL that opens a destructive dialog.', bad: 'Not quite. Only state that is meaningful to share or restore on refresh should go in the URL. A modal dialog is transient interaction state.' }
+  };
+
+  function checkAnswer(btn, isCorrect, quizId) {
+    const quiz = document.getElementById(quizId);
+    const opts = quiz.querySelectorAll('.quiz-opt');
+    if (quiz.dataset.answered) return;
+    quiz.dataset.answered = '1';
+    opts.forEach(o => o.disabled = true);
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    if (!isCorrect) {
+      opts.forEach(o => { if (o.onclick.toString().includes('true')) o.classList.add('correct'); });
+    }
+    if (isCorrect) quizScore++;
+    const fb = document.getElementById('fb-' + quizId);
+    fb.textContent = feedbacks[quizId][isCorrect ? 'good' : 'bad'];
+    fb.className = 'quiz-feedback show ' + (isCorrect ? 'good' : 'bad');
+    document.getElementById('next-' + quizId).classList.add('show');
+  }
+
+  function scrollTo(id) {
+    document.querySelector(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function showComplete() {
+    document.getElementById('quiz-complete').style.display = 'block';
+    document.getElementById('final-score').textContent = quizScore + '/4';
+    document.getElementById('quiz-complete').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('progress').style.width = '100%';
+  }
+
+  // ---- SPA DEMO ----
+  const demoHistory = ['home'];
+  let demoPos = 0;
+
+  function navigateTo(view, btn) {
+    demoHistory.splice(demoPos + 1);
+    demoHistory.push(view);
+    demoPos = demoHistory.length - 1;
+    renderDemo();
+    document.querySelectorAll('.demo-nav button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function historyBack() {
+    if (demoPos > 0) { demoPos--; renderDemo(); }
+  }
+
+  function historyForward() {
+    if (demoPos < demoHistory.length - 1) { demoPos++; renderDemo(); }
+  }
+
+  function refreshDemo() {
+    const current = demoHistory[demoPos];
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + current).classList.add('active');
+  }
+
+  function renderDemo() {
+    const current = demoHistory[demoPos];
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + current).classList.add('active');
+    document.getElementById('demo-url').textContent = 'example.com/#/' + current;
+    document.getElementById('btn-back').disabled = demoPos === 0;
+    document.getElementById('btn-fwd').disabled = demoPos === demoHistory.length - 1;
+    document.querySelectorAll('.demo-nav button').forEach(b => {
+      b.classList.toggle('active', b.textContent.toLowerCase() === current);
+    });
+  }
+
+  // ---- PROP TABS ----
+  function showProp(name, btn) {
+    document.querySelectorAll('.prop-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.prop-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('prop-' + name).classList.add('active');
+  }
+
+  // ---- CHECKLIST ----
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+    el.querySelector('.check-box').textContent = el.classList.contains('checked') ? '✓' : '';
+  }
+
+  // ---- SCROLL SPY ----
+  const sections = document.querySelectorAll('.section');
+  const navLinks = document.querySelectorAll('aside nav a');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach(a => {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+        });
+        // progress
+        const visibleSections = [...sections].filter(s => s.getBoundingClientRect().top < window.innerHeight * 0.6);
+        const pct = Math.min((visibleSections.length / sections.length) * 100, 95);
+        document.getElementById('progress').style.width = pct + '%';
+      }
+    });
+  }, { threshold: 0.25 });
+
+  sections.forEach(s => {
+    observer.observe(s);
+    // fade-in
+    const fadeObserver = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); fadeObserver.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    fadeObserver.observe(s);
+  });
+</script>
+</body>
+</html>

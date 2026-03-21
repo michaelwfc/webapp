@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Responsive Web Design — Interactive Tutorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: #2a2a3e;
+    --accent: #7c6af5;
+    --accent2: #3ecfb2;
+    --accent3: #f5a623;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --code-bg: #0d0d16;
+    --red: #ff5f6d;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ─── HERO ─────────────────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 30%, rgba(124,106,245,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 70%, rgba(62,207,178,0.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,106,245,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,106,245,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    color: var(--accent2);
+    border: 1px solid var(--accent2);
+    padding: 0.35rem 1rem;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s forwards;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.8rem, 8vw, 6rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.35s forwards;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero-sub {
+    margin-top: 1.5rem;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: var(--muted);
+    max-width: 560px;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.5s forwards;
+  }
+
+  .hero-cta {
+    margin-top: 3rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.65s forwards;
+  }
+
+  .btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    padding: 0.85rem 2rem;
+    border-radius: 3px;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-block;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #9584f7; transform: translateY(-2px); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--accent2);
+    border: 1px solid var(--accent2);
+  }
+  .btn-outline:hover { background: rgba(62,207,178,0.1); transform: translateY(-2px); }
+
+  /* ─── NAV ───────────────────────────────────────────── */
+  .toc {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .toc::-webkit-scrollbar { display: none; }
+
+  .toc-item {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    padding: 1rem 1.2rem;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: block;
+  }
+  .toc-item:hover, .toc-item.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* ─── MAIN CONTENT ──────────────────────────────────── */
+  .main { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }
+
+  .section {
+    padding: 5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 2.5rem 0 1rem;
+  }
+
+  p { color: rgba(232,232,240,0.85); margin-bottom: 1.2rem; }
+
+  /* ─── CODE BLOCKS ───────────────────────────────────── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 1.5rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    position: relative;
+  }
+
+  code {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.8;
+    color: #a8d8ff;
+  }
+
+  .inline-code {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82em;
+    background: var(--surface2);
+    color: var(--accent2);
+    padding: 0.15em 0.45em;
+    border-radius: 3px;
+  }
+
+  .kw { color: #c792ea; }
+  .at { color: var(--accent2); }
+  .val { color: #f5a623; }
+  .cm { color: var(--muted); font-style: italic; }
+  .sel { color: #82aaff; }
+  .prop { color: #ffcb6b; }
+
+  /* ─── CALLOUT BOXES ─────────────────────────────────── */
+  .callout {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    margin: 2rem 0;
+  }
+  .callout.tip { border-left-color: var(--accent2); }
+  .callout.warn { border-left-color: var(--accent3); }
+
+  .callout-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--accent);
+  }
+  .callout.tip .callout-title { color: var(--accent2); }
+  .callout.warn .callout-title { color: var(--accent3); }
+
+  /* ─── DEVICE CARDS (Section 1) ──────────────────────── */
+  .device-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .device-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    transition: all 0.3s;
+  }
+  .device-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+
+  .device-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+  .device-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .device-res {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+
+  /* ─── STAT BAR CHART ────────────────────────────────── */
+  .stat-chart { margin: 2rem 0; }
+
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    width: 90px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .stat-bar-track {
+    flex: 1;
+    height: 20px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .stat-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+    width: 0;
+  }
+
+  .stat-bar.mobile { background: linear-gradient(90deg, #7c6af5, #3ecfb2); }
+  .stat-bar.laptop { background: linear-gradient(90deg, #c792ea, #7c6af5); }
+  .stat-bar.desktop { background: linear-gradient(90deg, #3ecfb2, #82aaff); }
+  .stat-bar.other { background: linear-gradient(90deg, #555, #888); }
+
+  .stat-pct {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text);
+    width: 50px;
+    flex-shrink: 0;
+  }
+
+  /* ─── PILLAR CARDS (Section 2) ──────────────────────── */
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .pillar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .pillar:hover { border-color: var(--accent); }
+
+  .pillar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .pillar:nth-child(1)::before { background: var(--accent); }
+  .pillar:nth-child(2)::before { background: var(--accent2); }
+  .pillar:nth-child(3)::before { background: var(--accent3); }
+
+  .pillar-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .pillar h4 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+  }
+  .pillar:nth-child(1) h4 { color: var(--accent); }
+  .pillar:nth-child(2) h4 { color: var(--accent2); }
+  .pillar:nth-child(3) h4 { color: var(--accent3); }
+
+  .pillar p { font-size: 0.9rem; margin: 0; }
+
+  /* ─── LIVE DEMO (Section 3) ─────────────────────────── */
+  .demo-container {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 2rem 0;
+  }
+
+  .demo-toolbar {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .demo-toolbar span {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .size-btns { display: flex; gap: 0.5rem; }
+
+  .size-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 3px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .size-btn:hover, .size-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .demo-viewport {
+    background: #fff;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  .demo-viewport iframe {
+    width: 100%;
+    height: 380px;
+    border: none;
+    display: block;
+  }
+
+  /* ─── BREAKPOINT VISUAL (Section 4) ─────────────────── */
+  .bp-visual {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    margin: 2rem 0;
+  }
+
+  .bp-scale {
+    position: relative;
+    height: 60px;
+    margin-bottom: 1.5rem;
+  }
+
+  .bp-track {
+    position: absolute;
+    top: 50%;
+    left: 0; right: 0;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    transform: translateY(-50%);
+  }
+
+  .bp-zone {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 4px;
+    border-radius: 2px;
+  }
+
+  .bp-zone.mobile  { left: 0%; width: 40%; background: var(--accent); }
+  .bp-zone.tablet  { left: 40%; width: 35%; background: var(--accent2); }
+  .bp-zone.desktop { left: 75%; width: 25%; background: var(--accent3); }
+
+  .bp-marker {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+
+  .bp-marker-line {
+    width: 2px;
+    height: 60px;
+    background: var(--border);
+    margin: 0 auto;
+  }
+
+  .bp-marker-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    white-space: nowrap;
+    margin-top: 4px;
+  }
+
+  .bp-legend {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .bp-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .bp-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  /* ─── MOBILE FIRST (Section 5) ──────────────────────── */
+  .mf-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 2rem 0;
+    position: relative;
+  }
+
+  .mf-steps::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2), var(--accent3));
+  }
+
+  .mf-step {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem 0 1.5rem 0;
+    position: relative;
+  }
+
+  .mf-step-num {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .mf-step:nth-child(1) .mf-step-num { background: var(--accent); color: #fff; }
+  .mf-step:nth-child(2) .mf-step-num { background: var(--accent2); color: #0a0a0f; }
+  .mf-step:nth-child(3) .mf-step-num { background: var(--accent3); color: #0a0a0f; }
+
+  .mf-step-content h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+
+  .mf-step-content p { font-size: 0.9rem; margin: 0; }
+
+  /* ─── QUIZ ───────────────────────────────────────────── */
+  .quiz {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2.5rem;
+    margin: 3rem 0;
+  }
+
+  .quiz-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+  }
+
+  .quiz-q { margin-bottom: 2rem; }
+
+  .quiz-q-text {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .quiz-options { display: flex; flex-direction: column; gap: 0.6rem; }
+
+  .quiz-opt {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.85rem 1.25rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    text-align: left;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+  }
+  .quiz-opt:hover { border-color: var(--accent); background: rgba(124,106,245,0.08); }
+  .quiz-opt.correct { border-color: var(--accent2); background: rgba(62,207,178,0.1); color: var(--accent2); }
+  .quiz-opt.wrong { border-color: var(--red); background: rgba(255,95,109,0.08); color: var(--red); }
+
+  .quiz-feedback {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    font-style: italic;
+    min-height: 1.2rem;
+    color: var(--muted);
+  }
+
+  /* ─── ANIMATIONS ─────────────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ─── RESPONSIVE (META) ─────────────────────────────── */
+  @media (max-width: 600px) {
+    .pillars { grid-template-columns: 1fr; }
+    .device-grid { grid-template-columns: repeat(2, 1fr); }
+    .toc-item { padding: 0.85rem 0.9rem; font-size: 0.66rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ────────────────────── HERO ────────────────────────── -->
+<section class="hero">
+  <div class="grid-bg"></div>
+  <div class="hero-badge">CS142 — Mendel Rosenblum</div>
+  <h1><span>Responsive</span><br>Web Design</h1>
+  <p class="hero-sub">Build web apps that flow into and fill whatever device your user has — from 320px phones to 1920px desktops.</p>
+  <div class="hero-cta">
+    <a href="#challenge" class="btn btn-primary">Start Tutorial →</a>
+    <a href="#quiz" class="btn btn-outline">Test Yourself</a>
+  </div>
+</section>
+
+<!-- ────────────────────── STICKY NAV ──────────────────── -->
+<nav class="toc">
+  <a href="#challenge" class="toc-item" data-section="challenge">01 Challenge</a>
+  <a href="#rwd" class="toc-item" data-section="rwd">02 What is RWD</a>
+  <a href="#layout" class="toc-item" data-section="layout">03 Layout Demo</a>
+  <a href="#breakpoints" class="toc-item" data-section="breakpoints">04 Breakpoints</a>
+  <a href="#implementation" class="toc-item" data-section="implementation">05 Implementation</a>
+  <a href="#quiz" class="toc-item" data-section="quiz">Quiz</a>
+</nav>
+
+<!-- ────────────────────── MAIN ────────────────────────── -->
+<main class="main">
+
+  <!-- SECTION 1: CHALLENGE -->
+  <section id="challenge" class="section reveal">
+    <div class="section-label">Section 01</div>
+    <h2>The Screen Real Estate Challenge</h2>
+    <p>Modern web apps must serve users across wildly different screen sizes. Do we really need to build a separate version for each one?</p>
+
+    <div class="device-grid">
+      <div class="device-card">
+        <div class="device-icon">📱</div>
+        <div class="device-name">Phone (P)</div>
+        <div class="device-res">320 × 640</div>
+      </div>
+      <div class="device-card">
+        <div class="device-icon">📲</div>
+        <div class="device-name">Phone (L)</div>
+        <div class="device-res">640 × 320</div>
+      </div>
+      <div class="device-card">
+        <div class="device-icon">📟</div>
+        <div class="device-name">Tablet (P)</div>
+        <div class="device-res">768 × 1024</div>
+      </div>
+      <div class="device-card">
+        <div class="device-icon">🖥</div>
+        <div class="device-name">Desktop</div>
+        <div class="device-res">1920 × 1028</div>
+      </div>
+    </div>
+
+    <h3>Real-World Resolution Distribution</h3>
+    <p>StatCounter data from April 2018 shows the spread of screen resolutions in the wild. Mobile dominates — 360×640 alone accounts for over 22%.</p>
+
+    <div class="stat-chart" id="statChart">
+      <div class="stat-row">
+        <div class="stat-label">360×640</div>
+        <div class="stat-bar-track"><div class="stat-bar mobile" data-pct="55.5"></div></div>
+        <div class="stat-pct">22.14%</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-label">1366×768</div>
+        <div class="stat-bar-track"><div class="stat-bar laptop" data-pct="30.6"></div></div>
+        <div class="stat-pct">12.23%</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-label">1920×1080</div>
+        <div class="stat-bar-track"><div class="stat-bar desktop" data-pct="22.4"></div></div>
+        <div class="stat-pct">8.96%</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-label">375×667</div>
+        <div class="stat-bar-track"><div class="stat-bar mobile" data-pct="10.5"></div></div>
+        <div class="stat-pct">4.21%</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-label">1440×900</div>
+        <div class="stat-bar-track"><div class="stat-bar desktop" data-pct="7.7"></div></div>
+        <div class="stat-pct">3.07%</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-label">Other</div>
+        <div class="stat-bar-track"><div class="stat-bar other" data-pct="75.6"></div></div>
+        <div class="stat-pct">30.24%</div>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-title">⚡ Key Insight</div>
+      <p>No single resolution accounts for more than a quarter of users. You <em>cannot</em> optimize for just one screen size — you need a fluid, adaptive approach.</p>
+    </div>
+  </section>
+
+  <!-- SECTION 2: WHAT IS RWD -->
+  <section id="rwd" class="section reveal">
+    <div class="section-label">Section 02</div>
+    <h2>What is Responsive Web Design?</h2>
+    <p>The core insight of RWD, coined by Ethan Marcotte, is elegant:</p>
+
+    <div class="callout">
+      <div class="callout-title">💧 Content is like water</div>
+      <p>Your web app should flow into and fill whatever device you have — just like water takes the shape of its container.</p>
+    </div>
+
+    <p>RWD is made possible with three CSS-level techniques:</p>
+
+    <div class="pillars">
+      <div class="pillar">
+        <div class="pillar-num">01 / LAYOUT</div>
+        <h4>Fluid Grid</h4>
+        <p>Use relative units like <span class="inline-code">%</span> instead of absolute <span class="inline-code">px</span>. Elements pack into columns and rows, proportionally.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">02 / QUERIES</div>
+        <h4>Media Queries</h4>
+        <p>CSS <span class="inline-code">@media</span> rules let you switch layouts, hide elements, or change functionality based on screen size.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">03 / MEDIA</div>
+        <h4>Flexible Media</h4>
+        <p>Images and videos auto-scale to fit their container, never overflowing or distorting.</p>
+      </div>
+    </div>
+
+    <h3>Flexible Images & Videos</h3>
+    <p>Two CSS lines are all you need to make media responsive:</p>
+
+    <pre><code><span class="sel">img</span>   { <span class="prop">width</span>: <span class="val">100%</span>; <span class="prop">height</span>: <span class="val">auto</span>; }
+<span class="sel">video</span> { <span class="prop">width</span>: <span class="val">100%</span>; <span class="prop">height</span>: <span class="val">auto</span>; }</code></pre>
+
+    <div class="callout tip">
+      <div class="callout-title">✓ Why height: auto?</div>
+      <p>Setting <span class="inline-code">height: auto</span> preserves the original aspect ratio as the width changes. Without it, images would squish or stretch.</p>
+    </div>
+  </section>
+
+  <!-- SECTION 3: LAYOUT DEMO -->
+  <section id="layout" class="section reveal">
+    <div class="section-label">Section 03</div>
+    <h2>Responsive Layout in Action</h2>
+    <p>A classic RWD layout uses percentage-based columns. On wide screens menus sit side by side; on narrow screens they stack. Resize the demo below:</p>
+
+    <div class="demo-container">
+      <div class="demo-toolbar">
+        <span>Preview:</span>
+        <div class="size-btns">
+          <button class="size-btn active" data-width="100%">Desktop</button>
+          <button class="size-btn" data-width="768px">Tablet</button>
+          <button class="size-btn" data-width="375px">Mobile</button>
+        </div>
+      </div>
+      <div class="demo-viewport" id="demoViewport">
+        <iframe id="demoFrame" srcdoc=""></iframe>
+      </div>
+    </div>
+
+    <h3>How the Layout Works</h3>
+    <p>The layout uses a single HTML structure. CSS <span class="inline-code">@media</span> rules change the widths:</p>
+
+    <pre><code><span class="cm">/* Wide: nav sidebar (25%) + content (75%) */</span>
+<span class="at">@media</span> (<span class="prop">min-width</span>: <span class="val">768px</span>) {
+  <span class="sel">.nav</span>     { <span class="prop">width</span>: <span class="val">25%</span>; <span class="prop">float</span>: <span class="val">left</span>; }
+  <span class="sel">.content</span> { <span class="prop">width</span>: <span class="val">75%</span>; <span class="prop">float</span>: <span class="val">left</span>; }
+  <span class="sel">.menu-item</span> { <span class="prop">width</span>: <span class="val">25%</span>; }
+}
+
+<span class="cm">/* Narrow: everything stacks to 100% */</span>
+<span class="at">@media</span> (<span class="prop">max-width</span>: <span class="val">767px</span>) {
+  <span class="sel">.nav, .content</span> { <span class="prop">width</span>: <span class="val">100%</span>; <span class="prop">float</span>: <span class="val">none</span>; }
+  <span class="sel">.menu-item</span>      { <span class="prop">width</span>: <span class="val">100%</span>; }
+}</code></pre>
+  </section>
+
+  <!-- SECTION 4: BREAKPOINTS -->
+  <section id="breakpoints" class="section reveal">
+    <div class="section-label">Section 04</div>
+    <h2>CSS Breakpoints</h2>
+    <p>Breakpoints are the specific widths where your layout "breaks" and needs to reorganize. They're defined using CSS <span class="inline-code">@media</span> rules.</p>
+
+    <div class="bp-visual">
+      <div class="bp-scale">
+        <div class="bp-track"></div>
+        <div class="bp-zone mobile"></div>
+        <div class="bp-zone tablet"></div>
+        <div class="bp-zone desktop"></div>
+        <div class="bp-marker" style="left:40%">
+          <div class="bp-marker-line"></div>
+          <div class="bp-marker-label">767px</div>
+        </div>
+        <div class="bp-marker" style="left:75%">
+          <div class="bp-marker-line"></div>
+          <div class="bp-marker-label">1024px</div>
+        </div>
+      </div>
+      <div class="bp-legend">
+        <div class="bp-legend-item"><div class="bp-dot" style="background:var(--accent)"></div> Mobile (≤767px)</div>
+        <div class="bp-legend-item"><div class="bp-dot" style="background:var(--accent2)"></div> Tablet (768–1024px)</div>
+        <div class="bp-legend-item"><div class="bp-dot" style="background:var(--accent3)"></div> Desktop (&gt;1024px)</div>
+      </div>
+    </div>
+
+    <h3>Common Breakpoint Patterns</h3>
+
+    <pre><code><span class="cm">/* Tablets and desktops */</span>
+<span class="at">@media</span> <span class="kw">only screen</span> and (<span class="prop">min-width</span>: <span class="val">768px</span>) {
+  <span class="cm">/* Multi-column layout */</span>
+}
+
+<span class="cm">/* Phones */</span>
+<span class="at">@media</span> <span class="kw">only screen</span> and (<span class="prop">max-width</span>: <span class="val">767px</span>) {
+  <span class="cm">/* Single column, stacked menus */</span>
+}
+
+<span class="cm">/* Portrait phones specifically */</span>
+<span class="at">@media</span> <span class="kw">only screen</span> and (<span class="prop">max-width</span>: <span class="val">767px</span>)
+  and (<span class="prop">orientation</span>: <span class="val">portrait</span>) {
+  <span class="cm">/* Portrait-specific overrides */</span>
+}</code></pre>
+
+    <div class="callout tip">
+      <div class="callout-title">✓ Orientation Queries</div>
+      <p>The <span class="inline-code">orientation: portrait</span> and <span class="inline-code">orientation: landscape</span> media features let you tailor layouts for how the user is holding their device — very useful for phones.</p>
+    </div>
+
+    <h3>Phone Layout (max-width: 767px)</h3>
+    <p>When the screen narrows, nav items and menus that were side-by-side each become full width, stacking vertically:</p>
+
+    <pre><code><span class="cm">/* Each menu takes full row on mobile */</span>
+<span class="at">@media</span> (<span class="prop">max-width</span>: <span class="val">767px</span>) {
+  <span class="sel">.menu-item</span> { <span class="prop">width</span>: <span class="val">100%</span>; <span class="prop">display</span>: <span class="val">block</span>; }
+  <span class="sel">.view</span>      { <span class="prop">width</span>: <span class="val">100%</span>; }
+  <span class="sel">.footer</span>    { <span class="prop">width</span>: <span class="val">100%</span>; }
+}</code></pre>
+  </section>
+
+  <!-- SECTION 5: IMPLEMENTATION -->
+  <section id="implementation" class="section reveal">
+    <div class="section-label">Section 05</div>
+    <h2>Responsive Implementation</h2>
+
+    <h3>Core Rules</h3>
+    <p>Three foundational practices underpin every responsive implementation:</p>
+
+    <div class="mf-steps">
+      <div class="mf-step">
+        <div class="mf-step-num">1</div>
+        <div class="mf-step-content">
+          <h4>Relative over Absolute</h4>
+          <p>Use <span class="inline-code">%</span>, <span class="inline-code">em</span>, <span class="inline-code">rem</span>, <span class="inline-code">vw</span>, <span class="inline-code">vh</span> instead of <span class="inline-code">px</span> or <span class="inline-code">pt</span> for layout dimensions. This lets elements scale naturally with the viewport.</p>
+        </div>
+      </div>
+      <div class="mf-step">
+        <div class="mf-step-num">2</div>
+        <div class="mf-step-content">
+          <h4>CSS Breakpoints for Layout & Functionality</h4>
+          <p>Use media queries not just to rearrange layout, but also to conditionally show or hide features based on available screen real estate. A complex data table might become a simplified card list on mobile.</p>
+        </div>
+      </div>
+      <div class="mf-step">
+        <div class="mf-step-num">3</div>
+        <div class="mf-step-content">
+          <h4>Mobile First</h4>
+          <p>Start with a great mobile experience and progressively enhance it for larger screens. This ensures the core content is always accessible, and you add complexity only when you have space for it.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Mobile First in CSS</h3>
+    <p>In a mobile-first stylesheet, base styles are for small screens. You then override with <span class="inline-code">min-width</span> queries as the screen gets bigger:</p>
+
+    <pre><code><span class="cm">/* BASE: mobile styles (no media query needed) */</span>
+<span class="sel">.container</span> {
+  <span class="prop">width</span>: <span class="val">100%</span>;
+  <span class="prop">padding</span>: <span class="val">1rem</span>;
+}
+
+<span class="cm">/* TABLET: expand layout from 768px up */</span>
+<span class="at">@media</span> (<span class="prop">min-width</span>: <span class="val">768px</span>) {
+  <span class="sel">.container</span> { <span class="prop">max-width</span>: <span class="val">960px</span>; <span class="prop">margin</span>: <span class="val">0 auto</span>; }
+  <span class="sel">.sidebar</span>   { <span class="prop">width</span>: <span class="val">25%</span>; <span class="prop">float</span>: <span class="val">left</span>; }
+  <span class="sel">.main</span>      { <span class="prop">width</span>: <span class="val">75%</span>; <span class="prop">float</span>: <span class="val">left</span>; }
+}
+
+<span class="cm">/* DESKTOP: full layout from 1200px up */</span>
+<span class="at">@media</span> (<span class="prop">min-width</span>: <span class="val">1200px</span>) {
+  <span class="sel">.container</span> { <span class="prop">max-width</span>: <span class="val">1400px</span>; }
+}</code></pre>
+
+    <div class="callout">
+      <div class="callout-title">📐 Device Independent Units</div>
+      <p>High-DPI (Retina) screens have more physical pixels per CSS pixel. Always specify sizes in <strong>CSS pixels</strong> (device-independent units) — the browser handles the mapping to physical pixels automatically.</p>
+    </div>
+
+    <h3>Quick Reference</h3>
+
+    <pre><code><span class="cm">/* ✅ Responsive image */</span>
+<span class="sel">img</span> { <span class="prop">width</span>: <span class="val">100%</span>; <span class="prop">height</span>: <span class="val">auto</span>; }
+
+<span class="cm">/* ✅ Fluid typography */</span>
+<span class="sel">h1</span>  { <span class="prop">font-size</span>: <span class="val">clamp(1.8rem, 5vw, 4rem)</span>; }
+
+<span class="cm">/* ✅ Flexible grid */</span>
+<span class="sel">.grid</span> {
+  <span class="prop">display</span>: <span class="val">grid</span>;
+  <span class="prop">grid-template-columns</span>: <span class="val">repeat(auto-fit, minmax(240px, 1fr))</span>;
+}
+
+<span class="cm">/* ✅ Viewport meta tag (required in HTML!) */</span>
+<span class="cm">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></code></pre>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="section reveal">
+    <div class="section-label">Knowledge Check</div>
+    <h2>Test Yourself</h2>
+
+    <div class="quiz">
+      <div class="quiz-title">RWD Quiz</div>
+
+      <div class="quiz-q" id="q1">
+        <div class="quiz-q-text">1. Which CSS unit is better for responsive layouts?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" data-correct="false" onclick="answer(this,'q1')">px (pixels)</button>
+          <button class="quiz-opt" data-correct="true"  onclick="answer(this,'q1')">% (percentage)</button>
+          <button class="quiz-opt" data-correct="false" onclick="answer(this,'q1')">pt (points)</button>
+        </div>
+        <div class="quiz-feedback" id="f1"></div>
+      </div>
+
+      <div class="quiz-q" id="q2">
+        <div class="quiz-q-text">2. What CSS rule makes images scale responsively?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" data-correct="false" onclick="answer(this,'q2')">img { display: block; }</button>
+          <button class="quiz-opt" data-correct="false" onclick="answer(this,'q2')">img { max-width: 500px; }</button>
+          <button class="quiz-opt" data-correct="true"  onclick="answer(this,'q2')">img { width: 100%; height: auto; }</button>
+        </div>
+        <div class="quiz-feedback" id="f2"></div>
+      </div>
+
+      <div class="quiz-q" id="q3">
+        <div class="quiz-q-text">3. In "mobile first" design, which media query type do you use?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" data-correct="false" onclick="answer(this,'q3')">max-width (override for smaller screens)</button>
+          <button class="quiz-opt" data-correct="true"  onclick="answer(this,'q3')">min-width (enhance for larger screens)</button>
+          <button class="quiz-opt" data-correct="false" onclick="answer(this,'q3')">orientation: portrait</button>
+        </div>
+        <div class="quiz-feedback" id="f3"></div>
+      </div>
+
+      <div class="quiz-q" id="q4">
+        <div class="quiz-q-text">4. What does a CSS breakpoint define?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" data-correct="false" onclick="answer(this,'q4')">A fixed pixel size for all elements</button>
+          <button class="quiz-opt" data-correct="true"  onclick="answer(this,'q4')">A screen width at which the layout changes</button>
+          <button class="quiz-opt" data-correct="false" onclick="answer(this,'q4')">A specific font size for headings</button>
+        </div>
+        <div class="quiz-feedback" id="f4"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ────────────────────── FOOTER ──────────────────────── -->
+<footer style="text-align:center; padding: 3rem 2rem; color: var(--muted); font-size: 0.8rem; border-top: 1px solid var(--border);">
+  <p>Based on <strong style="color:var(--text)">CS142 Lecture Notes — Responsive Web Design</strong> by Mendel Rosenblum</p>
+  <p style="margin-top:0.4rem; font-family:'Space Mono',monospace; font-size:0.7rem;">Content is like water 💧</p>
+</footer>
+
+<script>
+// ── IFRAME DEMO CONTENT ──────────────────────────────────
+const demoHTML = `<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; font-size: 13px; }
+  .menu { display: flex; background: #4a3fa0; }
+  .menu-item { width: 25%; padding: 10px; color: #fff; text-align: center; font-weight: bold; border-right: 1px solid rgba(255,255,255,0.2); }
+  .body { display: flex; }
+  .nav { width: 25%; background: #2a2a3e; color: #aaa; }
+  .nav-item { padding: 10px 14px; border-bottom: 1px solid #3a3a50; }
+  .content { width: 75%; padding: 16px; background: #f5f5fa; color: #333; }
+  .content h2 { color: #4a3fa0; margin-bottom: 8px; font-size: 14px; }
+  .content p { color: #666; font-size: 12px; line-height: 1.6; }
+  .footer { background: #1a1a26; color: #777; padding: 10px; text-align: center; font-size: 11px; }
+  @media (max-width: 600px) {
+    .menu { flex-direction: column; }
+    .menu-item { width: 100%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.15); }
+    .body { flex-direction: column; }
+    .nav { width: 100%; display: flex; flex-wrap: wrap; }
+    .nav-item { width: 33.33%; }
+    .content { width: 100%; }
+  }
+</style>
+</head>
+<body>
+  <div class="menu">
+    <div class="menu-item">Menu #1 – 25%</div>
+    <div class="menu-item">Menu #2 – 25%</div>
+    <div class="menu-item">Menu #3 – 25%</div>
+    <div class="menu-item">Menu #4 – 25%</div>
+  </div>
+  <div class="body">
+    <div class="nav">
+      <div class="nav-item">Nav #1 – 25%</div>
+      <div class="nav-item">Nav #2 – 25%</div>
+      <div class="nav-item">Nav #3 – 25%</div>
+    </div>
+    <div class="content">
+      <h2>View Component – 75%</h2>
+      <p>This area holds the main content. On wide screens it sits next to the sidebar nav. On mobile it stacks below the nav items.</p>
+    </div>
+  </div>
+  <div class="footer">Footer – 100%</div>
+</body>
+</html>`;
+
+document.getElementById('demoFrame').srcdoc = demoHTML;
+
+// ── SIZE BUTTONS ─────────────────────────────────────────
+document.querySelectorAll('.size-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('demoViewport').style.width = btn.dataset.width;
+  });
+});
+
+// ── SCROLL REVEAL ────────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      // Animate stat bars when chart enters view
+      if (e.target.querySelector('#statChart') || e.target.id === 'challenge') {
+        animateBars();
+      }
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── STAT BARS ─────────────────────────────────────────────
+function animateBars() {
+  document.querySelectorAll('.stat-bar').forEach(bar => {
+    const pct = bar.dataset.pct;
+    setTimeout(() => { bar.style.width = pct + '%'; }, 200);
+  });
+}
+
+// ── NAV HIGHLIGHT ────────────────────────────────────────
+const sections = document.querySelectorAll('.section[id]');
+const navItems = document.querySelectorAll('.toc-item');
+
+const navObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navItems.forEach(n => n.classList.remove('active'));
+      const active = document.querySelector(`.toc-item[data-section="${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-40% 0px -55% 0px' });
+
+sections.forEach(s => navObserver.observe(s));
+
+// ── QUIZ ─────────────────────────────────────────────────
+const feedbacks = {
+  q1: { t: '✓ Correct! Percentage units scale proportionally with the viewport.', f: '✗ Fixed units like px don\'t scale. Use % for fluid layouts.' },
+  q2: { t: '✓ Correct! width: 100% fills the container; height: auto preserves the aspect ratio.', f: '✗ That doesn\'t make the image fluid. width: 100%; height: auto is the standard.' },
+  q3: { t: '✓ Correct! Mobile first uses min-width to progressively enhance for larger screens.', f: '✗ Mobile first means you start with base mobile styles and use min-width to enhance upward.' },
+  q4: { t: '✓ Correct! A breakpoint is a viewport width at which your CSS layout changes.', f: '✗ Breakpoints aren\'t about element sizes — they\'re viewport widths that trigger layout changes.' }
+};
+
+function answer(btn, qid) {
+  const q = document.getElementById(qid);
+  if (q.dataset.answered) return;
+  q.dataset.answered = '1';
+  const isCorrect = btn.dataset.correct === 'true';
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    q.querySelectorAll('[data-correct="true"]').forEach(b => b.classList.add('correct'));
+  }
+  document.getElementById('f' + qid.slice(1)).textContent = isCorrect ? feedbacks[qid].t : feedbacks[qid].f;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1375 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTTP — The Protocol of the Web</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --surface: #111118;
+        --border: #1e1e2e;
+        --accent: #00e5ff;
+        --accent2: #ff6b35;
+        --accent3: #a8ff78;
+        --text: #e8e8f0;
+        --muted: #6b6b8a;
+        --code-bg: #0d0d17;
+        --mono: "IBM Plex Mono", monospace;
+        --sans: "Syne", sans-serif;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        line-height: 1.7;
+        overflow-x: hidden;
+      }
+
+      /* Scanline overlay */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.03) 2px,
+          rgba(0, 0, 0, 0.03) 4px
+        );
+        pointer-events: none;
+        z-index: 1000;
+      }
+
+      /* Hero */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 80px 60px;
+        position: relative;
+        border-bottom: 1px solid var(--border);
+        overflow: hidden;
+      }
+
+      .hero-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(var(--border) 1px, transparent 1px),
+          linear-gradient(90deg, var(--border) 1px, transparent 1px);
+        background-size: 60px 60px;
+        opacity: 0.5;
+      }
+
+      .hero-glow {
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(
+          circle,
+          rgba(0, 229, 255, 0.08) 0%,
+          transparent 70%
+        );
+        top: -100px;
+        right: -100px;
+        pointer-events: none;
+      }
+
+      .hero-badge {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.2em;
+        color: var(--accent);
+        text-transform: uppercase;
+        border: 1px solid var(--accent);
+        display: inline-block;
+        padding: 4px 12px;
+        margin-bottom: 32px;
+        position: relative;
+      }
+
+      .hero h1 {
+        font-size: clamp(60px, 10vw, 120px);
+        font-weight: 800;
+        line-height: 0.9;
+        letter-spacing: -3px;
+        position: relative;
+        margin-bottom: 24px;
+      }
+
+      .hero h1 .outline {
+        -webkit-text-stroke: 1px var(--accent);
+        color: transparent;
+      }
+
+      .hero-sub {
+        font-family: var(--mono);
+        font-size: 14px;
+        color: var(--muted);
+        max-width: 500px;
+        position: relative;
+        margin-bottom: 48px;
+      }
+
+      .hero-meta {
+        display: flex;
+        gap: 32px;
+        position: relative;
+      }
+
+      .hero-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .hero-stat .num {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--accent);
+        font-family: var(--mono);
+      }
+
+      .hero-stat .label {
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        font-family: var(--mono);
+      }
+
+      .scroll-hint {
+        position: absolute;
+        bottom: 40px;
+        left: 60px;
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        letter-spacing: 0.1em;
+      }
+
+      .scroll-hint::before {
+        content: "";
+        width: 40px;
+        height: 1px;
+        background: var(--muted);
+      }
+
+      /* Nav */
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(10, 10, 15, 0.95);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        padding: 0 60px;
+        display: flex;
+        align-items: center;
+        gap: 0;
+        overflow-x: auto;
+      }
+
+      .nav a {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--muted);
+        text-decoration: none;
+        padding: 16px 20px;
+        white-space: nowrap;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+        letter-spacing: 0.05em;
+      }
+
+      .nav a:hover,
+      .nav a.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+
+      /* Layout */
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 60px;
+      }
+
+      /* Sections */
+      section {
+        padding: 100px 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .section-label {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--accent);
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .section-label::before {
+        content: "";
+        width: 24px;
+        height: 1px;
+        background: var(--accent);
+      }
+
+      h2 {
+        font-size: clamp(32px, 5vw, 52px);
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 48px;
+        line-height: 1.1;
+      }
+
+      h3 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: var(--text);
+      }
+
+      p {
+        color: #b0b0cc;
+        margin-bottom: 20px;
+        font-size: 15px;
+        max-width: 680px;
+      }
+
+      /* Code blocks */
+      pre {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        padding: 24px 28px;
+        font-family: var(--mono);
+        font-size: 13px;
+        line-height: 1.8;
+        overflow-x: auto;
+        margin: 24px 0;
+        position: relative;
+      }
+
+      pre .label {
+        position: absolute;
+        top: 8px;
+        right: 12px;
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .kw {
+        color: var(--accent);
+      }
+      .val {
+        color: var(--accent3);
+      }
+      .cm {
+        color: var(--muted);
+        font-style: italic;
+      }
+      .hdr {
+        color: #c792ea;
+      }
+      .num {
+        color: var(--accent2);
+      }
+      .str {
+        color: var(--accent3);
+      }
+
+      /* URL anatomy */
+      .url-anatomy {
+        font-family: var(--mono);
+        font-size: 18px;
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        padding: 32px;
+        margin: 32px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0;
+        align-items: flex-start;
+      }
+
+      .url-part {
+        position: relative;
+        padding-bottom: 36px;
+      }
+
+      .url-part span {
+        padding: 6px 2px;
+        display: inline-block;
+      }
+
+      .url-part.proto span {
+        color: var(--accent);
+        border-bottom: 2px solid var(--accent);
+      }
+      .url-part.host span {
+        color: var(--accent3);
+        border-bottom: 2px solid var(--accent3);
+      }
+      .url-part.port span {
+        color: var(--accent2);
+        border-bottom: 2px solid var(--accent2);
+      }
+      .url-part.path span {
+        color: #c792ea;
+        border-bottom: 2px solid #c792ea;
+      }
+
+      .url-part .tip {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        font-size: 10px;
+        color: var(--muted);
+        white-space: nowrap;
+        letter-spacing: 0.05em;
+      }
+
+      .url-sep {
+        color: var(--muted);
+        padding-bottom: 36px;
+      }
+
+      /* Architecture diagram */
+      .arch {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        margin: 48px 0;
+        overflow-x: auto;
+        padding: 8px 0;
+      }
+
+      .arch-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        padding: 24px 28px;
+        min-width: 180px;
+        flex-shrink: 0;
+      }
+
+      .arch-box .box-label {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+      }
+
+      .arch-box .box-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .arch-box .box-examples {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.8;
+      }
+
+      .arch-arrow {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 0 16px;
+        flex-shrink: 0;
+      }
+
+      .arch-arrow .protocol {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--accent);
+        font-weight: 600;
+      }
+
+      .arch-arrow .medium {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--muted);
+      }
+
+      .arrow-line {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--accent);
+        font-size: 18px;
+      }
+
+      /* Method cards */
+      .methods {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        margin: 32px 0;
+      }
+
+      .method-card {
+        background: var(--surface);
+        padding: 24px;
+        transition: background 0.2s;
+        cursor: default;
+      }
+
+      .method-card:hover {
+        background: #16161f;
+      }
+
+      .method-name {
+        font-family: var(--mono);
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .method-card.get .method-name {
+        color: var(--accent3);
+      }
+      .method-card.post .method-name {
+        color: var(--accent2);
+      }
+      .method-card.put .method-name {
+        color: #c792ea;
+      }
+      .method-card.delete .method-name {
+        color: #ff5370;
+      }
+      .method-card.head .method-name {
+        color: var(--accent);
+      }
+
+      .method-desc {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .method-tag {
+        display: inline-block;
+        margin-top: 12px;
+        font-family: var(--mono);
+        font-size: 10px;
+        padding: 2px 8px;
+        letter-spacing: 0.1em;
+      }
+
+      .method-card.get .method-tag {
+        background: rgba(168, 255, 120, 0.1);
+        color: var(--accent3);
+      }
+      .method-card.post .method-tag {
+        background: rgba(255, 107, 53, 0.1);
+        color: var(--accent2);
+      }
+      .method-card.put .method-tag,
+      .method-card.delete .method-tag {
+        background: rgba(199, 146, 234, 0.1);
+        color: #c792ea;
+      }
+      .method-card.head .method-tag {
+        background: rgba(0, 229, 255, 0.1);
+        color: var(--accent);
+      }
+
+      /* Status codes */
+      .status-grid {
+        display: grid;
+        gap: 1px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        margin: 32px 0;
+      }
+
+      .status-row {
+        display: grid;
+        grid-template-columns: 80px 1fr 1fr;
+        background: var(--surface);
+        transition: background 0.2s;
+      }
+
+      .status-row:hover {
+        background: #13131c;
+      }
+
+      .status-code {
+        font-family: var(--mono);
+        font-size: 20px;
+        font-weight: 600;
+        padding: 20px 24px;
+        border-right: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+      }
+
+      .s2xx {
+        color: var(--accent3);
+      }
+      .s3xx {
+        color: var(--accent);
+      }
+      .s4xx {
+        color: var(--accent2);
+      }
+      .s5xx {
+        color: #ff5370;
+      }
+
+      .status-name {
+        padding: 20px 24px;
+        font-weight: 700;
+        font-size: 14px;
+        border-right: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+      }
+
+      .status-desc {
+        padding: 20px 24px;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+      }
+
+      /* Cache section */
+      .cache-compare {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        margin: 32px 0;
+      }
+
+      .cache-side {
+        background: var(--surface);
+        padding: 32px;
+      }
+
+      .cache-side.pro h4 {
+        color: var(--accent3);
+      }
+      .cache-side.con h4 {
+        color: var(--accent2);
+      }
+
+      .cache-side h4 {
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+      }
+
+      .cache-side ul {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .cache-side li {
+        font-size: 14px;
+        color: #b0b0cc;
+        padding-left: 20px;
+        position: relative;
+        line-height: 1.5;
+      }
+
+      .cache-side.pro li::before {
+        content: "+";
+        position: absolute;
+        left: 0;
+        color: var(--accent3);
+        font-family: var(--mono);
+      }
+      .cache-side.con li::before {
+        content: "−";
+        position: absolute;
+        left: 0;
+        color: var(--accent2);
+        font-family: var(--mono);
+      }
+
+      /* Fetch modes */
+      .fetch-modes {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        margin: 32px 0;
+      }
+
+      .fetch-mode {
+        background: var(--surface);
+        padding: 28px;
+      }
+
+      .fetch-mode-num {
+        font-family: var(--mono);
+        font-size: 48px;
+        font-weight: 600;
+        color: var(--border);
+        line-height: 1;
+        margin-bottom: 12px;
+      }
+
+      .fetch-mode h4 {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .fetch-mode.sync h4 {
+        color: var(--accent2);
+      }
+      .fetch-mode.async h4 {
+        color: var(--accent3);
+      }
+      .fetch-mode.bg h4 {
+        color: var(--accent);
+      }
+
+      .fetch-mode p {
+        font-size: 13px;
+        color: var(--muted);
+        max-width: 100%;
+        margin-bottom: 16px;
+      }
+
+      pre.compact {
+        padding: 14px 16px;
+        font-size: 11px;
+        margin: 0;
+        border-left-width: 2px;
+      }
+
+      .sync pre.compact {
+        border-left-color: var(--accent2);
+      }
+      .async pre.compact {
+        border-left-color: var(--accent3);
+      }
+      .bg pre.compact {
+        border-left-color: var(--accent);
+      }
+
+      /* Footer */
+      footer {
+        padding: 60px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid var(--border);
+      }
+
+      footer .brand {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      footer .source {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.05em;
+      }
+
+      /* Animations */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(24px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .hero > * {
+        animation: fadeUp 0.7s ease both;
+      }
+      .hero .hero-badge {
+        animation-delay: 0.1s;
+      }
+      .hero h1 {
+        animation-delay: 0.2s;
+      }
+      .hero .hero-sub {
+        animation-delay: 0.3s;
+      }
+      .hero .hero-meta {
+        animation-delay: 0.4s;
+      }
+
+      /* Highlight box */
+      .callout {
+        border: 1px solid var(--accent);
+        background: rgba(0, 229, 255, 0.03);
+        padding: 24px 28px;
+        margin: 24px 0;
+        font-family: var(--mono);
+        font-size: 13px;
+        line-height: 1.7;
+        color: #b0d8e0;
+        position: relative;
+      }
+
+      .callout::before {
+        content: "!";
+        position: absolute;
+        top: -1px;
+        left: -1px;
+        background: var(--accent);
+        color: var(--bg);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 6px;
+        letter-spacing: 0.1em;
+      }
+
+      @media (max-width: 768px) {
+        .hero,
+        .container {
+          padding-left: 24px;
+          padding-right: 24px;
+        }
+        .nav {
+          padding: 0 24px;
+        }
+        .fetch-modes {
+          grid-template-columns: 1fr;
+        }
+        .cache-compare {
+          grid-template-columns: 1fr;
+        }
+        .arch {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        footer {
+          flex-direction: column;
+          gap: 16px;
+          padding: 40px 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HERO -->
+    <header class="hero">
+      <div class="hero-grid"></div>
+      <div class="hero-glow"></div>
+      <div class="hero-badge">CS142 · Web Technologies</div>
+      <h1>
+        <span class="outline">H</span>TTP<br />
+        <span
+          style="font-size: 0.45em; letter-spacing: -1px; color: var(--muted)"
+          >Hypertext Transport Protocol</span
+        >
+      </h1>
+      <p class="hero-sub">
+        The language of the web. Every page load, API call, and image fetch runs
+        on this simple request-response protocol.
+      </p>
+      <div class="hero-meta">
+        <div class="hero-stat">
+          <span class="num">5</span><span class="label">Methods</span>
+        </div>
+        <div class="hero-stat">
+          <span class="num">10+</span><span class="label">Status Codes</span>
+        </div>
+        <div class="hero-stat">
+          <span class="num">TCP/IP</span
+          ><span class="label">Underlying Layer</span>
+        </div>
+        <div class="hero-stat">
+          <span class="num">:80</span><span class="label">Default Port</span>
+        </div>
+      </div>
+      <div class="scroll-hint">Scroll to explore</div>
+    </header>
+
+    <!-- NAV -->
+    <nav class="nav">
+      <a href="#architecture">Architecture</a>
+      <a href="#urls">URLs</a>
+      <a href="#requests">Requests</a>
+      <a href="#methods">Methods</a>
+      <a href="#responses">Responses</a>
+      <a href="#status">Status Codes</a>
+      <a href="#caching">Caching</a>
+      <a href="#fetching">Fetching</a>
+      <a href="#dynamic">Dynamic JS</a>
+    </nav>
+
+    <!-- ARCHITECTURE -->
+    <section id="architecture">
+      <div class="container">
+        <div class="section-label">01 — Overview</div>
+        <h2>Web Application<br />Architecture</h2>
+        <p>
+          HTTP connects three layers of a web application. Browsers communicate
+          with servers over the open Internet; servers communicate with
+          databases over a private LAN.
+        </p>
+
+        <div class="arch">
+          <div class="arch-box">
+            <div class="box-label">Client</div>
+            <div class="box-title" style="color: var(--accent3)">
+              Web Browser
+            </div>
+            <div class="box-examples">
+              Chrome<br />Firefox<br />Safari<br />Edge
+            </div>
+          </div>
+
+          <div class="arch-arrow">
+            <div class="protocol">HTTP</div>
+            <div class="arrow-line">←→</div>
+            <div class="medium">Internet</div>
+          </div>
+
+          <div class="arch-box">
+            <div class="box-label">Server</div>
+            <div class="box-title" style="color: var(--accent)">App Server</div>
+            <div class="box-examples">
+              Node.js<br />Apache<br />Rails<br />Nginx
+            </div>
+          </div>
+
+          <div class="arch-arrow">
+            <div class="protocol" style="color: var(--muted)">TCP</div>
+            <div class="arrow-line" style="color: var(--muted)">←→</div>
+            <div class="medium">LAN</div>
+          </div>
+
+          <div class="arch-box">
+            <div class="box-label">Storage</div>
+            <div class="box-title" style="color: #c792ea">Database</div>
+            <div class="box-examples">
+              MongoDB<br />MySQL<br />PostgreSQL<br />Redis
+            </div>
+          </div>
+        </div>
+
+        <p>
+          HTTP is a <strong>simple request-response protocol</strong> layered on
+          top of TCP/IP. The browser opens a connection, sends a request, and
+          reads back the response — that's the entire cycle.
+        </p>
+      </div>
+    </section>
+
+    <!-- URLs -->
+    <section id="urls">
+      <div class="container">
+        <div class="section-label">02 — Addressing</div>
+        <h2>Universal Resource<br />Locators</h2>
+        <p>
+          Every resource on the web has a URL. Understanding each part is
+          essential for building and debugging web applications.
+        </p>
+
+        <div class="url-anatomy">
+          <div class="url-part proto">
+            <span>http</span>
+            <div class="tip">Protocol</div>
+          </div>
+          <div class="url-sep">://</div>
+          <div class="url-part host">
+            <span>www.example.com</span>
+            <div class="tip">Hostname</div>
+          </div>
+          <div class="url-sep">:</div>
+          <div class="url-part port">
+            <span>80</span>
+            <div class="tip">Port (default)</div>
+          </div>
+          <div class="url-sep">/</div>
+          <div class="url-part path">
+            <span>index.html</span>
+            <div class="tip">Path / Resource</div>
+          </div>
+        </div>
+
+        <p>All three steps happen every time you load a URL:</p>
+        <pre>
+<span class="kw">1.</span> Establish a TCP/IP connection to <span class="val">www.example.com:80</span>
+<span class="kw">2.</span> Send an HTTP <span class="val">GET</span> request along the connection
+<span class="kw">3.</span> Read the server's response from the connection</pre>
+
+        <div class="callout">
+          Omitting the port defaults to <strong>:80</strong> for http and
+          <strong>:443</strong> for https. Omitting the path defaults to
+          <strong>/index.html</strong> (server-configured).
+        </div>
+      </div>
+    </section>
+
+    <!-- REQUESTS -->
+    <section id="requests">
+      <div class="container">
+        <div class="section-label">03 — Client → Server</div>
+        <h2>Anatomy of an<br />HTTP Request</h2>
+        <p>
+          A request is written as plain text lines to a socket. The format is
+          strict: method line, then headers, then a blank line, then an optional
+          body.
+        </p>
+
+        <pre>
+<span class="label">REQUEST</span><span class="kw">GET</span> <span class="val">/index.html</span> <span class="hdr">HTTP/1.1</span>         <span class="cm">← Method  Path  Version</span>
+<span class="hdr">Host:</span>             <span class="val">www.example.com</span>
+<span class="hdr">User-Agent:</span>       <span class="val">Mozilla/5.0</span>
+<span class="hdr">Accept:</span>           <span class="val">text/html, */*</span>
+<span class="hdr">Accept-Language:</span>  <span class="val">en-us</span>
+<span class="hdr">Accept-Charset:</span>   <span class="val">ISO-8859-1,utf-8</span>
+<span class="hdr">Connection:</span>       <span class="val">keep-alive</span>
+                                        <span class="cm">← blank line (required)</span>
+                                        <span class="cm">← body (optional, used by POST/PUT)</span></pre>
+
+        <h3>The three parts</h3>
+        <p>
+          <strong>Request line</strong> — method, resource path, and HTTP
+          version. Always first.
+        </p>
+        <p>
+          <strong>Headers</strong> — key-value pairs providing metadata: who's
+          asking, what they accept, connection preferences.
+        </p>
+        <p>
+          <strong>Body</strong> — optional payload. Used when submitting form
+          data (POST) or uploading content (PUT). Absent in GET requests.
+        </p>
+      </div>
+    </section>
+
+    <!-- METHODS -->
+    <section id="methods">
+      <div class="container">
+        <div class="section-label">04 — Verbs</div>
+        <h2>HTTP Methods</h2>
+        <p>
+          Each method signals a different kind of intent. REST APIs use all
+          five; traditional web pages rely mostly on GET and POST.
+        </p>
+
+        <div class="methods">
+          <div class="method-card get">
+            <div class="method-name">GET</div>
+            <div class="method-desc">
+              Fetch a resource. No body. Safe and idempotent — repeated calls
+              have no side effects.
+            </div>
+            <div class="method-tag">READ</div>
+          </div>
+          <div class="method-card post">
+            <div class="method-name">POST</div>
+            <div class="method-desc">
+              Send form data to a URL and receive a response. Has a body. Not
+              idempotent.
+            </div>
+            <div class="method-tag">CREATE</div>
+          </div>
+          <div class="method-card put">
+            <div class="method-name">PUT</div>
+            <div class="method-desc">
+              Store or replace a resource at a URL. Idempotent — same request
+              gives same result.
+            </div>
+            <div class="method-tag">UPDATE</div>
+          </div>
+          <div class="method-card delete">
+            <div class="method-name">DELETE</div>
+            <div class="method-desc">
+              Remove a resource at the given URL. Idempotent by convention.
+            </div>
+            <div class="method-tag">DELETE</div>
+          </div>
+          <div class="method-card head">
+            <div class="method-name">HEAD</div>
+            <div class="method-desc">
+              Same as GET but the server only returns headers — no body. Useful
+              for checking if a resource exists.
+            </div>
+            <div class="method-tag">INSPECT</div>
+          </div>
+        </div>
+
+        <div class="callout">
+          Traditional web forms only support GET and POST. REST APIs leverage
+          all four data methods (GET, POST, PUT, DELETE) to map neatly onto CRUD
+          operations.
+        </div>
+      </div>
+    </section>
+
+    <!-- RESPONSES -->
+    <section id="responses">
+      <div class="container">
+        <div class="section-label">05 — Server → Client</div>
+        <h2>Anatomy of an<br />HTTP Response</h2>
+        <p>
+          The server replies with a status line, headers, a blank line, and then
+          the body — the actual resource content.
+        </p>
+
+        <pre>
+<span class="label">RESPONSE</span><span class="hdr">HTTP/1.1</span> <span class="num">200</span> <span class="val">OK</span>                      <span class="cm">← Version  Code  Message</span>
+<span class="hdr">Date:</span>           <span class="val">Thu, 24 Jul 2008 17:36:27 GMT</span>
+<span class="hdr">Server:</span>         <span class="val">Apache-Coyote/1.1</span>
+<span class="hdr">Content-Type:</span>   <span class="val">text/html;charset=UTF-8</span>
+<span class="hdr">Content-Length:</span> <span class="val">1846</span>
+                                           <span class="cm">← blank line</span>
+<span class="str">&lt;?xml ... &gt;</span>
+<span class="str">&lt;!DOCTYPE html ... &gt;</span>
+<span class="str">&lt;html ...&gt;</span>
+  <span class="cm">...</span>
+<span class="str">&lt;/html&gt;</span>                                   <span class="cm">← HTML body</span></pre>
+
+        <h3>Status line breakdown</h3>
+        <p><strong>HTTP/1.1</strong> — the protocol version.</p>
+        <p>
+          <strong>200</strong> — numeric status code that the browser acts on
+          programmatically.
+        </p>
+        <p>
+          <strong>OK</strong> — human-readable message accompanying the code.
+        </p>
+      </div>
+    </section>
+
+    <!-- STATUS CODES -->
+    <section id="status">
+      <div class="container">
+        <div class="section-label">06 — Status Codes</div>
+        <h2>Common Response<br />Status Codes</h2>
+        <p>
+          Status codes are grouped by their leading digit. 2xx = success, 3xx =
+          redirection, 4xx = client error, 5xx = server error.
+        </p>
+
+        <div class="status-grid">
+          <div class="status-row">
+            <div class="status-code s2xx">200</div>
+            <div class="status-name">OK</div>
+            <div class="status-desc">
+              Request succeeded. Standard success response.
+            </div>
+          </div>
+          <div class="status-row">
+            <div class="status-code s3xx">307</div>
+            <div class="status-name">Temporary Redirect</div>
+            <div class="status-desc">
+              Browser retries using the Location header URL.
+            </div>
+          </div>
+          <div class="status-row">
+            <div class="status-code s4xx">400</div>
+            <div class="status-name">Bad Request</div>
+            <div class="status-desc">
+              Use when the web app receives a malformed request.
+            </div>
+          </div>
+          <div class="status-row">
+            <div class="status-code s4xx">401</div>
+            <div class="status-name">Unauthorized</div>
+            <div class="status-desc">
+              User is not logged in. Authentication required.
+            </div>
+          </div>
+          <div class="status-row">
+            <div class="status-code s4xx">403</div>
+            <div class="status-name">Forbidden</div>
+            <div class="status-desc">
+              Even logging in wouldn't help. Access denied.
+            </div>
+          </div>
+          <div class="status-row">
+            <div class="status-code s4xx">404</div>
+            <div class="status-name">Not Found</div>
+            <div class="status-desc">
+              The famous one. Requested resource doesn't exist.
+            </div>
+          </div>
+          <div class="status-row">
+            <div class="status-code s5xx">500</div>
+            <div class="status-name">Internal Server Error</div>
+            <div class="status-desc">
+              Something is broken on the server side.
+            </div>
+          </div>
+          <div class="status-row">
+            <div class="status-code s5xx">501</div>
+            <div class="status-name">Not Implemented</div>
+            <div class="status-desc">
+              Feature is coming but not yet supported.
+            </div>
+          </div>
+          <div class="status-row">
+            <div class="status-code s5xx">503</div>
+            <div class="status-name">Service Unavailable</div>
+            <div class="status-desc">
+              Server crashed or is overloaded. Try again later.
+            </div>
+          </div>
+          <div class="status-row">
+            <div class="status-code s5xx">550</div>
+            <div class="status-name">Permission Denied</div>
+            <div class="status-desc">
+              Not allowed to perform the requested action.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CACHING -->
+    <section id="caching">
+      <div class="container">
+        <div class="section-label">07 — Performance</div>
+        <h2>Browser Caching<br />Control</h2>
+        <p>
+          Servers can instruct browsers to cache responses using the
+          <code
+            style="
+              font-family: var(--mono);
+              color: var(--accent);
+              font-size: 13px;
+            "
+            >Cache-Control</code
+          >
+          header. The browser may reuse a cached response until it exceeds the
+          max-age.
+        </p>
+
+        <pre>
+<span class="cm">HTTP Response Header:</span>
+
+<span class="hdr">Cache-Control:</span> <span class="val">max-age=</span><span class="num">120</span>     <span class="cm">← expires in 2 minutes</span>
+<span class="hdr">Cache-Control:</span> <span class="val">max-age=</span><span class="num">86400</span>   <span class="cm">← expires in 1 day</span>
+<span class="hdr">Cache-Control:</span> <span class="val">no-cache</span>        <span class="cm">← always revalidate</span>
+<span class="hdr">Cache-Control:</span> <span class="val">no-store</span>        <span class="cm">← never cache (sensitive data)</span></pre>
+
+        <p>
+          Most useful on <strong>static assets</strong>: images, CSS
+          stylesheets, compiled JavaScript bundles.
+        </p>
+
+        <div class="cache-compare">
+          <div class="cache-side pro">
+            <h4>Benefits</h4>
+            <ul>
+              <li>Reduces app startup latency significantly</li>
+              <li>Lowers server load and bandwidth costs</li>
+              <li>Enables offline-like experience for static content</li>
+            </ul>
+          </div>
+          <div class="cache-side con">
+            <h4>Trade-offs</h4>
+            <ul>
+              <li>Changes may not be picked up immediately by users</li>
+              <li>Stale assets after a new deployment can cause bugs</li>
+              <li>Requires cache-busting strategy (content hashing)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout">
+          Best practice: use long max-age (e.g. 1 year) for versioned static
+          files (e.g. <code style="color: var(--accent3)">app.a3f2c1.js</code>)
+          and short or no-cache for HTML files that reference them.
+        </div>
+      </div>
+    </section>
+
+    <!-- FETCHING -->
+    <section id="fetching">
+      <div class="container">
+        <div class="section-label">08 — Browser Lifecycle</div>
+        <h2>How the Browser<br />Fetches Resources</h2>
+        <p>
+          A browser's entire job is fetching things via HTTP. Not all fetches
+          are created equal — they happen in three different modes depending on
+          how the resource is referenced.
+        </p>
+
+        <div class="fetch-modes">
+          <div class="fetch-mode sync">
+            <div class="fetch-mode-num">01</div>
+            <h4>Synchronous (Blocking)</h4>
+            <p>
+              Page rendering pauses until the response arrives. Used for
+              critical CSS and scripts.
+            </p>
+            <pre
+              class="compact"
+            ><span class="str">&lt;link</span> <span class="hdr">href=</span><span class="val">"styles.css"</span>
+      <span class="hdr">rel=</span><span class="val">"stylesheet"</span> <span class="str">/&gt;</span>
+<span class="str">&lt;script</span> <span class="hdr">src=</span><span class="val">"app.js"</span><span class="str">&gt;&lt;/script&gt;</span></pre>
+          </div>
+          <div class="fetch-mode async">
+            <div class="fetch-mode-num">02</div>
+            <h4>Asynchronous &amp; Parallel</h4>
+            <p>
+              Multiple resources fetched simultaneously without blocking the
+              page. Common for images.
+            </p>
+            <pre
+              class="compact"
+            ><span class="str">&lt;img</span> <span class="hdr">src=</span><span class="val">"hero.jpg"</span><span class="str">&gt;</span>
+<span class="str">&lt;img</span> <span class="hdr">src=</span><span class="val">"thumb1.jpg"</span><span class="str">&gt;</span>
+<span class="str">&lt;img</span> <span class="hdr">src=</span><span class="val">"thumb2.jpg"</span><span class="str">&gt;</span></pre>
+          </div>
+          <div class="fetch-mode bg">
+            <div class="fetch-mode-num">03</div>
+            <h4>Background (Prefetch)</h4>
+            <p>
+              Linked URLs may be prefetched quietly in the background by the
+              browser.
+            </p>
+            <pre
+              class="compact"
+            ><span class="str">&lt;a</span> <span class="hdr">href=</span><span class="val">"http://example.com"</span><span class="str">&gt;</span>
+  Link
+<span class="str">&lt;/a&gt;</span></pre>
+          </div>
+        </div>
+
+        <p>A very common error you'll see in the browser console:</p>
+        <pre>GET http://localhost:3000/favicon.ico <span class="num">404</span> (Not Found)</pre>
+        <p>
+          This means the browser attempted a fetch, but the server had no
+          matching resource to return.
+        </p>
+      </div>
+    </section>
+
+    <!-- DYNAMIC JS -->
+    <section id="dynamic">
+      <div class="container">
+        <div class="section-label">09 — Advanced</div>
+        <h2>Dynamic Script<br />Loading</h2>
+        <p>
+          JavaScript can trigger HTTP requests at runtime by injecting HTML into
+          the page. This is powerful — but also a significant security surface
+          to be aware of.
+        </p>
+
+        <pre>
+<span class="cm">// This uses HTTP to fetch myJS.js and runs it immediately</span>
+elm.innerHTML =
+  <span class="str">'&lt;script src="http://www.example.com/myJS.js"'</span> +
+  <span class="str">'type="text/javascript"&gt;&lt;/script&gt;'</span>;</pre>
+
+        <p>
+          When the browser parses this injected HTML, it immediately makes an
+          HTTP GET request for
+          <code
+            style="
+              font-family: var(--mono);
+              color: var(--accent3);
+              font-size: 13px;
+            "
+            >myJS.js</code
+          >
+          and executes it in the current page context.
+        </p>
+
+        <div class="callout">
+          This pattern is useful for lazy-loading scripts on demand. However,
+          loading scripts from untrusted third-party URLs is a critical XSS risk
+          — only load scripts from sources you fully control or trust.
+        </div>
+
+        <h3 style="margin-top: 40px">Quick Summary</h3>
+        <pre>
+<span class="cm">The HTTP cycle, in full:</span>
+
+Browser                              Server
+  │                                    │
+  │── TCP connect ──────────────────→  │
+  │                                    │
+  │── GET /index.html HTTP/1.1 ──────→ │
+  │   Host: www.example.com            │
+  │   [headers...]                     │
+  │                                    │
+  │ ←── HTTP/1.1 200 OK ─────────────  │
+  │     Content-Type: text/html        │
+  │     [headers...]                   │
+  │     [blank line]                   │
+  │     &lt;html&gt;...&lt;/html&gt;              │
+  │                                    │</pre>
+      </div>
+    </section>
+
+    <footer>
+      <div class="brand">HTTP — The Protocol of the Web</div>
+      <div class="source">Source: CS142 Lecture Notes · Mendel Rosenblum</div>
+    </footer>
+
+    <script>
+      // Highlight active nav link on scroll
+      const sections = document.querySelectorAll("section[id]");
+      const navLinks = document.querySelectorAll(".nav a");
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              navLinks.forEach((l) => l.classList.remove("active"));
+              const active = document.querySelector(
+                `.nav a[href="#${entry.target.id}"]`,
+              );
+              if (active) active.classList.add("active");
+            }
+          });
+        },
+        { rootMargin: "-40% 0px -55% 0px" },
+      );
+
+      sections.forEach((s) => observer.observe(s));
+    </script>
+  </body>
+</html>
