@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Express.js Tutorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0e14;
+    --surface: #13161f;
+    --surface2: #1a1d29;
+    --border: #252836;
+    --accent: #e8ff47;
+    --accent2: #47c5ff;
+    --accent3: #ff6b6b;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --code-bg: #0a0c12;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* GRID LINES */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(232,255,71,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,255,71,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* SIDEBAR NAV */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0;
+    width: 260px;
+    height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    overflow-y: auto;
+    padding: 0 0 2rem 0;
+  }
+
+  .sidebar-logo {
+    padding: 2rem 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+
+  .sidebar-logo .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #000;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+    margin-bottom: 0.75rem;
+  }
+
+  .sidebar-logo h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: var(--text);
+    line-height: 1.1;
+  }
+
+  .sidebar-logo p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+  }
+
+  .nav-section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.75rem 1.5rem 0.4rem;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 1.5rem;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 400;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-item:hover {
+    color: var(--text);
+    background: var(--surface2);
+    border-left-color: var(--border);
+  }
+
+  .nav-item.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: rgba(232,255,71,0.05);
+  }
+
+  .nav-item .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--border);
+    min-width: 18px;
+  }
+
+  /* MAIN CONTENT */
+  .main {
+    margin-left: 260px;
+    padding: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 5rem 4rem 4rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: 'EXPRESS';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 10rem;
+    color: rgba(232,255,71,0.04);
+    line-height: 1;
+    pointer-events: none;
+    letter-spacing: -0.05em;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(232,255,71,0.1);
+    border: 1px solid rgba(232,255,71,0.25);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    padding: 6px 14px;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 3.5rem;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    max-width: 600px;
+    margin-bottom: 1.25rem;
+  }
+
+  .hero h2 span { color: var(--accent); }
+
+  .hero p {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.7;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 2.5rem;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.75rem;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* SECTIONS */
+  .section {
+    padding: 3.5rem 4rem;
+    border-bottom: 1px solid var(--border);
+    animation: fadeUp 0.5s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    background: rgba(232,255,71,0.08);
+    border: 1px solid rgba(232,255,71,0.2);
+    padding: 4px 10px;
+    border-radius: 3px;
+    margin-top: 6px;
+    white-space: nowrap;
+  }
+
+  .section h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.6rem;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .section h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text);
+    margin: 2rem 0 0.75rem;
+  }
+
+  .section p {
+    color: #a8adb8;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+
+  /* CALLOUT BOX */
+  .callout {
+    display: flex;
+    gap: 1rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 6px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+    color: #a8adb8;
+  }
+
+  .callout.warn { border-left-color: var(--accent3); }
+  .callout.success { border-left-color: var(--accent); }
+
+  .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* CODE BLOCKS */
+  .code-wrap {
+    margin: 1.25rem 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--code-bg);
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 1rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    padding: 3px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  pre {
+    padding: 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.8;
+    color: #c9d1e0;
+  }
+
+  /* Syntax highlighting */
+  .kw { color: #ff79c6; }
+  .fn { color: #50fa7b; }
+  .str { color: #f1fa8c; }
+  .num { color: #bd93f9; }
+  .cm { color: #6272a4; font-style: italic; }
+  .prop { color: var(--accent2); }
+  .var { color: #ffb86c; }
+
+  /* FEATURE GRID */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .feature-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    transition: border-color 0.2s;
+  }
+
+  .feature-card:hover { border-color: rgba(232,255,71,0.3); }
+
+  .feature-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: rgba(232,255,71,0.1);
+    border: 1px solid rgba(232,255,71,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .feature-card h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text);
+    margin-bottom: 0.35rem;
+  }
+
+  .feature-card p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* TABLE */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  thead { background: var(--surface2); }
+
+  th {
+    text-align: left;
+    padding: 0.75rem 1.25rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    color: #a8adb8;
+  }
+
+  td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent2);
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* INLINE CODE */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82em;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent2);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* MIDDLEWARE FLOW */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+  }
+
+  .flow-step {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.82rem;
+    text-align: center;
+  }
+
+  .flow-step .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 0.2rem;
+  }
+
+  .flow-step .name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .flow-step.highlight { border-color: rgba(232,255,71,0.4); background: rgba(232,255,71,0.05); }
+  .flow-step.highlight .name { color: var(--accent); }
+
+  .flow-arrow {
+    color: var(--muted);
+    font-size: 1rem;
+    padding: 0 0.4rem;
+  }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: transparent;
+    z-index: 200;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.1s;
+  }
+
+  /* FOOTER */
+  .footer {
+    padding: 3rem 4rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .footer span { color: var(--accent); }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero, .section { padding: 2.5rem 1.5rem; }
+    .hero h2 { font-size: 2.2rem; }
+    .feature-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    .feature-grid { grid-template-columns: 1fr; }
+    .hero-stats { flex-wrap: wrap; gap: 1.5rem; }
+  }
+
+  /* SCROLL ANIMATION */
+  .section { opacity: 0; transform: translateY(20px); transition: opacity 0.5s, transform 0.5s; }
+  .section.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="progress-wrap"><div class="progress-bar" id="progress"></div></div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="badge">Tutorial</div>
+    <h1>Express.js</h1>
+    <p>Node.js Web Framework</p>
+  </div>
+
+  <div class="nav-section-label">Contents</div>
+  <a href="#intro" class="nav-item active"><span class="num">01</span> Introduction</a>
+  <a href="#setup" class="nav-item"><span class="num">02</span> Basic Setup</a>
+  <a href="#routing" class="nav-item"><span class="num">03</span> Routing</a>
+  <a href="#request" class="nav-item"><span class="num">04</span> Request Object</a>
+  <a href="#response" class="nav-item"><span class="num">05</span> Response Object</a>
+  <a href="#middleware" class="nav-item"><span class="num">06</span> Middleware</a>
+  <a href="#examples" class="nav-item"><span class="num">07</span> Examples</a>
+  <a href="#async" class="nav-item"><span class="num">08</span> Async Patterns</a>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- HERO -->
+  <section class="hero" id="intro">
+    <div class="hero-tag">⚡ CS142 Lecture Notes</div>
+    <h2>Building Web Servers with <span>Express.js</span></h2>
+    <p>A fast, unopinionated, minimalist web framework for Node.js — learn routing, middleware, request/response handling, and async patterns.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">8</div><div class="stat-label">Sections</div></div>
+      <div class="stat"><div class="stat-num">12</div><div class="stat-label">Code Examples</div></div>
+      <div class="stat"><div class="stat-num">~30</div><div class="stat-label">Minutes</div></div>
+    </div>
+  </section>
+
+  <!-- 01 WHAT IS EXPRESS -->
+  <section class="section" id="intro-detail">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>What is Express.js?</h2>
+    </div>
+    <p>Express.js is a <strong>thin layer on top of Node.js</strong> that makes building web servers significantly easier. It's described as fast, unopinionated, and minimalist — meaning it gives you tools without forcing you into rigid patterns.</p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🌐</div>
+        <h4>HTTP Handling</h4>
+        <p>Accept TCP connections, process requests, and send replies. Built on Node's HTTP module.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🗺️</div>
+        <h4>Routing</h4>
+        <p>Map URLs to handler functions. Supports a routing table similar to React Router.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔌</div>
+        <h4>Middleware</h4>
+        <p>Plug in sessions, cookies, security, compression, and custom logic with ease.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 SETUP -->
+  <section class="section" id="setup">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Basic Setup</h2>
+    </div>
+    <p>Express uses the <strong>factory pattern</strong> — you call <code>express()</code> to get your app object, then use it to register routes and start the server.</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-lang">JavaScript</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">let</span> <span class="var">express</span> = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">let</span> <span class="var">expressApp</span> = <span class="fn">express</span>(); <span class="cm">// module uses factory pattern</span>
+
+<span class="cm">// expressApp has methods for:</span>
+<span class="cm">//   Routing HTTP requests</span>
+<span class="cm">//   Rendering HTML (e.g. Jade templating engine)</span>
+<span class="cm">//   Configuring middleware and preprocessors</span>
+
+<span class="var">expressApp</span>.<span class="fn">get</span>(<span class="str">'/'</span>, <span class="kw">function</span> (<span class="var">httpRequest</span>, <span class="var">httpResponse</span>) {
+  <span class="var">httpResponse</span>.<span class="fn">send</span>(<span class="str">'hello world'</span>);
+});
+
+<span class="var">expressApp</span>.<span class="fn">listen</span>(<span class="num">3000</span>); <span class="cm">// localhost:3000</span></pre>
+    </div>
+
+    <div class="callout success">
+      <span class="callout-icon">💡</span>
+      <div>Calling <code>expressApp.listen(3000)</code> starts the server on <strong>localhost:3000</strong> by default. You can pass a callback as the second argument to log a message when the server starts.</div>
+    </div>
+  </section>
+
+  <!-- 03 ROUTING -->
+  <section class="section" id="routing">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Express Routing</h2>
+    </div>
+    <p>Express maps HTTP methods and URL paths to handler functions. Each method corresponds directly to an HTTP verb.</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-lang">JavaScript</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="var">expressApp</span>.<span class="fn">get</span>(<span class="var">urlPath</span>, <span class="var">requestProcessFunction</span>);     <span class="cm">// GET</span>
+<span class="var">expressApp</span>.<span class="fn">post</span>(<span class="var">urlPath</span>, <span class="var">requestProcessFunction</span>);    <span class="cm">// POST</span>
+<span class="var">expressApp</span>.<span class="fn">put</span>(<span class="var">urlPath</span>, <span class="var">requestProcessFunction</span>);     <span class="cm">// PUT</span>
+<span class="var">expressApp</span>.<span class="fn">delete</span>(<span class="var">urlPath</span>, <span class="var">requestProcessFunction</span>);  <span class="cm">// DELETE</span>
+<span class="var">expressApp</span>.<span class="fn">all</span>(<span class="var">urlPath</span>, <span class="var">requestProcessFunction</span>);     <span class="cm">// ALL methods</span></pre>
+    </div>
+
+    <h3>Route Parameters</h3>
+    <p>Like React Router, Express supports dynamic URL segments using the <code>:</code> prefix. These become available in <code>request.params</code>.</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-lang">JavaScript</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cm">// URL: /user/42  →  request.params.user_id === "42"</span>
+<span class="var">expressApp</span>.<span class="fn">get</span>(<span class="str">'/user/:user_id'</span>, <span class="kw">function</span> (<span class="var">req</span>, <span class="var">res</span>) {
+  <span class="kw">let</span> <span class="var">id</span> = <span class="var">req</span>.<span class="prop">params</span>.<span class="prop">user_id</span>;
+  <span class="var">res</span>.<span class="fn">send</span>(<span class="str">'User ID is: '</span> + <span class="var">id</span>);
+});</pre>
+    </div>
+  </section>
+
+  <!-- 04 REQUEST -->
+  <section class="section" id="request">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>The Request Object</h2>
+    </div>
+    <p>The <code>httpRequest</code> object carries all information about the incoming request. Middleware can add extra properties to it.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Property / Method</th><th>Description</th><th>Example</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>request.params</td><td>URL route parameters</td><td><code>{ user_id: '42' }</code></td></tr>
+          <tr><td>request.query</td><td>Query string parameters</td><td><code>&foo=9</code> → <code>{ foo: '9' }</code></td></tr>
+          <tr><td>request.body</td><td>Parsed request body (set by middleware)</td><td><code>{ name: 'Alice' }</code></td></tr>
+          <tr><td>request.get(field)</td><td>Returns the value of an HTTP header</td><td><code>request.get('Content-Type')</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <span class="callout-icon">ℹ️</span>
+      <div><code>request.body</code> is only populated when body-parsing middleware is applied (e.g. <code>express.json()</code> or a JSON body parser). Without middleware, it will be <code>undefined</code>.</div>
+    </div>
+  </section>
+
+  <!-- 05 RESPONSE -->
+  <section class="section" id="response">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>The Response Object</h2>
+    </div>
+    <p>The <code>httpResponse</code> object is used to build and send the HTTP reply. Methods return <code>this</code>, enabling <strong>method chaining</strong>.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Method</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>response.write(content)</td><td>Append content to the response body</td></tr>
+          <tr><td>response.status(code)</td><td>Set the HTTP status code (200, 400, 500…)</td></tr>
+          <tr><td>response.set(prop, value)</td><td>Set a response header property</td></tr>
+          <tr><td>response.end()</td><td>Finalize and send the response</td></tr>
+          <tr><td>response.end(msg)</td><td>Finalize and send with a message</td></tr>
+          <tr><td>response.send(content)</td><td>Shorthand for write() + end()</td></tr>
+          <tr><td>response.json(obj)</td><td>Send JSON (sets Content-Type automatically)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Method Chaining</h3>
+    <p>Because methods return <code>this</code>, you can chain them for concise response handling:</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-lang">JavaScript</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cm">// Set status, write multiple chunks, then end</span>
+<span class="var">response</span>.<span class="fn">status</span>(<span class="num">200</span>).<span class="fn">write</span>(<span class="var">content1</span>).<span class="fn">write</span>(<span class="var">content2</span>).<span class="fn">end</span>();
+
+<span class="cm">// Most common: status + send in one line</span>
+<span class="var">response</span>.<span class="fn">status</span>(<span class="num">200</span>).<span class="fn">send</span>(<span class="var">userData</span>);</pre>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠️</span>
+      <div>Always call <code>end()</code> or <code>send()</code> to close the response. Forgetting to finalize a response will cause the request to hang indefinitely.</div>
+    </div>
+  </section>
+
+  <!-- 06 MIDDLEWARE -->
+  <section class="section" id="middleware">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Middleware</h2>
+    </div>
+    <p>Middleware lets you <strong>interpose on requests</strong> before they reach your route handlers. Each middleware receives the request, response, and a <code>next()</code> function to pass control along the chain.</p>
+
+    <div class="flow">
+      <div class="flow-step"><div class="label">Incoming</div><div class="name">Request</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step highlight"><div class="label">Middleware 1</div><div class="name">Auth Check</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step highlight"><div class="label">Middleware 2</div><div class="name">JSON Parser</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step highlight"><div class="label">Middleware 3</div><div class="name">Sessions</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="label">Final</div><div class="name">Route Handler</div></div>
+    </div>
+
+    <h3>Route-based Middleware</h3>
+    <p>Apply middleware to a specific URL path using <code>expressApp.all()</code>:</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-lang">JavaScript</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="var">expressApp</span>.<span class="fn">all</span>(<span class="var">urlPath</span>, <span class="kw">function</span> (<span class="var">request</span>, <span class="var">response</span>, <span class="var">next</span>) {
+  <span class="cm">// Do processing on request or set up response</span>
+  <span class="fn">next</span>(); <span class="cm">// pass control to the next handler</span>
+});</pre>
+    </div>
+
+    <h3>Global Middleware</h3>
+    <p>Apply middleware to <em>all</em> requests using <code>expressApp.use()</code>:</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-lang">JavaScript</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="var">expressApp</span>.<span class="fn">use</span>(<span class="kw">function</span> (<span class="var">request</span>, <span class="var">response</span>, <span class="var">next</span>) {
+  <span class="cm">// Runs for every incoming request</span>
+  <span class="fn">next</span>();
+});
+
+<span class="cm">// Serve static files from the current directory</span>
+<span class="var">app</span>.<span class="fn">use</span>(<span class="var">express</span>.<span class="fn">static</span>(<span class="var">__dirname</span>));</pre>
+    </div>
+
+    <h3>Common Use Cases</h3>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h4>Authentication</h4>
+        <p>Check if user is logged in; send 401 and skip <code>next()</code> if not.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📦</div>
+        <h4>Body Parsing</h4>
+        <p>Parse JSON request bodies and attach to <code>request.body</code>.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🍪</div>
+        <h4>Sessions & Cookies</h4>
+        <p>Manage user sessions, cookies, and encrypted tokens.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 EXAMPLES -->
+  <section class="section" id="examples">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>Complete Examples</h2>
+    </div>
+
+    <h3>Simple File Server (Project #4 Pattern)</h3>
+    <p>Serve static files from a directory and handle a root route:</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-lang">JavaScript — webServer.js</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">let</span> <span class="var">express</span> = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">let</span> <span class="var">app</span> = <span class="fn">express</span>();
+
+<span class="var">app</span>.<span class="fn">use</span>(<span class="var">express</span>.<span class="fn">static</span>(<span class="var">__dirname</span>)); <span class="cm">// Serve files from this directory</span>
+
+<span class="var">app</span>.<span class="fn">get</span>(<span class="str">'/'</span>, <span class="kw">function</span> (<span class="var">request</span>, <span class="var">response</span>) {
+  <span class="var">response</span>.<span class="fn">send</span>(<span class="str">'Simple web server of files from '</span> + <span class="var">__dirname</span>);
+});
+
+<span class="var">app</span>.<span class="fn">listen</span>(<span class="num">3000</span>, <span class="kw">function</span> () {
+  <span class="var">console</span>.<span class="fn">log</span>(<span class="str">'Listening at http://localhost:3000'</span>);
+});</pre>
+    </div>
+
+    <h3>REST API Routes (Project #5 Pattern)</h3>
+    <p>Fetch a list of users or a single user by ID, with proper error handling:</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-lang">JavaScript</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cm">// GET /user/list — return all users</span>
+<span class="var">app</span>.<span class="fn">get</span>(<span class="str">'/user/list'</span>, <span class="kw">function</span> (<span class="var">request</span>, <span class="var">response</span>) {
+  <span class="var">response</span>.<span class="fn">status</span>(<span class="num">200</span>).<span class="fn">send</span>(<span class="var">cs142models</span>.<span class="fn">userListModel</span>());
+});
+
+<span class="cm">// GET /user/:id — return a single user</span>
+<span class="var">app</span>.<span class="fn">get</span>(<span class="str">'/user/:id'</span>, <span class="kw">function</span> (<span class="var">request</span>, <span class="var">response</span>) {
+  <span class="kw">let</span> <span class="var">id</span> = <span class="var">request</span>.<span class="prop">params</span>.<span class="prop">id</span>;
+  <span class="kw">let</span> <span class="var">user</span> = <span class="var">cs142models</span>.<span class="fn">userModel</span>(<span class="var">id</span>);
+
+  <span class="kw">if</span> (<span class="var">user</span> === <span class="kw">null</span>) {
+    <span class="var">response</span>.<span class="fn">status</span>(<span class="num">400</span>).<span class="fn">send</span>(<span class="str">'Not found'</span>);
+    <span class="kw">return</span>;
+  }
+  <span class="var">response</span>.<span class="fn">status</span>(<span class="num">200</span>).<span class="fn">send</span>(<span class="var">user</span>);
+});</pre>
+    </div>
+
+    <h3>Reading from a JSON File</h3>
+    <p>Fetch an object from the filesystem and return it as JSON:</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-lang">JavaScript</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="var">expressApp</span>.<span class="fn">get</span>(<span class="str">"/object/:objid"</span>, <span class="kw">function</span> (<span class="var">request</span>, <span class="var">response</span>) {
+  <span class="kw">let</span> <span class="var">dbFile</span> = <span class="str">"DB"</span> + <span class="var">request</span>.<span class="prop">params</span>.<span class="prop">objid</span>;
+
+  <span class="var">fs</span>.<span class="fn">readFile</span>(<span class="var">dbFile</span>, <span class="kw">function</span> (<span class="var">error</span>, <span class="var">contents</span>) {
+    <span class="kw">if</span> (<span class="var">error</span>) {
+      <span class="var">response</span>.<span class="fn">status</span>(<span class="num">500</span>).<span class="fn">send</span>(<span class="var">error</span>.<span class="prop">message</span>);
+    } <span class="kw">else</span> {
+      <span class="kw">let</span> <span class="var">obj</span> = <span class="var">JSON</span>.<span class="fn">parse</span>(<span class="var">contents</span>); <span class="cm">// Buffer types accepted</span>
+      <span class="var">obj</span>.<span class="prop">date</span> = <span class="kw">new</span> <span class="fn">Date</span>();
+      <span class="var">response</span>.<span class="fn">json</span>(<span class="var">obj</span>); <span class="cm">// sets Content-Type automatically</span>
+    }
+  });
+});</pre>
+    </div>
+  </section>
+
+  <!-- 08 ASYNC -->
+  <section class="section" id="async">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>Async Patterns</h2>
+    </div>
+    <p>When a route needs to fetch <em>multiple</em> related files or resources, you'll need an async coordination strategy. The <code>async</code> library's <code>each</code> function is a classic approach:</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-lang">JavaScript — Fetching multiple models</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="var">app</span>.<span class="fn">get</span>(<span class="str">"/commentsOf/:objid"</span>, <span class="kw">function</span> (<span class="var">request</span>, <span class="var">response</span>) {
+  <span class="kw">let</span> <span class="var">comments</span> = [];
+
+  <span class="cm">// Step 1: Read the main object file</span>
+  <span class="var">fs</span>.<span class="fn">readFile</span>(<span class="str">"DB"</span> + <span class="var">request</span>.<span class="prop">params</span>.<span class="prop">objid</span>, <span class="kw">function</span> (<span class="var">error</span>, <span class="var">contents</span>) {
+    <span class="kw">let</span> <span class="var">obj</span> = <span class="var">JSON</span>.<span class="fn">parse</span>(<span class="var">contents</span>);
+    <span class="cm">// Step 2: Fetch each comment file in parallel</span>
+    <span class="var">async</span>.<span class="fn">each</span>(<span class="var">obj</span>.<span class="prop">comments</span>, <span class="var">fetchComments</span>, <span class="var">allDone</span>);
+  });
+
+  <span class="cm">// Called for each comment file</span>
+  <span class="kw">function</span> <span class="fn">fetchComments</span>(<span class="var">commentFile</span>, <span class="var">callback</span>) {
+    <span class="var">fs</span>.<span class="fn">readFile</span>(<span class="str">"DB"</span> + <span class="var">commentFile</span>, <span class="kw">function</span> (<span class="var">error</span>, <span class="var">contents</span>) {
+      <span class="kw">if</span> (!<span class="var">error</span>) <span class="var">comments</span>.<span class="fn">push</span>(<span class="var">JSON</span>.<span class="fn">parse</span>(<span class="var">contents</span>));
+      <span class="fn">callback</span>(<span class="var">error</span>);
+    });
+  }
+
+  <span class="cm">// Called when all fetches complete (or one errors)</span>
+  <span class="kw">function</span> <span class="fn">allDone</span>(<span class="var">error</span>) {
+    <span class="kw">if</span> (<span class="var">error</span>) <span class="var">response</span>.<span class="fn">status</span>(<span class="num">500</span>).<span class="fn">send</span>(<span class="var">error</span>.<span class="prop">message</span>);
+    <span class="kw">else</span> <span class="var">response</span>.<span class="fn">json</span>(<span class="var">comments</span>);
+  }
+});</pre>
+    </div>
+
+    <div class="callout">
+      <span class="callout-icon">ℹ️</span>
+      <div><code>async.each</code> runs all iterations <strong>in parallel</strong> and calls <code>allDone</code> once every callback has fired — or immediately if any callback receives an error. This is the classic pattern before <code>Promise.all()</code> became mainstream.</div>
+    </div>
+
+    <h3>Modern Alternative with Promises</h3>
+    <p>Today you'd typically use <code>async/await</code> and <code>Promise.all()</code> for cleaner async handling:</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-lang">JavaScript — Modern async/await</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="var">app</span>.<span class="fn">get</span>(<span class="str">"/commentsOf/:objid"</span>, <span class="kw">async</span> <span class="kw">function</span> (<span class="var">req</span>, <span class="var">res</span>) {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> <span class="var">contents</span> = <span class="kw">await</span> <span class="var">fs</span>.<span class="prop">promises</span>.<span class="fn">readFile</span>(<span class="str">"DB"</span> + <span class="var">req</span>.<span class="prop">params</span>.<span class="prop">objid</span>);
+    <span class="kw">const</span> <span class="var">obj</span> = <span class="var">JSON</span>.<span class="fn">parse</span>(<span class="var">contents</span>);
+    <span class="kw">const</span> <span class="var">comments</span> = <span class="kw">await</span> <span class="var">Promise</span>.<span class="fn">all</span>(
+      <span class="var">obj</span>.<span class="prop">comments</span>.<span class="fn">map</span>(<span class="var">f</span> => <span class="var">fs</span>.<span class="prop">promises</span>.<span class="fn">readFile</span>(<span class="str">"DB"</span> + <span class="var">f</span>).<span class="fn">then</span>(<span class="var">JSON</span>.<span class="prop">parse</span>))
+    );
+    <span class="var">res</span>.<span class="fn">json</span>(<span class="var">comments</span>);
+  } <span class="kw">catch</span> (<span class="var">err</span>) {
+    <span class="var">res</span>.<span class="fn">status</span>(<span class="num">500</span>).<span class="fn">send</span>(<span class="var">err</span>.<span class="prop">message</span>);
+  }
+});</pre>
+    </div>
+  </section>
+
+  <footer class="footer">
+    Based on <span>CS142 Lecture Notes</span> · Express.js Tutorial · Mendel Rosenblum
+  </footer>
+
+</main>
+
+<script>
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const docH = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docH > 0 ? (window.scrollY / docH) * 100 : 0;
+    document.getElementById('progress').style.width = pct + '%';
+  });
+
+  // Scroll animation
+  const sections = document.querySelectorAll('.section');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  sections.forEach(s => io.observe(s));
+
+  // Active nav
+  const navLinks = document.querySelectorAll('.nav-item');
+  const sectionEls = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sectionEls.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 120) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  });
+
+  // Copy buttons
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1800);
+    });
+  }
+</script>
+</body>
+</html>

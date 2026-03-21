@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Web Servers — Interactive Tutorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0e14;
+    --surface: #131720;
+    --surface2: #1a2030;
+    --border: #252d3d;
+    --accent: #4f9cf9;
+    --accent2: #7c6af7;
+    --accent3: #39d98a;
+    --warn: #f7c948;
+    --text: #e2e8f5;
+    --muted: #6b7a99;
+    --code-bg: #0d1117;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── SIDEBAR NAV ─── */
+  .layout { display: flex; min-height: 100vh; }
+
+  nav {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 32px 0 40px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nav-brand {
+    padding: 0 24px 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .nav-brand .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 6px;
+  }
+  .nav-brand h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .nav-item:hover { color: var(--text); background: rgba(79,156,249,0.06); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(79,156,249,0.1); }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-num {
+    margin-left: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    background: var(--border);
+    padding: 2px 7px;
+    border-radius: 999px;
+    color: var(--muted);
+  }
+  .nav-item.active .nav-num { background: rgba(79,156,249,0.2); color: var(--accent); }
+
+  .nav-progress {
+    margin-top: auto;
+    padding: 20px 24px 0;
+    border-top: 1px solid var(--border);
+  }
+  .progress-label { font-size: 11px; color: var(--muted); margin-bottom: 8px; font-family: 'IBM Plex Mono', monospace; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 0.5s ease; }
+
+  /* ─── MAIN CONTENT ─── */
+  main { flex: 1; padding: 0; }
+
+  .section {
+    display: none;
+    padding: 64px 72px 80px;
+    max-width: 860px;
+    animation: fadeSlide 0.4s ease;
+  }
+  .section.active { display: block; }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(79,156,249,0.12);
+    border: 1px solid rgba(79,156,249,0.25);
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.15;
+    background: linear-gradient(135deg, var(--text), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    margin: 40px 0 16px;
+    color: var(--text);
+  }
+
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 28px 0 12px;
+    color: var(--accent);
+  }
+
+  p { color: #b0bcd4; margin-bottom: 16px; }
+
+  .lead { font-size: 18px; color: #c4cfe6; margin-bottom: 32px; line-height: 1.65; }
+
+  /* ─── CODE BLOCKS ─── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    overflow-x: auto;
+    margin: 20px 0;
+    position: relative;
+  }
+  pre .lang-label {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: #a8c8fa;
+  }
+  p code, li code {
+    background: rgba(79,156,249,0.12);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-size: 13px;
+  }
+
+  /* Syntax highlight helpers */
+  .kw { color: #c792ea; }
+  .fn { color: #82aaff; }
+  .str { color: #c3e88d; }
+  .cm { color: #546e7a; font-style: italic; }
+  .num { color: #f78c6c; }
+  .ty { color: #ffcb6b; }
+
+  /* ─── CARDS & CALLOUTS ─── */
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .card .card-icon { font-size: 28px; margin-bottom: 12px; }
+  .card h4 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .card p { font-size: 14px; margin: 0; }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: rgba(79,156,249,0.07);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: 14.5px;
+    color: #c4cfe6;
+  }
+  .callout.warn { border-left-color: var(--warn); background: rgba(247,201,72,0.07); }
+  .callout.success { border-left-color: var(--accent3); background: rgba(57,217,138,0.07); }
+  .callout strong { color: var(--text); }
+
+  /* ─── TABLES ─── */
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+  th {
+    background: var(--surface2);
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 12px 16px; border-bottom: 1px solid rgba(37,45,61,0.7); color: #b0bcd4; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(79,156,249,0.04); }
+
+  /* ─── ARCHITECTURE DIAGRAM ─── */
+  .arch-diagram {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px;
+    margin: 28px 0;
+    display: flex;
+    justify-content: center;
+  }
+  .arch-diagram svg { width: 100%; max-width: 600px; }
+
+  /* ─── LOOP FLOW ─── */
+  .loop-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+  }
+  .loop-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    position: relative;
+  }
+  .loop-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 40px;
+    width: 2px;
+    height: calc(100% - 8px);
+    background: linear-gradient(180deg, var(--accent), var(--accent2));
+    opacity: 0.4;
+  }
+  .loop-dot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(79,156,249,0.15);
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .loop-content { padding-top: 10px; }
+  .loop-content strong { color: var(--text); font-size: 15px; }
+  .loop-content p { font-size: 14px; margin: 4px 0 0; color: var(--muted); }
+
+  /* ─── GENERATION CARDS ─── */
+  .gen-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  .gen-card-header {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .gen-card-header h3 { margin: 0; color: #fff; font-size: 16px; }
+  .gen-card-body { padding: 24px; }
+
+  .step-list { list-style: none; counter-reset: steps; }
+  .step-list li {
+    counter-increment: steps;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    font-size: 15px;
+    color: #b0bcd4;
+  }
+  .step-list li::before {
+    content: counter(steps);
+    background: rgba(79,156,249,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(79,156,249,0.3);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* ─── QUIZ ─── */
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin: 24px 0;
+  }
+  .quiz-card h4 { font-family: 'Syne', sans-serif; font-size: 17px; margin-bottom: 20px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-option {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    color: #c4cfe6;
+  }
+  .quiz-option:hover { border-color: var(--accent); color: var(--text); }
+  .quiz-option.correct { border-color: var(--accent3); background: rgba(57,217,138,0.1); color: var(--accent3); }
+  .quiz-option.wrong { border-color: #f76a6a; background: rgba(247,106,106,0.1); color: #f76a6a; }
+  .quiz-feedback { margin-top: 16px; font-size: 14px; display: none; }
+  .quiz-feedback.show { display: block; }
+
+  /* ─── NAV BUTTONS ─── */
+  .section-nav { display: flex; gap: 12px; margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #3a8bf0; transform: translateY(-1px); }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--text); }
+
+  /* ─── HIGHLIGHT BOX ─── */
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(79,156,249,0.08), rgba(124,106,247,0.08));
+    border: 1px solid rgba(79,156,249,0.2);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin: 24px 0;
+  }
+
+  ul, ol { padding-left: 22px; margin-bottom: 16px; }
+  li { color: #b0bcd4; margin-bottom: 6px; font-size: 15px; }
+
+  /* ─── HERO SECTION ─── */
+  #hero { padding-top: 80px; }
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+  .hero-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    nav { display: none; }
+    .section { padding: 32px 24px 48px; }
+    .card-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ─── SIDEBAR ─── -->
+  <nav id="sidebar">
+    <div class="nav-brand">
+      <div class="label">CS142 · Stanford</div>
+      <h2>Web Servers</h2>
+    </div>
+
+    <a class="nav-item active" onclick="goTo(0)" href="#">
+      <span class="icon">🏠</span> Introduction
+      <span class="nav-num">01</span>
+    </a>
+    <a class="nav-item" onclick="goTo(1)" href="#">
+      <span class="icon">🏗️</span> Architecture
+      <span class="nav-num">02</span>
+    </a>
+    <a class="nav-item" onclick="goTo(2)" href="#">
+      <span class="icon">🔄</span> Request Loop
+      <span class="nav-num">03</span>
+    </a>
+    <a class="nav-item" onclick="goTo(3)" href="#">
+      <span class="icon">📁</span> File Reads
+      <span class="nav-num">04</span>
+    </a>
+    <a class="nav-item" onclick="goTo(4)" href="#">
+      <span class="icon">⚙️</span> CGI &amp; Processes
+      <span class="nav-num">05</span>
+    </a>
+    <a class="nav-item" onclick="goTo(5)" href="#">
+      <span class="icon">🧩</span> MVC Frameworks
+      <span class="nav-num">06</span>
+    </a>
+    <a class="nav-item" onclick="goTo(6)" href="#">
+      <span class="icon">⚡</span> JS Frameworks
+      <span class="nav-num">07</span>
+    </a>
+    <a class="nav-item" onclick="goTo(7)" href="#">
+      <span class="icon">🧠</span> Quiz
+      <span class="nav-num">08</span>
+    </a>
+
+    <div class="nav-progress">
+      <div class="progress-label" id="progress-label">0 / 8 complete</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:12.5%"></div></div>
+    </div>
+  </nav>
+
+  <!-- ─── CONTENT ─── -->
+  <main>
+
+    <!-- 0 · INTRO -->
+    <section class="section active" id="sec-0">
+      <div class="section-badge">📡 Getting Started</div>
+      <h1>Web Servers<br/>Demystified</h1>
+      <div class="hero-meta">
+        <span class="hero-chip">CS142 Lecture</span>
+        <span class="hero-chip">Mendel Rosenblum</span>
+        <span class="hero-chip">7 sections · ~20 min</span>
+      </div>
+      <p class="lead">
+        Every time you open a webpage, a web server quietly accepts your request, fetches the right data, and sends back a response — all in milliseconds. This tutorial unpacks exactly how that works.
+      </p>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">🌐</div>
+          <h4>HTTP Protocol</h4>
+          <p>How browsers and servers communicate using a shared language: HTTP over TCP/IP.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔁</div>
+          <h4>Request Processing</h4>
+          <p>The endless loop a web server runs — accepting connections, reading requests, writing responses.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🗃️</div>
+          <h4>File vs. Dynamic</h4>
+          <p>Serving static files vs. generating responses dynamically with databases and programs.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🚀</div>
+          <h4>Modern Frameworks</h4>
+          <p>From CGI scripts to Rails to JavaScript SPA frameworks — the evolution of web architectures.</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Prerequisites:</strong> Basic familiarity with HTTP (request/response), TCP/IP networking, and some programming experience (C or pseudocode is used in examples).
+      </div>
+
+      <div class="section-nav">
+        <button class="btn btn-primary" onclick="goTo(1)">Start Learning →</button>
+      </div>
+    </section>
+
+    <!-- 1 · ARCHITECTURE -->
+    <section class="section" id="sec-1">
+      <div class="section-badge">🏗️ Section 02</div>
+      <h1>Web App Architecture</h1>
+      <p class="lead">Before diving into web servers, let's understand where they fit in the bigger picture of a web application.</p>
+
+      <h2>The Three-Layer Model</h2>
+      <p>Every web application at its core consists of three connected components:</p>
+
+      <div class="arch-diagram">
+        <svg viewBox="0 0 580 220" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, monospace">
+          <!-- Browser -->
+          <rect x="20" y="70" width="140" height="80" rx="10" fill="#131720" stroke="#4f9cf9" stroke-width="1.5"/>
+          <text x="90" y="100" fill="#4f9cf9" font-size="22" text-anchor="middle">🌐</text>
+          <text x="90" y="125" fill="#e2e8f5" font-size="12" text-anchor="middle" font-weight="600">Web Browser</text>
+          <text x="90" y="141" fill="#6b7a99" font-size="10" text-anchor="middle">Client</text>
+
+          <!-- Arrow left→right -->
+          <line x1="160" y1="110" x2="220" y2="110" stroke="#4f9cf9" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <polygon points="220,106 228,110 220,114" fill="#4f9cf9"/>
+          <text x="194" y="100" fill="#4f9cf9" font-size="10" text-anchor="middle">HTTP</text>
+          <!-- Arrow right→left -->
+          <line x1="228" y1="122" x2="168" y2="122" stroke="#7c6af7" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <polygon points="168,118 160,122 168,126" fill="#7c6af7"/>
+
+          <!-- Web Server -->
+          <rect x="228" y="55" width="140" height="110" rx="10" fill="#131720" stroke="#7c6af7" stroke-width="1.5"/>
+          <text x="298" y="88" fill="#7c6af7" font-size="22" text-anchor="middle">🖥️</text>
+          <text x="298" y="112" fill="#e2e8f5" font-size="12" text-anchor="middle" font-weight="600">Web Server</text>
+          <text x="298" y="128" fill="#6b7a99" font-size="10" text-anchor="middle">Processes Requests</text>
+          <text x="298" y="152" fill="#6b7a99" font-size="9" text-anchor="middle">Internet / LAN</text>
+
+          <!-- Arrow server→storage -->
+          <line x1="368" y1="110" x2="418" y2="110" stroke="#39d98a" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <polygon points="418,106 426,110 418,114" fill="#39d98a"/>
+          <line x1="426" y1="122" x2="376" y2="122" stroke="#39d98a" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <polygon points="376,118 368,122 376,126" fill="#39d98a"/>
+
+          <!-- Storage -->
+          <rect x="426" y="70" width="130" height="80" rx="10" fill="#131720" stroke="#39d98a" stroke-width="1.5"/>
+          <text x="491" y="100" fill="#39d98a" font-size="22" text-anchor="middle">💾</text>
+          <text x="491" y="124" fill="#e2e8f5" font-size="12" text-anchor="middle" font-weight="600">Storage</text>
+          <text x="491" y="140" fill="#6b7a99" font-size="10" text-anchor="middle">DB / Filesystem</text>
+
+          <!-- Labels -->
+          <text x="90" y="185" fill="#6b7a99" font-size="10" text-anchor="middle">Sends requests</text>
+          <text x="298" y="185" fill="#6b7a99" font-size="10" text-anchor="middle">Processes &amp; routes</text>
+          <text x="491" y="185" fill="#6b7a99" font-size="10" text-anchor="middle">Persists data</text>
+        </svg>
+      </div>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">🌐</div>
+          <h4>Web Browser (Client)</h4>
+          <p>The user's interface. Sends HTTP <strong>requests</strong> and renders the HTTP <strong>responses</strong> it receives.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🖥️</div>
+          <h4>Web Server</h4>
+          <p>The middleman. Receives requests, applies logic, fetches data, and returns responses. Lives on the Internet or LAN.</p>
+        </div>
+      </div>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">💾</div>
+          <h4>Storage System</h4>
+          <p>Databases, filesystems, caches. The web server talks to storage via the LAN (fast, local network).</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📡</div>
+          <h4>HTTP as the Glue</h4>
+          <p>Browser and server speak <strong>HTTP</strong>. Server and storage speak SQL or other protocols.</p>
+        </div>
+      </div>
+
+      <div class="callout success">
+        <strong>Key insight:</strong> The browser never talks directly to the database. The web server acts as a gatekeeper, applying security, business logic, and data formatting.
+      </div>
+
+      <div class="section-nav">
+        <button class="btn btn-ghost" onclick="goTo(0)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(2)">Request Loop →</button>
+      </div>
+    </section>
+
+    <!-- 2 · REQUEST LOOP -->
+    <section class="section" id="sec-2">
+      <div class="section-badge">🔄 Section 03</div>
+      <h1>The Server Loop</h1>
+      <p class="lead">A web server never sleeps. It runs an infinite loop, handling one connection after another. Here's exactly what happens on every iteration.</p>
+
+      <h2>The Core Loop</h2>
+      <p>At the heart of every web server is a simple, repeating algorithm:</p>
+
+      <pre><code><span class="kw">loop</span> forever doing:
+  accept TCP connection from browser
+  read HTTP request from TCP connection
+  process HTTP request
+  write HTTP response to TCP connection
+  shutdown TCP connection
+    (except if <span class="str">Connection: keep-alive</span>)</code></pre>
+
+      <h2>Step by Step</h2>
+      <div class="loop-flow">
+        <div class="loop-step">
+          <div class="loop-dot">1</div>
+          <div class="loop-content">
+            <strong>Accept TCP Connection</strong>
+            <p>The server listens on port 80 (HTTP) or 443 (HTTPS) and accepts an incoming TCP connection from the browser.</p>
+          </div>
+        </div>
+        <div class="loop-step">
+          <div class="loop-dot">2</div>
+          <div class="loop-content">
+            <strong>Read HTTP Request</strong>
+            <p>The server reads the full HTTP request from the TCP stream — method, URL, headers, optional body.</p>
+          </div>
+        </div>
+        <div class="loop-step">
+          <div class="loop-dot">3</div>
+          <div class="loop-content">
+            <strong>Process the Request</strong>
+            <p>The core work: read a file, run a program, query a database, and build an appropriate response.</p>
+          </div>
+        </div>
+        <div class="loop-step">
+          <div class="loop-dot">4</div>
+          <div class="loop-content">
+            <strong>Write HTTP Response</strong>
+            <p>The server sends back an HTTP response with headers (status, content-type, etc.) followed by the response body.</p>
+          </div>
+        </div>
+        <div class="loop-step">
+          <div class="loop-dot">5</div>
+          <div class="loop-content">
+            <strong>Close or Keep-Alive</strong>
+            <p>By default the TCP connection closes. With <code>Connection: keep-alive</code> it stays open for reuse — faster for multiple assets.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>HTTP Over TCP/IP</h2>
+      <p>HTTP doesn't exist in a vacuum — it's layered on top of the TCP/IP networking stack:</p>
+
+      <div class="highlight-box">
+        <table>
+          <thead><tr><th>Layer</th><th>Protocol</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td>Application</td><td><code>HTTP/HTTPS</code></td><td>Request/response messages</td></tr>
+            <tr><td>Transport</td><td><code>TCP</code></td><td>Reliable byte streams</td></tr>
+            <tr><td>Network</td><td><code>IP</code></td><td>Routing packets across networks</td></tr>
+            <tr><td>Link</td><td>Ethernet/WiFi</td><td>Physical/logical data link</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <strong>Note on concurrency:</strong> A simple single-threaded loop handles one request at a time. Real servers handle thousands of concurrent connections using multi-threading, multi-processing, or async I/O (event loops).
+      </div>
+
+      <div class="section-nav">
+        <button class="btn btn-ghost" onclick="goTo(1)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(3)">File Reads →</button>
+      </div>
+    </section>
+
+    <!-- 3 · FILE READS -->
+    <section class="section" id="sec-3">
+      <div class="section-badge">📁 Section 04</div>
+      <h1>Processing File Requests</h1>
+      <p class="lead">The simplest type of request a web server handles: "give me this file." This is the foundation of every static website.</p>
+
+      <h2>HTTP GET → File Read → Response</h2>
+      <p>When a browser sends <code>GET /index.html</code>, the server executes roughly this logic:</p>
+
+      <pre><code><span class="cm">// 1. Open the file from disk</span>
+<span class="ty">int</span> fd = <span class="fn">open</span>(<span class="str">"index.html"</span>);
+
+<span class="cm">// 2. Read its contents into a buffer</span>
+<span class="ty">int</span> len = <span class="fn">read</span>(fd, fileContents, <span class="fn">sizeOfFile</span>(fd));
+
+<span class="cm">// 3. Send HTTP headers first</span>
+<span class="fn">write</span>(tcpConnection, httpResponseHeader, headerSize);
+
+<span class="cm">// 4. Send the file contents as the body</span>
+<span class="fn">write</span>(tcpConnection, fileContents, len);<span class="lang-label">C pseudocode</span></code></pre>
+
+      <h2>The Slow Disk Problem</h2>
+
+      <div class="callout warn">
+        <strong>Performance concern:</strong> <code>open()</code> and <code>read()</code> must wait for the disk — which is orders of magnitude slower than RAM and CPU.
+      </div>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">🐌</div>
+          <h4>Disk Latency</h4>
+          <p>HDD: ~5–10ms per seek. SSD: ~0.1ms. Still much slower than CPU cache (~1ns) or RAM (~100ns).</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <h4>OS Caching</h4>
+          <p>Modern OS kernels cache recently-read files in RAM, so repeated requests for the same file skip the disk entirely.</p>
+        </div>
+      </div>
+
+      <h2>Concurrency: Threads vs Processes</h2>
+      <p>To avoid blocking while one request waits for disk, web servers handle requests concurrently:</p>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">🧵</div>
+          <h4>Thread per Request</h4>
+          <p>Spawn a new OS thread per connection. Threads share memory — lighter weight. Used by Apache (worker mode), Java servlets.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔀</div>
+          <h4>Process per Request</h4>
+          <p>Fork a new OS process per connection. Stronger isolation. Original Apache (prefork). Expensive but robust.</p>
+        </div>
+      </div>
+
+      <div class="callout success">
+        <strong>Modern approach:</strong> Async/event-driven servers (Node.js, Nginx) use a single thread with non-blocking I/O — no waiting, extremely high throughput.
+      </div>
+
+      <h2>What Gets Served as Static Files?</h2>
+      <ul>
+        <li>HTML documents (<code>.html</code>)</li>
+        <li>CSS stylesheets (<code>.css</code>)</li>
+        <li>JavaScript files (<code>.js</code>)</li>
+        <li>Images (<code>.jpg</code>, <code>.png</code>, <code>.svg</code>)</li>
+        <li>Fonts, videos, PDFs, and other binary assets</li>
+      </ul>
+
+      <div class="section-nav">
+        <button class="btn btn-ghost" onclick="goTo(2)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(4)">CGI & Processes →</button>
+      </div>
+    </section>
+
+    <!-- 4 · CGI -->
+    <section class="section" id="sec-4">
+      <div class="section-badge">⚙️ Section 05</div>
+      <h1>CGI &amp; Dynamic Processing</h1>
+      <p class="lead">Static files only get you so far. For dynamic content — personalized pages, search results, form submissions — servers need to <em>run programs</em>.</p>
+
+      <h2>CGI: Common Gateway Interface</h2>
+      <p>CGI is the original mechanism for running programs from a web server. When the server receives a request for a dynamic resource (like a PHP file), it spawns a new process to handle it:</p>
+
+      <pre><code><span class="cm">// Process HTTP GET of index.php</span>
+<span class="fn">runProgramInNewProcess</span>(tcpConnection);<span class="lang-label">pseudocode</span></code></pre>
+
+      <div class="arch-diagram">
+        <svg viewBox="0 0 560 180" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, monospace">
+          <rect x="10" y="50" width="110" height="80" rx="8" fill="#131720" stroke="#4f9cf9" stroke-width="1.5"/>
+          <text x="65" y="82" fill="#4f9cf9" font-size="18" text-anchor="middle">🌐</text>
+          <text x="65" y="105" fill="#e2e8f5" font-size="11" text-anchor="middle">Browser</text>
+          <text x="65" y="120" fill="#6b7a99" font-size="9" text-anchor="middle">GET index.php</text>
+
+          <line x1="120" y1="90" x2="165" y2="90" stroke="#4f9cf9" stroke-width="1.5"/>
+          <polygon points="165,86 173,90 165,94" fill="#4f9cf9"/>
+
+          <rect x="173" y="50" width="120" height="80" rx="8" fill="#131720" stroke="#7c6af7" stroke-width="1.5"/>
+          <text x="233" y="82" fill="#7c6af7" font-size="18" text-anchor="middle">🖥️</text>
+          <text x="233" y="105" fill="#e2e8f5" font-size="11" text-anchor="middle">Web Server</text>
+          <text x="233" y="120" fill="#6b7a99" font-size="9" text-anchor="middle">CGI handler</text>
+
+          <!-- fork arrow down -->
+          <line x1="233" y1="130" x2="233" y2="155" stroke="#f7c948" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <polygon points="229,155 233,163 237,155" fill="#f7c948"/>
+          <text x="250" y="152" fill="#f7c948" font-size="9">fork()</text>
+
+          <rect x="173" y="163" width="120" height="40" rx="6" fill="#131720" stroke="#f7c948" stroke-width="1.5"/>
+          <text x="233" y="188" fill="#f7c948" font-size="10" text-anchor="middle">New Process (PHP)</text>
+
+          <line x1="293" y1="90" x2="340" y2="90" stroke="#39d98a" stroke-width="1.5"/>
+          <polygon points="340,86 348,90 340,94" fill="#39d98a"/>
+
+          <rect x="348" y="50" width="120" height="80" rx="8" fill="#131720" stroke="#39d98a" stroke-width="1.5"/>
+          <text x="408" y="82" fill="#39d98a" font-size="18" text-anchor="middle">💾</text>
+          <text x="408" y="105" fill="#e2e8f5" font-size="11" text-anchor="middle">Database</text>
+          <text x="408" y="120" fill="#6b7a99" font-size="9" text-anchor="middle">SQL queries</text>
+        </svg>
+      </div>
+
+      <h2>What CGI Programs Do</h2>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">📋</div>
+          <h4>Template Processing</h4>
+          <p>Reads an HTML template, fills in dynamic values from the database, outputs final HTML.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🗄️</div>
+          <h4>Database Queries</h4>
+          <p>Fetches model data (users, posts, products) from a DBMS and injects it into the response.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📝</div>
+          <h4>Form Processing</h4>
+          <p>Receives POST data from HTML forms, validates it, writes to storage, redirects the browser.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔐</div>
+          <h4>Auth & Sessions</h4>
+          <p>Checks cookies/tokens, validates user identity, controls access to protected resources.</p>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <strong>CGI performance drawback:</strong> Forking a new process for every single request is expensive. Each new process has to load the interpreter (PHP, Python, Perl), connect to the DB, etc. FastCGI and persistent processes solve this.
+      </div>
+
+      <div class="section-nav">
+        <button class="btn btn-ghost" onclick="goTo(3)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(5)">MVC Frameworks →</button>
+      </div>
+    </section>
+
+    <!-- 5 · MVC FRAMEWORKS -->
+    <section class="section" id="sec-5">
+      <div class="section-badge">🧩 Section 06</div>
+      <h1>2nd Gen Web Frameworks</h1>
+      <p class="lead">As the web matured, raw CGI scripts became hard to maintain. A new generation of frameworks introduced structure: the <strong>Model-View-Controller</strong> pattern.</p>
+
+      <h2>The Controller Pipeline</h2>
+      <p>In 2nd generation frameworks, the web server runs a <strong>controller program per request</strong>:</p>
+
+      <div class="gen-card">
+        <div class="gen-card-header">
+          <span style="font-size:20px">🔄</span>
+          <h3>Request → Response Pipeline</h3>
+        </div>
+        <div class="gen-card-body">
+          <ol class="step-list">
+            <li><strong>Parse URL &amp; Request Body</strong> — extract parameters from the incoming request</li>
+            <li><strong>Fetch Model Data</strong> — query the DBMS (typically SQL/relational) using those parameters</li>
+            <li><strong>Run View Template</strong> — combine the model data with an HTML template to generate HTML</li>
+            <li><strong>Return HTTP Response</strong> — send the generated HTML back to the browser</li>
+          </ol>
+        </div>
+      </div>
+
+      <h2>Ruby on Rails — A Concrete Example</h2>
+      <p>Rails popularized this pattern. Given a URL like <code>/rails_intro/hello</code>:</p>
+
+      <div class="highlight-box">
+        <table>
+          <thead><tr><th>Component</th><th>File</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>🎮 Controller</td>
+              <td><code>hello.rb</code></td>
+              <td>Ruby program — fetches models using ORM (ActiveRecord)</td>
+            </tr>
+            <tr>
+              <td>👁️ View Template</td>
+              <td><code>hello.html.erb</code></td>
+              <td>HTML with embedded Ruby — generates final HTML</td>
+            </tr>
+            <tr>
+              <td>📦 Assets</td>
+              <td><code>.js</code>, <code>.css</code>, images</td>
+              <td>Included like any static file</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>What is an ORM?</h2>
+      <p>An <strong>Object-Relational Mapper</strong> lets you interact with the database using your programming language's objects instead of writing raw SQL:</p>
+
+      <pre><code><span class="cm"># Raw SQL (what ORM hides)</span>
+SELECT * FROM users WHERE id = 42;
+
+<span class="cm"># ActiveRecord ORM (Ruby)</span>
+user = User.<span class="fn">find</span>(<span class="num">42</span>)
+puts user.name<span class="lang-label">Ruby</span></code></pre>
+
+      <h2>Other 2nd Gen Frameworks</h2>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">💎</div>
+          <h4>Ruby on Rails</h4>
+          <p>Convention over configuration. Pioneered MVC for web. Very expressive ORM (ActiveRecord).</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🐍</div>
+          <h4>Django (Python)</h4>
+          <p>"Batteries included" framework. Built-in admin, ORM, authentication, templating.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🐘</div>
+          <h4>Laravel (PHP)</h4>
+          <p>Modern PHP framework with elegant MVC. Eloquent ORM. Huge ecosystem.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">☕</div>
+          <h4>Spring MVC (Java)</h4>
+          <p>Enterprise-grade. Dependency injection, AOP, powerful but verbose.</p>
+        </div>
+      </div>
+
+      <div class="section-nav">
+        <button class="btn btn-ghost" onclick="goTo(4)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(6)">JS Frameworks →</button>
+      </div>
+    </section>
+
+    <!-- 6 · JS FRAMEWORKS -->
+    <section class="section" id="sec-6">
+      <div class="section-badge">⚡ Section 07</div>
+      <h1>JavaScript Framework Era</h1>
+      <p class="lead">Modern SPAs (Single Page Applications) shift most rendering to the browser. The web server's role changes dramatically — it becomes simpler and more focused.</p>
+
+      <h2>Two Kinds of Content</h2>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">📦</div>
+          <h4>Static Files (most of the app)</h4>
+          <p>HTML shell, CSS, JavaScript bundles, images, fonts. <strong>Any</strong> HTTP server can serve these — no special logic needed.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📡</div>
+          <h4>API Calls (model data)</h4>
+          <p>JSON data fetched dynamically from the server. Minimal processing — mostly DBMS reads/writes.</p>
+        </div>
+      </div>
+
+      <h2>CRUD Operations via API</h2>
+      <p>In the JS framework model, the browser communicates with the server primarily for <strong>CRUD</strong> operations on model data:</p>
+
+      <div class="highlight-box">
+        <table>
+          <thead><tr><th>Operation</th><th>HTTP Method</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Create</strong></td><td><code>POST</code></td><td><code>POST /api/users</code> → creates a new user</td></tr>
+            <tr><td><strong>Read</strong></td><td><code>GET</code></td><td><code>GET /api/users/42</code> → fetches user #42</td></tr>
+            <tr><td><strong>Update</strong></td><td><code>PUT / PATCH</code></td><td><code>PUT /api/users/42</code> → updates user #42</td></tr>
+            <tr><td><strong>Delete</strong></td><td><code>DELETE</code></td><td><code>DELETE /api/users/42</code> → removes user #42</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>What's Still on the Server?</h2>
+      <ul>
+        <li>🔐 <strong>Session management</strong> — login, logout, auth tokens (JWT, cookies)</li>
+        <li>🗄️ <strong>Database operations</strong> — CRUD on persistent data</li>
+        <li>🔒 <strong>Authorization</strong> — "can this user access this resource?"</li>
+        <li>📧 <strong>Background tasks</strong> — sending emails, processing uploads, webhooks</li>
+      </ul>
+
+      <h2>Popular JS Framework Stacks</h2>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">⚛️</div>
+          <h4>React + Node.js</h4>
+          <p>Frontend: React SPA. Backend: Express/Fastify API on Node.js. Same language end-to-end.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">💚</div>
+          <h4>Vue + Django REST</h4>
+          <p>Vue.js frontend, Django REST Framework backend. Clean Python API with powerful ORM.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔺</div>
+          <h4>Angular + Spring Boot</h4>
+          <p>TypeScript throughout. Enterprise-grade Java backend, strongly typed frontend.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🟩</div>
+          <h4>Next.js / Nuxt.js</h4>
+          <p>Full-stack JS frameworks with SSR + SPA. Server and client in one unified project.</p>
+        </div>
+      </div>
+
+      <div class="callout success">
+        <strong>Low server requirements:</strong> Because the browser does the rendering, the web server just needs to serve static files via HTTP GET and handle DBMS operations for model data. Much simpler than server-side rendering!
+      </div>
+
+      <div class="section-nav">
+        <button class="btn btn-ghost" onclick="goTo(5)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(7)">Take the Quiz →</button>
+      </div>
+    </section>
+
+    <!-- 7 · QUIZ -->
+    <section class="section" id="sec-7">
+      <div class="section-badge">🧠 Section 08</div>
+      <h1>Knowledge Check</h1>
+      <p class="lead">Let's make sure the concepts stuck. Click the answer you think is correct.</p>
+
+      <!-- Q1 -->
+      <div class="quiz-card">
+        <h4>Q1 · What protocol do browsers and web servers use to communicate?</h4>
+        <div class="quiz-options">
+          <div class="quiz-option" onclick="answer(this, false, 'q1')">FTP — File Transfer Protocol</div>
+          <div class="quiz-option" onclick="answer(this, true, 'q1')">HTTP — HyperText Transfer Protocol</div>
+          <div class="quiz-option" onclick="answer(this, false, 'q1')">SMTP — Simple Mail Transfer Protocol</div>
+          <div class="quiz-option" onclick="answer(this, false, 'q1')">TCP — Transmission Control Protocol</div>
+        </div>
+        <div class="quiz-feedback" id="q1-fb"></div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="quiz-card">
+        <h4>Q2 · What does <code>Connection: keep-alive</code> do?</h4>
+        <div class="quiz-options">
+          <div class="quiz-option" onclick="answer(this, false, 'q2')">Keeps the server process alive between restarts</div>
+          <div class="quiz-option" onclick="answer(this, false, 'q2')">Enables HTTP compression for the response</div>
+          <div class="quiz-option" onclick="answer(this, true, 'q2')">Keeps the TCP connection open for reuse after a response</div>
+          <div class="quiz-option" onclick="answer(this, false, 'q2')">Prevents the browser from caching the response</div>
+        </div>
+        <div class="quiz-feedback" id="q2-fb"></div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="quiz-card">
+        <h4>Q3 · Why are <code>open()</code> and <code>read()</code> slow when serving files?</h4>
+        <div class="quiz-options">
+          <div class="quiz-option" onclick="answer(this, false, 'q3')">They require network access to fetch file metadata</div>
+          <div class="quiz-option" onclick="answer(this, true, 'q3')">They must communicate with a slow disk device</div>
+          <div class="quiz-option" onclick="answer(this, false, 'q3')">They run in a separate process with overhead</div>
+          <div class="quiz-option" onclick="answer(this, false, 'q3')">They encrypt the file before sending it</div>
+        </div>
+        <div class="quiz-feedback" id="q3-fb"></div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="quiz-card">
+        <h4>Q4 · In the MVC pipeline, what does the <strong>controller</strong> do first?</h4>
+        <div class="quiz-options">
+          <div class="quiz-option" onclick="answer(this, false, 'q4')">Run the HTML view template</div>
+          <div class="quiz-option" onclick="answer(this, false, 'q4')">Write the HTTP response</div>
+          <div class="quiz-option" onclick="answer(this, true, 'q4')">Parse the URL / request body to get parameters</div>
+          <div class="quiz-option" onclick="answer(this, false, 'q4')">Open a TCP connection to the browser</div>
+        </div>
+        <div class="quiz-feedback" id="q4-fb"></div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="quiz-card">
+        <h4>Q5 · In JS framework architectures, what does the web server primarily deliver?</h4>
+        <div class="quiz-options">
+          <div class="quiz-option" onclick="answer(this, false, 'q5')">Fully server-rendered HTML pages for each request</div>
+          <div class="quiz-option" onclick="answer(this, true, 'q5')">Static files (HTML/CSS/JS) + JSON model data via APIs</div>
+          <div class="quiz-option" onclick="answer(this, false, 'q5')">Only database query results in XML format</div>
+          <div class="quiz-option" onclick="answer(this, false, 'q5')">CGI scripts executed for every user interaction</div>
+        </div>
+        <div class="quiz-feedback" id="q5-fb"></div>
+      </div>
+
+      <div id="quiz-result" style="display:none" class="highlight-box" style="margin-top:24px">
+        <h3 id="quiz-score-label" style="margin-bottom:8px"></h3>
+        <p id="quiz-score-msg" style="margin:0; color:#b0bcd4"></p>
+      </div>
+
+      <div class="section-nav">
+        <button class="btn btn-ghost" onclick="goTo(6)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(0)">↩ Start Over</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const SECTIONS = 8;
+  let current = 0;
+  let visited = new Set([0]);
+  let quizAnswers = {};
+
+  const explanations = {
+    q1: { correct: "✅ Correct! HTTP (HyperText Transfer Protocol) is the application-layer protocol both browsers and web servers use. It runs on top of TCP/IP.", wrong: "❌ Not quite. HTTP is the protocol. TCP is the transport layer underneath it, FTP is for file transfers, and SMTP is for email." },
+    q2: { correct: "✅ Correct! Keep-alive keeps the underlying TCP connection open so it can be reused for multiple requests, avoiding the overhead of opening a new TCP connection each time.", wrong: "❌ Not quite. Connection: keep-alive tells the server (and browser) not to close the TCP connection after one response — it stays open for subsequent requests." },
+    q3: { correct: "✅ Correct! Disk I/O is many orders of magnitude slower than CPU/RAM operations. The server process must wait for the disk subsystem to read the file before it can continue.", wrong: "❌ Not quite. The slowness comes from disk latency — HDDs have mechanical seek times, and even SSDs are much slower than RAM and CPU caches." },
+    q4: { correct: "✅ Correct! Step 1 in the MVC pipeline: parse the URL and request body to extract the parameters the controller needs to fetch the right model data.", wrong: "❌ Not quite. The very first step is parsing the URL and request body to get parameters — before any database queries or template rendering happens." },
+    q5: { correct: "✅ Correct! In JS SPA architectures, the web server delivers: (1) static files for the initial load, and (2) JSON API responses for model data. The browser handles all rendering.", wrong: "❌ Not quite. JS framework architectures shift rendering to the browser. The server mainly delivers static files (HTML/CSS/JS bundles) and JSON data via API endpoints." }
+  };
+
+  function goTo(idx) {
+    document.getElementById(`sec-${current}`).classList.remove('active');
+    document.querySelectorAll('.nav-item')[current].classList.remove('active');
+    current = idx;
+    visited.add(idx);
+    document.getElementById(`sec-${current}`).classList.add('active');
+    document.querySelectorAll('.nav-item')[current].classList.add('active');
+    window.scrollTo(0, 0);
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const pct = Math.round((visited.size / SECTIONS) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = `${visited.size} / ${SECTIONS} complete`;
+  }
+
+  function answer(el, correct, qid) {
+    if (quizAnswers[qid] !== undefined) return;
+    quizAnswers[qid] = correct;
+
+    const opts = el.parentElement.querySelectorAll('.quiz-option');
+    opts.forEach(o => o.style.pointerEvents = 'none');
+    el.classList.add(correct ? 'correct' : 'wrong');
+
+    const fb = document.getElementById(`${qid}-fb`);
+    fb.innerHTML = `<div class="callout ${correct ? 'success' : 'warn'}">${correct ? explanations[qid].correct : explanations[qid].wrong}</div>`;
+    fb.classList.add('show');
+
+    if (Object.keys(quizAnswers).length === 5) {
+      const score = Object.values(quizAnswers).filter(Boolean).length;
+      const res = document.getElementById('quiz-result');
+      res.style.display = 'block';
+      document.getElementById('quiz-score-label').textContent = `You scored ${score} / 5`;
+      const msgs = ['Keep reviewing the material — you\'ll get there!', 'Good effort! Review the sections you missed.', 'Solid! A couple more reads and you\'ll have it.', 'Great job! Almost perfect.', '🎉 Perfect score! You\'ve mastered web servers.'];
+      document.getElementById('quiz-score-msg').textContent = msgs[score];
+    }
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
