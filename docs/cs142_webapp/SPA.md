@@ -3,8 +3,23 @@
 *CS142 Lecture Notes — Mendel Rosenblum*
 
 ---
+## What is a Single Page Application?
 
-## Web Apps and Browsers
+A Single Page Application (SPA) is a web app that loads one HTML document and dynamically updates content in the browser without performing a full page reload. The JavaScript runtime persists across views — giving users the experience of a fast, native-like app.
+
+Unlike traditional multi-page apps that fetch a new HTML page from the server on every navigation, SPAs intercept navigation events, update only what's needed, and manage history entirely on the client.
+
+
+- Traditional MPA
+Every click triggers a full HTTP request. Server sends back a new HTML page. JS environment is torn down and restarted. State is lost.
+
+- Single Page App
+One initial load. All subsequent navigation is handled in JS. DOM updates dynamically. State, network connections, and timers persist.
+
+Key insight: The "single page" refers to the server's perspective — it serves one HTML document. From the user's point of view, the app has many screens.
+
+
+### Web Apps and Browsers
 
 - Web apps run in browsers (by definition)
 - Users are used to browsing in browsers
@@ -20,7 +35,7 @@
 
 ---
 
-## Problem with Some Web Apps
+### Problem with Some Web Apps
 
 - **Initial:** pages served from web server
   - Each page had a URL and app switched between pages served by web server
@@ -40,7 +55,7 @@ window.onbeforeunload = function(e) { return 'All will be lost!'; }
 
 ---
 
-## Changing URL Without Page Refresh
+### Changing URL Without Page Refresh
 
 - Can change hash fragment in URL without reload
 
@@ -102,7 +117,10 @@ http://www.example.org/show/A6CD4967199
 
 ---
 
-## ReactJS Support for SPA
+## ReactJS Support for SPA ： React Router
+
+React has no built-in opinion on routing — it's a view library. For SPA routing, you need a third-party package. The most popular choice is **React Router**.
+`npm install react-router-dom`
 
 - ReactJS has no opinion! Need 3rd party module.
 - Example: **React Router Version 5** — [https://v5.reactrouter.com/](https://v5.reactrouter.com/)
@@ -119,7 +137,7 @@ import {HashRouter, Route, Link, Redirect} from 'react-router-dom';
 
 ---
 
-## Example: React Router V5
+### Example: React Router V5
 
 ```jsx
 <HashRouter>
@@ -143,7 +161,7 @@ import {HashRouter, Route, Link, Redirect} from 'react-router-dom';
 
 ---
 
-## Passing Parameters with React Router
+### Passing Parameters with React Router
 
 - Parameter passing in URL:
 
@@ -177,7 +195,7 @@ Renders: **Book: Moby**, **Chapter: 1**
 
 ---
 
-## Route: `component=`, `render=`, `children=`
+### Route: `component=`, `render=`, `children=`
 
 - **`component={BookChapterComponent}`**
   - Mounts components on match (unmounts on URL change)
@@ -197,7 +215,7 @@ Multiple route matches have precedence order: `component`, `render`, `children`
 
 ---
 
-## Example: What to Keep in the URL
+### Example: What to Keep in the URL
 
 Consider a data table with: table length, viewport in table, search box, sort column, etc.
 
@@ -208,7 +226,7 @@ Consider a data table with: table length, viewport in table, search box, sort co
 
 ---
 
-## Example: Not Everything Goes in the URL
+### Example: Not Everything Goes in the URL
 
 Consider a delete confirmation dialog — transient UI state like open modals typically should **not** be encoded in the URL. The dialog is an ephemeral interaction state, not a shareable context.
 

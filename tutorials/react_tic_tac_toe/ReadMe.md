@@ -15,3 +15,12 @@ If you get stuck, don’t let this stop you! Follow along online instead and try
 
 ## React DevTools
 For local development, React DevTools is available as a Chrome, Firefox, and Edge browser extension. Install it, and the Components tab will appear in your browser Developer Tools for sites using React.
+
+
+# Characteristics:
+
+- Created using npx create-react-app
+- Uses react-scripts (a complete toolchain abstraction)
+- Zero configuration - all webpack, babel, eslint configs are hidden
+- Opinionated setup with batteries included
+- Easier for beginners but less flexible

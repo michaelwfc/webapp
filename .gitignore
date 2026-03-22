@@ -1,8 +1,11 @@
 client/dist/bundle.js
 node_modules/
+dist/
+output/
 venv/
 .venv/
 .DS_Store
 .env
 chroma.log
 chroma_data/
+

@@ -28,11 +28,28 @@ ReactJS is a JavaScript framework for building web applications that run in the 
 
 ---
 
+### The HTML entry point: ReactJS Web Application Page
 
+Every React app starts with a plain HTML file. React injects its entire UI into a single div — the rest is JavaScript.
 
+```html
+<!doctype html>
+<html>
+  <head>
+    <title>CS142 Example</title>
+  </head>
+  <body>
+    <div id="reactapp"></div>
+    <script src="./webpackOutput/reactApp.bundle.js"></script>
+  </body>
+</html>
+```
+- The div with id="reactapp" is the mount point. React writes the entire application view into this single element.
+- ReactJS applications come as a **JavaScript blob** that will use the DOM interface to write the view into the `div`.
 
+---
 
-## ReactJS Tool Chain
+### ReactJS Tool Chain
 
 ![image](../../images/reactjs_tool_chain.png)
 | Tool | Purpose |
@@ -43,9 +60,9 @@ ReactJS is a JavaScript framework for building web applications that run in the 
 
 
 
----
-
 ## React Components
+
+
 
 ### ES6 Class Definition
 
@@ -116,26 +133,7 @@ render() {
 ```
 
 
-### The HTML entry point: ReactJS Web Application Page
 
-Every React app starts with a plain HTML file. React injects its entire UI into a single div — the rest is JavaScript.
-
-```html
-<!doctype html>
-<html>
-  <head>
-    <title>CS142 Example</title>
-  </head>
-  <body>
-    <div id="reactapp"></div>
-    <script src="./webpackOutput/reactApp.bundle.js"></script>
-  </body>
-</html>
-```
-
-ReactJS applications come as a **JavaScript blob** that will use the DOM interface to write the view into the `div`.
-
----
 
 
 ### React.createElement under the hood
@@ -683,3 +681,20 @@ this.parentCallback = (infoFromChild) => {
 
 - Provides global variables for a subtree of components
 - See: https://reactjs.org/docs/context.html
+
+
+
+### Questions
+How Babel transpilation works
+How JSX gets transpiled to JavaScript
+How HTML templates are processed
+How webpack works and bundled together
+How development servers work
+
+
+Great question! Let me analyze the structure and then explain the full build pipeline.
+
+---
+
+
+
