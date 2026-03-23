@@ -1,0 +1,11 @@
+/* In ReactAppView.css: */
+.cs142-code-name {
+  color: rgb(251, 0, 255);
+  font-family:
+    Courier New,
+    monospace;
+}
+
+#greeting {
+  color: blue;
+}

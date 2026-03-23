@@ -91,7 +91,8 @@ export default ReactAppView;
 
 ---
 
-#### ReactAppView `render()` Method
+#### ReactAppView with `render()` Method
+
 
 ```js
 render() {
@@ -117,7 +118,7 @@ Returns an element tree with a `div` containing `label`, `input`, and `h1` eleme
 
 ---
 
-#### `render()` Without Intermediate Variables
+#### ReactAppView `render()` Without Intermediate Variables
 
 ```js
 render() {
@@ -131,44 +132,10 @@ render() {
   );
 }
 ```
-
-
-
-
-
-### React.createElement under the hood
-
-Before JSX, you created elements by calling `React.createElement(type, props, ...children)` directly. Understanding this helps you understand what JSX compiles to.
-```js
-render() {
-  return React.createElement(
-    'div', null,
-    React.createElement('label', null, 'Name: '),
-    React.createElement('input',
-      { type: 'text', value: this.state.yourName }),
-    React.createElement('h1', null,
-      'Hello ', this.state.yourName, '!')
-  );
-}
-```
-### Rendering into the DOM
-To mount your root component into the HTML page, you call `ReactDOM.render()`. This is the bridge between React's virtual world and the real browser DOM.
-
-```js
-// reactApp.js — Render Element into Browser DOM
-import React from 'react';   // **ES6 Modules** — bring in React and web app React components
-import ReactDOM from 'react-dom';
-import ReactAppView from './components/ReactAppView';
-
-let viewTree = React.createElement(ReactAppView, null);
-let where = document.getElementById('reactapp');
-ReactDOM.render(viewTree, where); //Renders the tree of React elements into the browser's DOM at the `div` with `id="reactapp"`
-```
-
-
----
-
-### Using JSX to Generate `createElement` Calls
+#### Using JSX to Generate `createElement` Calls
+- JSX makes building the element tree look like templated HTML-like syntax directly embedded in JavaScript.
+- Babel compiles it to React.createElement() calls automatically.
+- The browser never sees JSX — only plain JavaScript.
 
 ```jsx
 render() {
@@ -185,15 +152,59 @@ render() {
   );
 }
 ```
-
-JSX makes building the element tree look like templated HTML embedded in JavaScript.
-
-
-
 ---
 
 
 
+### React.createElement under the hood
+
+Before JSX, you created elements by calling `React.createElement(type, props, ...children)` directly. Understanding this helps you understand what JSX compiles to.
+
+-  type = HTML tag or Component, 
+-  props = attributes object (or null)
+-  children = nested elements or text.
+
+```js
+render() {
+  return React.createElement(
+    'div', null,
+    React.createElement('label', null, 'Name: '),
+    React.createElement('input',
+      { type: 'text', value: this.state.yourName }),
+    React.createElement('h1', null,
+      'Hello ', this.state.yourName, '!')
+  );
+}
+```
+
+### Rendering into the DOM
+To mount your root component into the HTML page, you call `ReactDOM.render()`. This is the bridge between React's virtual world and the real browser DOM.
+
+### Old way (React 17 and below):
+```js
+// reactApp.js — Render Element into Browser DOM
+import React from 'react';   // **ES6 Modules** — bring in React and web app React components
+import ReactDOM from 'react-dom';
+import ReactAppView from './components/ReactAppView';
+
+let viewTree = React.createElement(ReactAppView, null);
+let where = document.getElementById('reactapp');
+ReactDOM.render(viewTree, where); //Renders the tree of React elements into the browser's DOM at the `div` with `id="reactapp"`
+```
+
+
+####  Modern React 18+ rendering
+```js
+import React from 'react';
+import ReactDOM from "react-dom/client"; // ← note: /client subpath
+let appView = React.createElement(ReactAppView, null);
+const app = document.getElementById("reactapp");
+const root = ReactDOM.createRoot(app);
+root.render(appView);
+```
+
+
+---
 
 
 
@@ -202,10 +213,10 @@ JSX makes building the element tree look like templated HTML embedded in JavaScr
 
 ### Component State and Input Handling
 
-State is a component's private, mutable data. Initialize it in the constructor and update it with this.setState(). React automatically re-renders when state changes.
+State is a component's private, mutable data. Initialize it in the constructor and update it with `this.setState()`. React automatically re-renders when state changes.
 
 - Input calls `setState()`, which causes React to call `render()` again
-- Never mutate this.state directly (e.g. this.state.yourName = 'x'). Always use setState() so React knows to re-render.
+- Never mutate `this.state` directly (e.g. this.state.yourName = 'x'). Always use setState() so React knows to re-render.
 
 ```js
 import React from 'react';
@@ -222,7 +233,67 @@ class ReactAppView extends React.Component {
 }
 ```
 
+#### Why `event.target.value`?
+When the user types in the input box, the browser fires a DOM event. That event object has a specific structure:
 
+```
+event                        ← the whole DOM event object
+  │
+  ├── event.type             → "change"
+  ├── event.timeStamp        → when it happened
+  │
+  └── event.target           ← the DOM element that triggered the event
+        │                       (the <input> box itself)
+        │
+        ├── event.target.type      → "text"
+        ├── event.target.name      → ""
+        ├── event.target.id        → ""
+        └── event.target.value     → "A"  ← what the user typed
+```
+
+So `event.target` is the `<input>` element, and `.value` is whatever text is currently inside it. When the user types "A", `event.target.value === "A"`. When they type "An", `event.target.value === "An"`, and so on.
+
+This is why `handleChange` uses it to update state:
+
+```javascript
+handleChange(event) {
+  this.setState({
+    yourName: event.target.value   // grab what's in the input box
+  });                              // and save it into state
+}
+```
+
+The full one-way data binding loop looks like this:
+
+```
+User types "A" into <input>
+        ↓
+onChange fires → handleChange(event) called
+        ↓
+event.target         = the <input> DOM element
+event.target.value   = "A"   (what the user typed)
+        ↓
+this.setState({ yourName: "A" })
+        ↓
+React re-renders → <h1>Hello A!</h1>
+        ↓
+input value={this.state.yourName} → input shows "A"
+```
+
+---
+
+A quick comparison of what you could read from `event` and why `.target.value` is the right choice for an input:
+
+| Expression | What it gives you | Useful for |
+|---|---|---|
+| `event` | The whole event object | Rarely needed directly |
+| `event.type` | `"change"` | Knowing which event fired |
+| `event.target` | The `<input>` DOM node | Accessing element properties |
+| `event.target.value` | `"A"` — the text typed | Reading input content |
+| `event.target.checked` | `true/false` | Checkboxes and radio buttons |
+| `event.target.name` | The `name=""` attribute | Handling multiple inputs in one handler |
+
+For a text input, `event.target.value` is always the right thing to read.
 
 ---
 
@@ -232,20 +303,22 @@ React uses **one-way binding**: data flows from state into the view, and user in
 
 React only re-renders what actually changed in the virtual DOM. This makes updates very fast even for complex UIs.
 
+```
 1. User Typing 'D' in the Input Box -> JSX `onChange` fires -> triggers `handleChange` with `event.target.value === "D"`
 2. `handleChange` calls `this.setState({ yourName: event.target.value })`
    - `this.state.yourName` is changed to `"D"`
 3. React sees state change and calls `render()` again
 4. The h1 now shows 'Hello D!' — Feature of React: **highly efficient re-rendering**
-
+```
 
 
 ---
 
 ### The 'this' problem with event handlers
 
-Calling React Components from Events: A Problem
-Passing a method as an event handler breaks the this context. 
+When you pass a method reference, the browser calls it without the correct 'this' context. Binding ensures 'this' always refers to the component instance.
+
+Calling React Components from Events: A Problem Passing a method as an event handler breaks the this context. 
 
 This does **not** work — `this` context is lost when passed as a callback:
 
@@ -345,7 +418,7 @@ React.createElement(type, props, ...children)
 ---
 ### camelCase vs. dash-case
 
-HTML attributes are case-insensitive, but JavaScript is not. JSX is embedded in JavaScript, so React uses camelCase for all attributes.
+HTML attributes are `case-insensitive`, but JavaScript is not. JSX is embedded in JavaScript, so React uses `camelCase` for all attributes.
 
 - HTML is **case-insensitive**, JavaScript is **case-sensitive**
   
@@ -355,12 +428,11 @@ HTML attributes are case-insensitive, but JavaScript is not. JSX is embedded in 
   
 - **ReactJS rule**: use `camelCase` for attributes (e.g. `onChange`, `onClick`)
 - AngularJS used both: dashes in HTML and camelCase in JavaScript
-
+- Use `className=` instead of `class=` to avoid conflict with the JavaScript `class` keyword. Same for `htmlFor=` instead of `for=`.
 ---
 ### JSX rules: expressions only
-Inside JSX curly braces {}, you can only use expressions — things that evaluate to a value. JavaScript statements like if and for don't work.
-
-- The ternary operator (? :) is an expression — it evaluates to a value. if/for/let are statements and cannot appear directly in JSX.
+- Inside `JSX curly braces {}`, you can only use expressions — things that evaluate to a value. - JavaScript statements like `let`,`if` and `for` don't work.
+- The ternary operator `(? :)` is an expression — it evaluates to a value. if/for/let are statements and cannot appear directly in JSX.
 
 ```js
 // Valid: expression
@@ -369,6 +441,9 @@ Inside JSX curly braces {}, you can only use expressions — things that evaluat
 
 // Invalid: 'if' is a statement, not an expression
 <div>{if (flag) { ... }}</div>
+
+// Workaround: ternary
+<div>{flag ? <A/> : <B/>}</div>
 
 // Workaround: IIFE (immediately-invoked function)
 <div>{ (function() { 
@@ -446,11 +521,18 @@ return <ul>{listItems}</ul>;
 **Using `map` (functional style):**
 
 ```jsx
-<ul>{data.map((d) => <li key={d}>Data Value {d}</li>)}</ul>
+return (
+  <ul>
+    {data.map((d) => (
+      <li key={d}>Data Value {d}</li>
+    ))}
+  </ul>
+);
+
 ```
 
-> The `key=` attribute improves efficiency of rendering on data change.
-
+> The key= prop helps React identify which items changed, improving re-render performance. Keys must be unique among siblings.
+React uses keys to match elements between renders. Without keys, React may unnecessarily re-create DOM nodes when the list changes.
 ---
 
 ### Styling with React/JSX
@@ -490,8 +572,11 @@ class ReactAppView extends React.Component {
 ---
 
 ## Component Lifecycle and Methods
+
 [react-lifecycle-methods-diagram](http://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)
 ![image](../../images/react-lifecycle-methods-diagram.png)
+
+Class components go through three lifecycle phases. React calls specific methods at each phase, giving you hooks to run code at the right moment.
 
 Three phases:
 
@@ -501,12 +586,12 @@ Three phases:
 | **Updating** | `render` → `componentDidUpdate` (triggered by new props, `setState()`, or `forceUpdate()`) |
 | **Unmounting** | `componentWillUnmount` |
 
-- componentDidMount — great for starting timers or fetching data
-  componentDidMount runs after the component is first added to the DOM — the right place to start timers, fetch data, or set up subscriptions.
+- `componentDidMount` — great for starting timers or fetching data
+  `componentDidMount` runs after the component is first added to the DOM — the right place to start timers, fetch data, or set up subscriptions.
 
-- componentDidUpdate — runs after every re-render (check what changed!)
+- `componentDidUpdate` — runs after every re-render (check what changed!)
   
-- componentWillUnmount — clean up timers, subscriptions, listeners
+- `componentWillUnmount` — clean up timers, subscriptions, listeners
   
 ---
 
@@ -559,8 +644,11 @@ Much more concise than a class with a `render` method.
 
 ### React Hooks — Add State to Stateless Components
 Hooks let function components use state and lifecycle features. 
-- useState adds state; 
-- useEffect replaces lifecycle methods.
+- `useState` adds state; 
+- `useEffect` replaces lifecycle methods.
+
+Hooks cannot be used inside a class component. useState and useEffect are React Hooks — they only work inside function components. 
+
 
 #### `useState`
 
@@ -681,18 +769,6 @@ this.parentCallback = (infoFromChild) => {
 
 - Provides global variables for a subtree of components
 - See: https://reactjs.org/docs/context.html
-
-
-
-### Questions
-How Babel transpilation works
-How JSX gets transpiled to JavaScript
-How HTML templates are processed
-How webpack works and bundled together
-How development servers work
-
-
-Great question! Let me analyze the structure and then explain the full build pipeline.
 
 ---
 

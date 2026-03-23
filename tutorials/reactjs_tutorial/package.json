@@ -1,7 +1,7 @@
 {
   "name": "reactjs_tutorial",
   "version": "1.0.0",
-  "main": "./src/reactApp.js",
+  "main": "./src/index.js",
   "scripts": {
     "start": "webpack serve --mode development",
     "build": "webpack --mode production",

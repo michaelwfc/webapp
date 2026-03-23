@@ -1,39 +1,31 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import "./ReactAppView.css";
 
 class ReactAppView extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { yourName: "" }; //Makes `<h1>Hello {this.state.yourName}!</h1>` update reactively
+    this.state = { yourName: "", clicker: 0, counter: 0 }; //Makes `<h1>Hello {this.state.yourName}!</h1>` update reactively
   }
 
   handleChange(event) {
-    this.setState({ yourName: event.target.value }); // setState() triggers React's reconciliation: it updates the state object and calls render() again with the new values.
+    // setState() triggers React's reconciliation: it updates the state object and calls render() again with the new values.
+    this.setState({ yourName: event.target.value });
   }
 
-  // Returns an element tree with a div containing label, input, and h1 elements:
-  // <div>
-  //   <label>Name: </label>
-  //   <input type="text" … />
-  //   <h1>Hello {this.state.yourName}!</h1>
-  // </div>
+  handleClicker(event) {
+    this.setState({ clicker: this.state.clicker + 1 });
+  }
 
-  //   render() {
-  //     let label = React.createElement("label", null, "Name: ");
-  //     let input = React.createElement("input", {
-  //       type: "text",
-  //       value: this.state.yourName,
-  //       onChange: (event) => this.handleChange(event),
-  //     });
-  //     let h1 = React.createElement(
-  //       "h1",
-  //       null,
-  //       "Hello ",
-  //       this.state.yourName,
-  //       "!",
-  //     );
-  //     return React.createElement("div", null, label, input, h1);
-  //   }
-
+  componentDidMount() {
+    // Start 2 sec counter
+    const incFunc = () => this.setState({ counter: this.state.counter + 1 });
+    this.timerID = setInterval(incFunc, 2 * 1000);
+  }
+  componentWillUnmount() {
+    // Shutdown timer
+    clearInterval(this.timerID);
+  }
+  // `render()` With JSX
   render() {
     return (
       <div>
@@ -45,7 +37,15 @@ class ReactAppView extends React.Component {
           //  //Creates a new function on each render — OK for most cases.
           onChange={(event) => this.handleChange(event)}
         />
-        <h1>Hello {this.state.yourName}!</h1>
+        <h1 id="greeting">Hello {this.state.yourName}!</h1>
+        <p className="cs142-code-name">
+          This is a simple example of a React component. This component is
+          exported to be used elsewhere.
+        </p>
+        <button onClick={(event) => this.handleClicker(event)}>
+          Clicker Times:{this.state.clicker}
+        </button>
+        <p> Counting: {this.state.counter}</p>
       </div>
     );
   }
