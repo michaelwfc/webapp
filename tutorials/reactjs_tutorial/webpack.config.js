@@ -2,7 +2,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-  mode: "development",
+  mode: "development", // ← enables the React error overlay
   entry: "./src/index.js",
   output: {
     path: path.resolve(__dirname, "dist"),
@@ -27,7 +27,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "./public/index.html",
+      template: "./public/index.html", // ← reads your template
       filename: "index.html",
     }),
   ],
@@ -35,7 +35,7 @@ module.exports = {
     static: {
       directory: path.join(__dirname, "dist"),
     },
-    port: 3001,
+    port: 3000,
     hot: true,
     open: true,
   },

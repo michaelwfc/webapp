@@ -272,5 +272,121 @@ For a new React project today, Vite is the default recommendation. webpack-dev-s
 
 ---
 
+# Debug 
+
+
+
+---
+
+## Why the terminal showed no error
+
+Error:
+```
+when the whole component crashes at runtime, why when I debug as
+
+webpack serve --mode development
+there is no error information show , then I do not why it failed? how can I see this kind of error next time?
+
+```
+
+
+The terminal only shows **build-time errors** — things Babel and Webpack catch while compiling your files. The missing `import React` is a **runtime error** — the file compiled fine (JSX syntax was valid), but crashed when the browser actually executed it. Webpack never sees runtime errors at all.
+
+```
+Build-time errors     → shown in terminal
+  (syntax, missing files, bad imports)
+
+Runtime errors        → shown in browser console ONLY
+  (ReferenceError, TypeError, crashed components)
+```
+
+---
+
+## The 3 places to always check---
+
+## Place 1 — Terminal (build-time errors)
+
+You already know this one. It catches anything Webpack and Babel find during compilation. For your current project, this would have caught a bad import path like `import ChildComponent from "./WrongName"` — but not a missing `import React`, because the file syntax was valid.
+
+---
+
+## Place 2 — Browser Console (runtime errors) ← where your error was hiding
+
+Press `F12` → **Console** tab. This is where `ReferenceError: React is not defined` was sitting the whole time. Any time the page is blank and the terminal shows no error, this is the **first place to look**.
+
+For your specific error it would have shown:
+
+```
+ReferenceError: React is not defined
+    at ChildComponent (ChildComponent.js:3:5)
+    at renderWithHooks (react-dom.development.js:...)
+    at mountIndeterminateComponent (react-dom.development.js:...)
+```
+
+The stack trace points directly to `ChildComponent.js` line 3 — the exact file and line of the crash.
+
+---
+
+## Place 3 — React Error Overlay (development mode popup)
+![image](../../images/react_error_surfaces.svg)
+
+In development mode, React shows a **full-screen error overlay** directly in the browser when a component crashes. If you did not see this, it means the overlay was suppressed or your webpack config is missing the right mode setting.
+
+Make sure your `webpack.config.js` has:
+
+```javascript
+module.exports = {
+  mode: "development",       // ← enables the React error overlay
+  devtool: "eval-source-map",
+  // ...
+};
+```
+
+And your `package.json` start script should not override it to production:
+
+```json
+"scripts": {
+  "start": "webpack serve",       // ← no --mode production here
+  "build": "webpack --mode production"
+}
+```
+
+When correctly configured, a runtime crash shows a red overlay like this directly in the browser — no need to open DevTools at all:
+
+```
+┌─────────────────────────────────────────┐
+│  ReferenceError                         │
+│  React is not defined                   │
+│                                         │
+│  ChildComponent.js:3                    │
+│  > 3 | function ChildComponent({...})   │
+│                                         │
+│  Click outside to dismiss               │
+└─────────────────────────────────────────┘
+```
+
+---
+
+## Your debugging checklist for next time
+
+```
+Page is blank or component missing?
+          │
+          ▼
+1. Check terminal ────────── build error? fix the import/syntax
+          │
+          ▼ no error in terminal
+2. Press F12 → Console ───── runtime error? read the stack trace,
+          │                   it tells you exactly which file + line
+          ▼ no error in console
+3. React DevTools ────────── Components tab: is the component
+          │                   in the tree at all?
+          ▼ component missing from tree
+4. Check the import chain ── is the file imported?
+                              is export default present?
+                              is the path spelled correctly?
+```
+
+The most important habit is: **every time the UI looks wrong, press F12 first before looking at anything else**. The browser console almost always has the answer.
 
 

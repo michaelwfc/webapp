@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./ReactAppView.css";
+import ParentComponent from "./ParentComponent";
 
 class ReactAppView extends React.Component {
   constructor(props) {
@@ -46,6 +47,8 @@ class ReactAppView extends React.Component {
           Clicker Times:{this.state.clicker}
         </button>
         <p> Counting: {this.state.counter}</p>
+        {/* ParentComponent renders here — ChildComponent is inside it */}
+        <ParentComponent />
       </div>
     );
   }

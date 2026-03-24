@@ -1,6 +1,6 @@
 # CS142 Lecture Notes - ReactJS Introduction
 
-*Mendel Rosenblum*
+_Mendel Rosenblum_
 
 - [react-lifecycle-methods-diagram](http://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)
 - [react.dev](https://react.dev/)
@@ -8,13 +8,14 @@
 - [legacy reactjs docs](https://reactjs.org/docs/context.html)
 - [legacy reactjs-tutorial](https://legacy.reactjs.org/tutorial/tutorial.html)
 - [w3schools-react](https://www.w3schools.com/react/react_getstarted.asp)
+
 ---
 
 ## ReactJS Overview
 
 ### What is ReactJS?
-ReactJS is a JavaScript framework for building web applications that run in the browser. Unlike server-rendered apps, React gives you snappy, app-like responsiveness without full page reloads.
 
+ReactJS is a JavaScript framework for building web applications that run in the browser. Unlike server-rendered apps, React gives you snappy, app-like responsiveness without full page reloads.
 
 - JavaScript framework for writing web applications
   - Like AngularJS — **snappy** response from running in browser
@@ -44,6 +45,7 @@ Every React app starts with a plain HTML file. React injects its entire UI into 
   </body>
 </html>
 ```
+
 - The div with id="reactapp" is the mount point. React writes the entire application view into this single element.
 - ReactJS applications come as a **JavaScript blob** that will use the DOM interface to write the view into the `div`.
 
@@ -57,19 +59,15 @@ Every React app starts with a plain HTML file. React injects its entire UI into 
 | **Babel** | Transpile language features (e.g. ECMAScript, JSX) to basic JavaScript |
 | **Webpack** | Bundle modules and resources (CSS, images) — output loadable with a single `<script>` tag in any browser |
 
-
-
-
 ## React Components
-
-
 
 ### ES6 Class Definition
 
 A React component class(or React component type) is an ES6 class that extends `React.Component`. Every component must have a `render()` method that returns a tree of React elements.
--  A component takes in parameters, called `props` (short for “properties”), and returns a hierarchy of views to display via the `render` method.
--  The `render` method returns a description of what you want to see on the screen. React takes the description and displays the result. In particular, render returns a `React element`, which is a lightweight description of what to render.
--  Most React developers use a special syntax called “JSX” which makes these structures easier to write. 
+
+- A component takes in parameters, called `props` (short for “properties”), and returns a hierarchy of views to display via the `render` method.
+- The `render` method returns a description of what you want to see on the screen. React takes the description and displays the result. In particular, render returns a `React element`, which is a lightweight description of what to render.
+- Most React developers use a special syntax called “JSX” which makes these structures easier to write.
 
 ```js
 // components/ReactAppView.js
@@ -88,11 +86,9 @@ class ReactAppView extends React.Component {  // Inherits from `React.Component`
 export default ReactAppView;
 ```
 
-
 ---
 
 #### ReactAppView with `render()` Method
-
 
 ```js
 render() {
@@ -132,7 +128,9 @@ render() {
   );
 }
 ```
+
 #### Using JSX to Generate `createElement` Calls
+
 - JSX makes building the element tree look like templated HTML-like syntax directly embedded in JavaScript.
 - Babel compiles it to React.createElement() calls automatically.
 - The browser never sees JSX — only plain JavaScript.
@@ -152,17 +150,16 @@ render() {
   );
 }
 ```
+
 ---
-
-
 
 ### React.createElement under the hood
 
 Before JSX, you created elements by calling `React.createElement(type, props, ...children)` directly. Understanding this helps you understand what JSX compiles to.
 
--  type = HTML tag or Component, 
--  props = attributes object (or null)
--  children = nested elements or text.
+- type = HTML tag or Component,
+- props = attributes object (or null)
+- children = nested elements or text.
 
 ```js
 render() {
@@ -178,24 +175,26 @@ render() {
 ```
 
 ### Rendering into the DOM
+
 To mount your root component into the HTML page, you call `ReactDOM.render()`. This is the bridge between React's virtual world and the real browser DOM.
 
 ### Old way (React 17 and below):
+
 ```js
 // reactApp.js — Render Element into Browser DOM
-import React from 'react';   // **ES6 Modules** — bring in React and web app React components
-import ReactDOM from 'react-dom';
-import ReactAppView from './components/ReactAppView';
+import React from "react"; // **ES6 Modules** — bring in React and web app React components
+import ReactDOM from "react-dom";
+import ReactAppView from "./components/ReactAppView";
 
 let viewTree = React.createElement(ReactAppView, null);
-let where = document.getElementById('reactapp');
+let where = document.getElementById("reactapp");
 ReactDOM.render(viewTree, where); //Renders the tree of React elements into the browser's DOM at the `div` with `id="reactapp"`
 ```
 
+#### Modern React 18+ rendering
 
-####  Modern React 18+ rendering
 ```js
-import React from 'react';
+import React from "react";
 import ReactDOM from "react-dom/client"; // ← note: /client subpath
 let appView = React.createElement(ReactAppView, null);
 const app = document.getElementById("reactapp");
@@ -203,13 +202,9 @@ const root = ReactDOM.createRoot(app);
 root.render(appView);
 ```
 
-
 ---
 
-
-
 ## State & Events
-
 
 ### Component State and Input Handling
 
@@ -219,7 +214,7 @@ State is a component's private, mutable data. Initialize it in the constructor a
 - Never mutate `this.state` directly (e.g. this.state.yourName = 'x'). Always use setState() so React knows to re-render.
 
 ```js
-import React from 'react';
+import React from "react";
 
 class ReactAppView extends React.Component {
   constructor(props) {
@@ -234,6 +229,7 @@ class ReactAppView extends React.Component {
 ```
 
 #### Why `event.target.value`?
+
 When the user types in the input box, the browser fires a DOM event. That event object has a specific structure:
 
 ```
@@ -284,14 +280,14 @@ input value={this.state.yourName} → input shows "A"
 
 A quick comparison of what you could read from `event` and why `.target.value` is the right choice for an input:
 
-| Expression | What it gives you | Useful for |
-|---|---|---|
-| `event` | The whole event object | Rarely needed directly |
-| `event.type` | `"change"` | Knowing which event fired |
-| `event.target` | The `<input>` DOM node | Accessing element properties |
-| `event.target.value` | `"A"` — the text typed | Reading input content |
-| `event.target.checked` | `true/false` | Checkboxes and radio buttons |
-| `event.target.name` | The `name=""` attribute | Handling multiple inputs in one handler |
+| Expression             | What it gives you       | Useful for                              |
+| ---------------------- | ----------------------- | --------------------------------------- |
+| `event`                | The whole event object  | Rarely needed directly                  |
+| `event.type`           | `"change"`              | Knowing which event fired               |
+| `event.target`         | The `<input>` DOM node  | Accessing element properties            |
+| `event.target.value`   | `"A"` — the text typed  | Reading input content                   |
+| `event.target.checked` | `true/false`            | Checkboxes and radio buttons            |
+| `event.target.name`    | The `name=""` attribute | Handling multiple inputs in one handler |
 
 For a text input, `event.target.value` is always the right thing to read.
 
@@ -311,25 +307,26 @@ React only re-renders what actually changed in the virtual DOM. This makes updat
 4. The h1 now shows 'Hello D!' — Feature of React: **highly efficient re-rendering**
 ```
 
-
 ---
 
 ### The 'this' problem with event handlers
 
 When you pass a method reference, the browser calls it without the correct 'this' context. Binding ensures 'this' always refers to the component instance.
 
-Calling React Components from Events: A Problem Passing a method as an event handler breaks the this context. 
+Calling React Components from Events: A Problem Passing a method as an event handler breaks the this context.
 
 This does **not** work — `this` context is lost when passed as a callback:
 
-Understand  Why doesn't onChange={this.handleChange} work without binding?
+Understand Why doesn't onChange={this.handleChange} work without binding?
+
 ```jsx
 <input type="text" value={this.state.yourName} onChange={this.handleChange} />
 ```
+
 When you pass a method reference, the browser calls it without the correct 'this' context. Binding ensures 'this' always refers to the component instance.
 
-
 ---
+
 There are three standard workarounds.
 
 #### Workaround #1 — Bind in Constructor
@@ -339,7 +336,7 @@ class ReactAppView extends React.Component {
   constructor(props) {
     super(props);
     this.state = { yourName: "" };
-    this.handleChange = this.handleChange.bind(this);  //Create instance function bound to instance, Safe and explicit. Best for class components.
+    this.handleChange = this.handleChange.bind(this); //Create instance function bound to instance, Safe and explicit. Best for class components.
   }
 
   handleChange(event) {
@@ -359,9 +356,10 @@ class ReactAppView extends React.Component {
     this.state = { yourName: "" };
   }
 
-  handleChange = (event) => {  //Using public fields of classes with arrow functions. Automatic binding. Cleanest syntax.
-    this.setState({ yourName: event.target.value }); 
-  }
+  handleChange = (event) => {
+    //Using public fields of classes with arrow functions. Automatic binding. Cleanest syntax.
+    this.setState({ yourName: event.target.value });
+  };
 }
 ```
 
@@ -381,8 +379,8 @@ class ReactAppView extends React.Component {
         type="text"
         value={this.state.yourName}
         // Using arrow functions in JSX
-        //Creates a new function on each render — OK for most cases. 
-        onChange={(event) => this.handleChange(event)}  
+        //Creates a new function on each render — OK for most cases.
+        onChange={(event) => this.handleChange(event)}
       />
     );
   }
@@ -391,46 +389,44 @@ class ReactAppView extends React.Component {
 
 ---
 
-
-
 ## JSX pattern
+
 ### JSX: the readable shorthand
 
 JSX lets you write HTML-like syntax directly in JavaScript. Babel compiles it to React.createElement() calls automatically — so the output is identical to the previous slide.
-
-
-
 
 ### Programming with JSX
 
 JSX maps to calls to `React.createElement`:
 
 ```js
-React.createElement(type, props, ...children)
+React.createElement(type, props, ...children);
 ```
 
-| Parameter | Description |
-|-----------|-------------|
-| `type` | HTML tag (e.g. `h1`, `p`) or `React.Component` |
-| `props` | Attributes (e.g. `type="text"`). Uses **camelCase**! |
+| Parameter  | Description                                                        |
+| ---------- | ------------------------------------------------------------------ |
+| `type`     | HTML tag (e.g. `h1`, `p`) or `React.Component`                     |
+| `props`    | Attributes (e.g. `type="text"`). Uses **camelCase**!               |
 | `children` | Zero or more: strings/numbers, React elements, or arrays of either |
 
 ---
+
 ### camelCase vs. dash-case
 
 HTML attributes are `case-insensitive`, but JavaScript is not. JSX is embedded in JavaScript, so React uses `camelCase` for all attributes.
 
 - HTML is **case-insensitive**, JavaScript is **case-sensitive**
-  
 - ReactJS's JSX has HTML-like syntax embedded in JavaScript
   - HTML attribute : onclick, onchange, class, tabindex
   - JSX attribute : onClick, onChange, className, tabIndex
-  
 - **ReactJS rule**: use `camelCase` for attributes (e.g. `onChange`, `onClick`)
 - AngularJS used both: dashes in HTML and camelCase in JavaScript
 - Use `className=` instead of `class=` to avoid conflict with the JavaScript `class` keyword. Same for `htmlFor=` instead of `for=`.
+
 ---
+
 ### JSX rules: expressions only
+
 - Inside `JSX curly braces {}`, you can only use expressions — things that evaluate to a value. - JavaScript statements like `let`,`if` and `for` don't work.
 - The ternary operator `(? :)` is an expression — it evaluates to a value. if/for/let are statements and cannot appear directly in JSX.
 
@@ -446,11 +442,12 @@ HTML attributes are `case-insensitive`, but JavaScript is not. JSX is embedded i
 <div>{flag ? <A/> : <B/>}</div>
 
 // Workaround: IIFE (immediately-invoked function)
-<div>{ (function() { 
-  if (...) return <A/>; 
-  return <B/>; 
+<div>{ (function() {
+  if (...) return <A/>;
+  return <B/>;
 })() }</div>
 ```
+
 ---
 
 #### JSX Templates Must Return a Valid `children` Param
@@ -477,6 +474,7 @@ Workaround — anonymous immediately-invoked function:
 ---
 
 ### Conditional Render in JSX
+
 Since JSX requires expressions, there are two clean patterns for conditional rendering.
 
 Pattern 1: **Using the ternary operator:**
@@ -494,8 +492,13 @@ const en = "Hello";
 const sp = <b>Hola</b>;
 let { useSpanish } = this.props;
 
-if (useSpanish) { greeting = sp; } else { greeting = en; }
+if (useSpanish) {
+  greeting = sp;
+} else {
+  greeting = en;
+}
 ```
+
 ```jsx
 <div>{greeting}</div>
 ```
@@ -528,12 +531,11 @@ return (
     ))}
   </ul>
 );
-
 ```
 
 > The key= prop helps React identify which items changed, improving re-render performance. Keys must be unique among siblings.
-React uses keys to match elements between renders. Without keys, React may unnecessarily re-create DOM nodes when the list changes.
----
+
+## React uses keys to match elements between renders. Without keys, React may unnecessarily re-create DOM nodes when the list changes.
 
 ### Styling with React/JSX
 
@@ -541,9 +543,9 @@ React uses keys to match elements between renders. Without keys, React may unnec
 - Must use `className=` instead of `class=` (conflict with the JS `class` keyword)
 
 ```js
-import React from 'react';
+import React from "react";
 
-import './ReactAppView.css';  
+import "./ReactAppView.css";
 //Webpack can import CSS style sheets:
 // .cs142-code-name {
 // font-family: Courier New, monospace;
@@ -552,7 +554,9 @@ import './ReactAppView.css';
 class ReactAppView extends React.Component {
   render() {
     return (
-      <span className="cs142-code-name"> // Must use className= for HTML class= attribute (JS keyword conflict)
+      <span className="cs142-code-name">
+        {" "}
+        // Must use className= for HTML class= attribute (JS keyword conflict)
         ...
       </span>
     );
@@ -563,11 +567,11 @@ class ReactAppView extends React.Component {
 ```css
 /* ReactAppView.css */
 .cs142-code-name {
-  font-family: Courier New, monospace;
+  font-family:
+    Courier New,
+    monospace;
 }
 ```
-
-
 
 ---
 
@@ -580,32 +584,32 @@ Class components go through three lifecycle phases. React calls specific methods
 
 Three phases:
 
-| Phase | Key Methods |
-|-------|-------------|
-| **Mounting** | `constructor` → `render` → `componentDidMount` |
-| **Updating** | `render` → `componentDidUpdate` (triggered by new props, `setState()`, or `forceUpdate()`) |
-| **Unmounting** | `componentWillUnmount` |
+| Phase          | Key Methods                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------ |
+| **Mounting**   | `constructor` → `render` → `componentDidMount`                                             |
+| **Updating**   | `render` → `componentDidUpdate` (triggered by new props, `setState()`, or `forceUpdate()`) |
+| **Unmounting** | `componentWillUnmount`                                                                     |
 
 - `componentDidMount` — great for starting timers or fetching data
   `componentDidMount` runs after the component is first added to the DOM — the right place to start timers, fetch data, or set up subscriptions.
 
 - `componentDidUpdate` — runs after every re-render (check what changed!)
-  
 - `componentWillUnmount` — clean up timers, subscriptions, listeners
-  
+
 ---
 
 ### Lifecycle Methods Example — Update UI Every 2 Seconds
 
 ```js
 class Example extends React.Component {
-  componentDidMount() {  // Start 2 sec counter
-    const incFunc =
-      () => this.setState({ counter: this.state.counter + 1 });
+  componentDidMount() {
+    // Start 2 sec counter
+    const incFunc = () => this.setState({ counter: this.state.counter + 1 });
     this.timerID = setInterval(incFunc, 2 * 1000);
   }
 
-  componentWillUnmount() { // Shutdown timer
+  componentWillUnmount() {
+    // Shutdown timer
     clearInterval(this.timerID);
   }
 }
@@ -643,12 +647,13 @@ Much more concise than a class with a `render` method.
 ---
 
 ### React Hooks — Add State to Stateless Components
-Hooks let function components use state and lifecycle features. 
-- `useState` adds state; 
+
+Hooks let function components use state and lifecycle features.
+
+- `useState` adds state;
 - `useEffect` replaces lifecycle methods.
 
-Hooks cannot be used inside a class component. useState and useEffect are React Hooks — they only work inside function components. 
-
+Hooks cannot be used inside a class component. useState and useEffect are React Hooks — they only work inside function components.
 
 #### `useState`
 
@@ -658,14 +663,13 @@ Hooks cannot be used inside a class component. useState and useEffect are React 
   - 1st element - A set function to call (like this.setState)
 
 Example: a bit of state:
+
 ```js
 const [bit, setBit] = useState(0);
 //      ↑      ↑               ↑
 //  current  setter       initial value
 //   value
 ```
-
-
 
 #### `useEffect`
 
@@ -677,8 +681,9 @@ useEffect(lifeCycleFunction, dependencyArray);
 ```
 
 #### Example
+
 ```js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 function Counter() {
   // [currentValue, setter] = useState(initialValue)
@@ -691,18 +696,17 @@ function Counter() {
   }, [count]);
 
   return (
-    <button onClick={() => setCount(count + 1)}>
-      Clicked {count} times
-    </button>
+    <button onClick={() => setCount(count + 1)}>Clicked {count} times</button>
   );
 }
 ```
+
 ---
 
 ### React Hooks Example — `useState`
 
 ```js
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 function Example() {
   const [count, setCount] = useState(0);
@@ -710,9 +714,7 @@ function Example() {
   return (
     <div>
       <p>You clicked {count} times</p>
-      <button onClick={() => setCount(count + 1)}>
-        Click me
-      </button>
+      <button onClick={() => setCount(count + 1)}>Click me</button>
     </div>
   );
 }
@@ -723,7 +725,7 @@ function Example() {
 ### React Hooks Example — `useEffect` Model Fetching
 
 ```js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 function Example() {
   const [count, setCount] = useState(0);
@@ -737,9 +739,7 @@ function Example() {
   return (
     <div>
       <p>You clicked {count} times</p>
-      <button onClick={() => setCount(count + 1)}>
-        Click me
-      </button>
+      <button onClick={() => setCount(count + 1)}>Click me</button>
     </div>
   );
 }
@@ -747,30 +747,205 @@ function Example() {
 
 ---
 
-## Communicating Between React Components
+# Communicating Between React Components
 
 **Parent to Child — use `props` (attributes):**
 
 ```jsx
+// Child reads it via props.param
 <ChildComponent param={infoForChildComponent} />
+
 ```
 
 **Child to Parent — use callbacks:**
 
 ```js
+// Parent passes callback.
 this.parentCallback = (infoFromChild) => {
-  /* processInfoFromChild */
+  this.setState({ received: infoFromChild });
 };
 
-<ChildComponent callback={this.parentCallback} />
+<ChildComponent callback={this.parentCallback} />;
+
+// Child calls it
+props.callback("hello from child");
 ```
 
 **Across the tree — React Context:**
-
-- Provides global variables for a subtree of components
+- `React.createContext()` provides a global value to any component in a subtree — avoids prop drilling.
 - See: https://reactjs.org/docs/context.html
 
 ---
 
+## How Child to Parent — use callbacks
+Great question! The example in the notes is a bit incomplete — it skips showing how the parent and child actually fit together. Let me build a complete, concrete example from scratch.
 
+---
 
+### The core idea
+
+In React, data flows **down** via props. But sometimes a child needs to send data **up** to the parent — for example, a child button tells the parent what was clicked. Since you can't pass data upward directly, the parent **passes a function down as a prop**, and the child **calls that function** with the data. The function lives in the parent, so when the child calls it, the parent receives the data.
+
+```
+Parent owns the state
+    │
+    │  passes a function as a prop (the "callback")
+    ▼
+  Child
+    │
+    │  calls props.callback("some data")  when something happens
+    ▼
+Parent's function runs → this.setState() → re-renders with new data
+```
+
+---
+
+### Complete working example
+
+Here is the notes' example rewritten as two complete components you can actually run.
+
+**The Parent component:**
+
+```javascript
+import React from "react";
+import ChildComponent from "./ChildComponent";
+
+class ParentComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      receivedMessage: "Nothing yet...",  // starts empty
+    };
+  }
+
+  // Step 1 — Parent defines the callback function
+  // This function lives in the parent, so it can call this.setState()
+  handleMessageFromChild = (infoFromChild) => {
+    this.setState({ receivedMessage: infoFromChild });
+  };
+
+  render() {
+    return (
+      <div>
+        <h2>Parent Component</h2>
+
+        {/* Step 2 — Parent passes the callback DOWN as a prop */}
+        <ChildComponent onSendMessage={this.handleMessageFromChild} />
+
+        {/* Step 4 — Parent shows the data it received from child */}
+        <p>Message from child: <strong>{this.state.receivedMessage}</strong></p>
+      </div>
+    );
+  }
+}
+
+export default ParentComponent;
+```
+
+**The Child component:**
+
+```javascript
+import React from "react";
+
+class ChildComponent extends React.Component {
+  handleButtonClick = () => {
+    // Step 3 — Child calls the callback with data to send UP
+    // props.onSendMessage is the function the parent passed down
+    this.props.onSendMessage("Hello from child!");
+  };
+
+  render() {
+    return (
+      <div>
+        <h3>Child Component</h3>
+        <button onClick={this.handleButtonClick}>
+          Send message to parent
+        </button>
+      </div>
+    );
+  }
+}
+
+export default ChildComponent;
+```
+
+---
+
+### Annotated flow0what happens step by step when you click the button
+![image](../../images/child_to_parent_callback_flow.svg)
+**Step-by-step when you click the button:**
+
+1. Parent defines `handleMessageFromChild` — a function that calls `this.setState()`
+2. Parent passes it **down** to child as `onSendMessage={this.handleMessageFromChild}`
+3. Child receives it as `this.props.onSendMessage` — the child doesn't own this function, it just holds a reference to it
+4. User clicks the button → child calls `this.props.onSendMessage("Hello from child!")`
+5. That executes the parent's function with `infoFromChild = "Hello from child!"`
+6. Parent calls `this.setState({ receivedMessage: "Hello from child!" })`
+7. React re-renders the parent → `<p>` shows the new message
+
+---
+
+### The bug in the original notes
+
+The notes example had a small bug worth pointing out:
+
+```javascript
+// BUGGY — notes version
+this.parentCallback = (infoFromChild) => {
+  this.setState({ received: info });  // ← 'info' is not defined!
+};                                    //    should be 'infoFromChild'
+```
+
+```javascript
+// CORRECT
+this.parentCallback = (infoFromChild) => {
+  this.setState({ received: infoFromChild });  // ← use the parameter name
+};
+```
+
+---
+
+### The same thing in modern function components
+
+Since you are learning React today, here is the same pattern using hooks — which is how you would write it in a real project:
+
+```javascript
+// Parent (function component)
+import React, { useState } from "react";
+import ChildComponent from "./ChildComponent";
+
+function ParentComponent() {
+  const [receivedMessage, setReceivedMessage] = useState("Nothing yet...");
+
+  // Step 1 — define the callback
+  const handleMessageFromChild = (infoFromChild) => {
+    setReceivedMessage(infoFromChild);
+  };
+
+  return (
+    <div>
+      <h2>Parent</h2>
+      {/* Step 2 — pass it down */}
+      <ChildComponent onSendMessage={handleMessageFromChild} />
+      <p>Message from child: <strong>{receivedMessage}</strong></p>
+    </div>
+  );
+}
+```
+
+```javascript
+// Child (function component)
+function ChildComponent({ onSendMessage }) {   // destructure the prop directly
+  return (
+    <div>
+      <h3>Child</h3>
+      {/* Step 3 — call it with data */}
+      <button onClick={() => onSendMessage("Hello from child!")}>
+        Send message to parent
+      </button>
+    </div>
+  );
+}
+```
+
+The pattern is identical — only the syntax changes. The callback is still defined in the parent, passed down as a prop, and called by the child to send data upward.

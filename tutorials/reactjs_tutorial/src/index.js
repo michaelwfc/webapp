@@ -12,9 +12,11 @@ import ReactAppView from "./components/ReactAppView";
 
 // Modern React 18+ rendering
 import ReactDOM from "react-dom/client"; // ← note: /client subpath
+
 let appView = React.createElement(ReactAppView, null);
 const app = document.getElementById("reactapp");
 const root = ReactDOM.createRoot(app);
+
 root.render(appView);
 
 // import { createRoot } from "react-dom/client"; //In React 18+, createRoot is imported directly from react-dom/client, not from the main react-dom package.
