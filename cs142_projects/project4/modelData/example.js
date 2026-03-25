@@ -5,6 +5,7 @@
  * property cs142models.exampleModel a function that returns an object with the
  * following property:
  *    name:  A string with name.
+ *    motto: A string with a short motto (up to 20 characters).
  *
  * See README.md for information on how to access it.
  */
@@ -16,6 +17,7 @@ if (cs142models === undefined) {
 
 cs142models.exampleModel = function () {
   return {
-    name: "Unknown Name",
+    name: "Michael",
+    motto: "Eduction is lighting a kindle",
   };
 };

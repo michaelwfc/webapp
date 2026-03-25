@@ -18,15 +18,19 @@ var portno = 3000; // Port number to use
 var app = express();
 
 // We have the express static module
+// express.static is built-in middleware that automatically serves files from a folder.
 // (http://expressjs.com/en/starter/static-files.html) do all the work for us.
+// So this one line essentially turns your Node.js process into a full static file server —
+// no extra configuration needed. Any file in that directory (HTML, CSS, JS, images) becomes accessible via the browser.
 app.use(express.static(__dirname));
 
+// The function passed as the second argument is a callback that runs only once the server is ready and actually listening.
 var server = app.listen(portno, function () {
   var port = server.address().port;
   console.log(
     "Listening at http://localhost:" +
       port +
       " exporting the directory " +
-      __dirname
+      __dirname,
   );
 });
