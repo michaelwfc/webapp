@@ -26,6 +26,7 @@ class Example extends React.Component {
       // the model data scripts are loaded before the React application:
       name: window.cs142models.exampleModel().name,
       motto: window.cs142models.exampleModel().motto,
+      inputMotto: "", //use a separate temporary state for the input, and only update motto when Enter is pressed.
       counter: 0,
       inputValue: "",
       buttonWasClicked: "",
@@ -35,6 +36,10 @@ class Example extends React.Component {
     // directly call the methods of this class. We generate new functions that
     // handle the event by just calling the method that handles the event.
     this.handleChangeBound = (event) => this.handleChange(event);
+    this.handleMottoChangeBound = (event) => this.handleMottoChange(event);
+    this.handleMottoUpdateBound = (event) => this.handleMottoUpdate(event);
+
+    
     // Note: A commmon idiom in React code is to use JavaScript bind() to smash
     // the method to accomplish this passthrough to the method:
     //      this.handleChange = this.handleChange.bind(this);
@@ -70,6 +75,19 @@ class Example extends React.Component {
   // Method called when the input box is typed into.
   handleChange(event) {
     this.setState({ inputValue: event.target.value });
+  }
+
+  // Method called when the motto input box is typed into.
+  // Update handleMottoChange to write to inputMotto instead of motto:
+  handleMottoChange(event){
+    this.setState({inputMotto: event.target.value});
+  }
+
+  // add a new method to update the motto:
+  handleMottoUpdate(event) {
+    if(event.key === 'Enter'){
+      this.setState({motto: this.state.inputMotto, inputMotto: ''});
+    }
   }
 
   // Method called when the button is pushed
@@ -109,6 +127,21 @@ class Example extends React.Component {
           {/* Your Problem 1 motto displaying and updating widget goes here */}
           <h2 className="user-name">{this.state.name}</h2>
           <p className="user-motto">{this.state.motto}</p>
+        </div>
+
+        <div className="motto-input-section">
+          <label htmlFor="motto-input">
+           Update your motto:
+          </label>
+          <input
+            id="motto-input"
+            type="text"
+            value={this.state.inputMotto}
+            onChange={this.handleMottoChangeBound}
+            onKeyDown={this.handleMottoUpdateBound}
+            maxLength={20}
+            placeholder="Enter a new motto(max 20 chars)"
+          />
         </div>
 
         <p>
@@ -328,6 +361,11 @@ class Example extends React.Component {
 
         {/* eslint-disable jsx-a11y/label-has-associated-control */
         /* eslint-disable jsx-a11y/label-has-for */}
+        {/* htmlFor is the React/JSX equivalent of the HTML for attribute used with <label> elements.
+        Why it exists: In regular HTML, you use the for attribute to associate a label with an input field:
+        <label for="inId">Input Field:</label>
+        <input id="inId" type="text" />
+        */}
         <div className="cs142-example-output">
           <label htmlFor="inId">Input Field:</label>
           <input

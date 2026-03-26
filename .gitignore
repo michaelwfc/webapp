@@ -1,6 +1,7 @@
 client/dist/bundle.js
 node_modules/
 dist/
+compiled/
 output/
 venv/
 .venv/

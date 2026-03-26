@@ -132,9 +132,13 @@ render() {
 #### Using JSX to Generate `createElement` Calls
 
 - JSX makes building the element tree look like templated HTML-like syntax directly embedded in JavaScript.
-- Babel compiles it to React.createElement() calls automatically.
+- Babel compiles it to React.createElement() calls automatically.— so the output is identical to the previous slide.
 - The browser never sees JSX — only plain JavaScript.
 
+### JSX: the readable shorthand
+
+
+- 
 ```jsx
 render() {
   return (
@@ -157,9 +161,19 @@ render() {
 
 Before JSX, you created elements by calling `React.createElement(type, props, ...children)` directly. Understanding this helps you understand what JSX compiles to.
 
-- type = HTML tag or Component,
-- props = attributes object (or null)
-- children = nested elements or text.
+
+```js
+React.createElement(type, props, ...children);
+```
+
+| Parameter  | Description                                                        |
+| ---------- | ------------------------------------------------------------------ |
+| `type`     | HTML tag (e.g. `h1`, `p`) or `React.Component`                     |
+| `props`    | Attributes object (or null) (e.g. `type="text"`). Uses **camelCase**!               |
+| `children` | nested elements or text, Zero or more: strings/numbers, React elements, or arrays of either |
+
+---
+
 
 ```js
 render() {
@@ -233,11 +247,11 @@ class ReactAppView extends React.Component {
 When the user types in the input box, the browser fires a DOM event. That event object has a specific structure:
 
 ```
-event                        ← the whole DOM event object
+event                        ← KeyboardEvent object
   │
-  ├── event.type             → "change"
-  ├── event.timeStamp        → when it happened
-  │
+  ├── event.type             → "keydown", "keyup", or "keypress"
+  ├── event.key              → "Enter", "a", "Escape", "ArrowDown", etc.
+  ├── event.code             → "KeyA", "Enter", "Escape", "ArrowDown", etc.
   └── event.target           ← the DOM element that triggered the event
         │                       (the <input> box itself)
         │
@@ -245,6 +259,12 @@ event                        ← the whole DOM event object
         ├── event.target.name      → ""
         ├── event.target.id        → ""
         └── event.target.value     → "A"  ← what the user typed
+  ├── event.shiftKey         → true/false (was Shift pressed?)
+  ├── event.ctrlKey          → true/false (was Ctrl pressed?)
+  ├── event.altKey           → true/false (was Alt pressed?)
+  └── event.metaKey          → true/false (was Meta/Command pressed?)
+
+
 ```
 
 So `event.target` is the `<input>` element, and `.value` is whatever text is currently inside it. When the user types "A", `event.target.value === "A"`. When they type "An", `event.target.value === "An"`, and so on.
@@ -389,29 +409,14 @@ class ReactAppView extends React.Component {
 
 ---
 
-## JSX pattern
+## JSX 
+JSX lets you write HTML-like syntax directly in JavaScript. 
+JSX is run as a preprocessor to the HTML-like language to JavaScript. The generated JavaScipt is limited to calls to the React.js  `createElement`  function which allow us to write something that looks like HTML to describe what the component renders.
 
-### JSX: the readable shorthand
 
-JSX lets you write HTML-like syntax directly in JavaScript. Babel compiles it to React.createElement() calls automatically — so the output is identical to the previous slide.
-
-### Programming with JSX
-
-JSX maps to calls to `React.createElement`:
-
-```js
-React.createElement(type, props, ...children);
-```
-
-| Parameter  | Description                                                        |
-| ---------- | ------------------------------------------------------------------ |
-| `type`     | HTML tag (e.g. `h1`, `p`) or `React.Component`                     |
-| `props`    | Attributes (e.g. `type="text"`). Uses **camelCase**!               |
-| `children` | Zero or more: strings/numbers, React elements, or arrays of either |
-
----
 
 ### camelCase vs. dash-case
+Although JSX looks like HTML, it is not HTML. Some of the differences are necessary due to embeddding in JavaScript. 
 
 HTML attributes are `case-insensitive`, but JavaScript is not. JSX is embedded in JavaScript, so React uses `camelCase` for all attributes.
 
@@ -427,7 +432,8 @@ HTML attributes are `case-insensitive`, but JavaScript is not. JSX is embedded i
 
 ### JSX rules: expressions only
 
-- Inside `JSX curly braces {}`, you can only use expressions — things that evaluate to a value. - JavaScript statements like `let`,`if` and `for` don't work.
+- Inside `JSX curly braces {}`, you can only use expressions — things that evaluate to a value. 
+- JavaScript statements like `let`,`if` and `for` don't work.
 - The ternary operator `(? :)` is an expression — it evaluates to a value. if/for/let are statements and cannot appear directly in JSX.
 
 ```js
@@ -450,7 +456,12 @@ HTML attributes are `case-insensitive`, but JavaScript is not. JSX is embedded i
 
 ---
 
-#### JSX Templates Must Return a Valid `children` Param
+### Template substitution
+
+JSX treats text inside of parentheses (e.g. {JavaScriptExpression}) as templates where the JavaScript expression is evaluated in the context of the current function and whose value replaces the template in the string. The expression can evaluate to a JavaScript string or value from a JSX expression. This feature allows component's specification to use templated HTML.
+
+JSX Templates Must Return a Valid `children` Param
+
 
 Valid — variables and expressions in scope:
 
@@ -472,8 +483,14 @@ Workaround — anonymous immediately-invoked function:
 ```
 
 ---
+### One-way binding from JavaScript to HTML
 
-### Conditional Render in JSX
+React automatically propagates any changes to JavaScript state to the JSX templates. 
+
+For example the following code (`{this.state.counter}`) displays the state.counter property of the Example component. The component sets a timer that increments the counter every 2 seconds. The value of the counter can be seen changing here: 2384.
+
+### Control flow
+#### Conditional Render in JSX
 
 Since JSX requires expressions, there are two clean patterns for conditional rendering.
 
@@ -505,7 +522,7 @@ if (useSpanish) {
 
 ---
 
-### Iteration in JSX
+#### Iteration in JSX
 
 To render a list of items, use .map() to transform an array into an array of JSX elements. Always include a key= prop for efficiency.
 
@@ -535,7 +552,47 @@ return (
 
 > The key= prop helps React identify which items changed, improving re-render performance. Keys must be unique among siblings.
 
-## React uses keys to match elements between renders. Without keys, React may unnecessarily re-create DOM nodes when the list changes.
+React uses keys to match elements between renders. Without keys, React may unnecessarily re-create DOM nodes when the list changes.
+
+#### Short-circuit boolean operations
+Short-circuit boolean operations such as "&&" can also be used to control what is rendered. For example the following code will make a sentence appear between to two paragraph when some characters are typed into the input box below.
+
+```jsx
+<div>
+  <p>A paragraph will appear between this paragraph</p>
+  {
+    this.state.inputValue && (
+      <p>This text will appear when this.state.inputValue is truthy.
+        this.state.inputValue === {this.state.inputValue}
+      </p>
+    )
+  }
+  <p>... and this one when some characters are typed into the input box below.</p>
+</div>
+```
+
+Generates the output:
+```
+A paragraph will appear between this paragraph
+
+... and this one when some characters are typed into the below box.
+```
+
+
+### Input using DOM-like handlers
+
+Input in React is done using DOM-like event handlers. For example, JSX statements like:
+
+```jsx
+<label htmlFor="inId">Input Field: </label>
+<input type="text" value={this.state.inputValue} onChange={this.handleChangeBound} />
+
+```
+
+will display the text from the inputValue property of the Component's state in the input box (it starts out blank) and calls the function this.handleChangedBound every time the input field is changed.
+Typically this kind of input will be associated with a Button or inside a Form to allow the user to signal when they are finished changing the input field. 
+Note the differences from HTML in onchange= become onChange= andfor= becoming htmlFor=.
+
 
 ### Styling with React/JSX
 
