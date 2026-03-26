@@ -1,5 +1,6 @@
 import React from "react";
 import "./styles.css";
+import Header from "../Header";
 
 /**
  * Define States, a React component of CS142 Project 4, Problem 2. The model
@@ -53,6 +54,7 @@ class States extends React.Component {
   render() {
     return (
       <div>
+        <Header />
         <h1>CS142 Project 4 React.js Problem 2</h1>
         <div className="substring-input-section">
           <label htmlFor="substring-input">Substring Input: </label>

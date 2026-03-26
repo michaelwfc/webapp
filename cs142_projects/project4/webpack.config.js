@@ -18,9 +18,11 @@ module.exports = {
         test: /\.(png|jpg|gif)$/,
         use: [
           {
-            loader: "url-loader",
+            loader: "file-loader",
             options: {
-              limit: 8192,
+              name: "[contenthash].[ext]", // keeps the hashed filename
+              outputPath: ".", // puts the file in compiled/
+              publicPath: "/compiled/", // the URL prefix in the browser
             },
           },
         ],

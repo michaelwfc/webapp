@@ -18,7 +18,11 @@ In order to fetch our web app via the HTTP protocol, we use a simple Node.js web
 
 All the files in the project4 can be fetched using an URL starting with http://localhost:3000. Click on http://localhost:3000 to verify your web server is running. It should serve the file index.html to your browser.
 
-We recommend you configure your development environment to run webpack in watch mode, which means you will need to run the node webserver (`node webServer.js`) and webpack (`npm run build:w`) when building and testing your project. You could do this by running the programs in different command line tabs or windows. Syntax errors get detected and reported by Babel, so the output of webpack is useful.
+We recommend you configure your development environment to run webpack in watch mode, which means you will need to 
+- run the node webserver (`node webServer.js`) and
+- run webpack (`npm run build:w`) when building and testing your project. 
+  
+You could do this by running the programs in different command line tabs or windows. Syntax errors get detected and reported by Babel, so the output of webpack is useful.
 
 
 # Getting Started
