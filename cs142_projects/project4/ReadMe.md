@@ -335,3 +335,28 @@ You should look through and understand the `getting-started.html` view and the E
 5. **React Component Access**: The React components can then access this data via `window.cs142models.exampleModel()` because by the time the React code runs, the model scripts have already executed and populated the global object.
 
 This is a simple way to provide mock data for a frontend-only application without needing a backend API. The data is essentially "baked into" the HTML page through script tags, making it immediately available to the JavaScript application.
+
+
+# Debug
+
+
+
+## How to set breakpoints for debugging for webpack
+
+**In Chrome DevTools:**
+1. Open `http://localhost:3000/p2.html` → press `F12`
+2. Go to **Sources** tab → in the left panel find `webpack://` → navigate to `components/States/index.jsx`
+3. Click any line number to set a breakpoint — then type in the input to trigger it
+
+**Or use `debugger` statement directly in code:**
+```javascript
+handleSubstringChange(event) {
+  debugger;  // ← browser will pause here when you type
+  const substring = event.target.value;
+  ...
+}
+```
+
+**Key thing to inspect at the breakpoint:**
+- `event.target.value` — the new value being typed
+- `this.state.substringInput` — notice it's **one keystroke behind**, which was the original bug

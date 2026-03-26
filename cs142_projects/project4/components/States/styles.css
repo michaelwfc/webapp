@@ -4,3 +4,163 @@
  * Since CSS uses a global name space for classes we should use names starting
  * with "cs142-states-" here.
  */
+
+/* =============================================================
+   CS142 Project 4 — States Component Styles
+   File: components/States/styles.css
+   ============================================================= */
+
+/* -------------------------------------------------------------
+   1. LAYOUT — Page wrapper
+   The outermost container for the whole States view.
+   `max-width` keeps lines readable on wide screens.
+   `margin: 0 auto` centres the block horizontally.
+   `padding` adds breathing room so content doesn't touch edges.
+   ------------------------------------------------------------- */
+.States {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  color: #333;
+}
+
+/* -------------------------------------------------------------
+   2. PAGE HEADING
+   `margin-bottom` pushes the first section away from the title.
+   ------------------------------------------------------------- */
+.States h1 {
+  font-size: 24px;
+  margin-bottom: 24px;
+  color: #222;
+}
+
+/* -------------------------------------------------------------
+   3. INPUT SECTION — label + text box
+   `display: flex` lines the label and input up side by side.
+   `align-items: center` vertically centres them with each other.
+   `gap` adds space between the label and the input box.
+   `margin-bottom` separates this row from the list below it.
+   ------------------------------------------------------------- */
+.substring-input-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* The <label> text — no extra styling needed, inherits the parent font */
+.substring-input-section label {
+  font-weight: bold;
+  white-space: nowrap; /* prevent the label from wrapping onto two lines */
+}
+
+/* The <input> text box */
+.substring-input-section input {
+  flex: 1; /* stretches to fill remaining row width */
+  padding: 8px 10px; /* inner breathing room so text isn't cramped */
+  font-size: 16px; /* matches the body text so it looks consistent */
+  border: 1px solid #ccc;
+  border-radius: 4px; /* softly rounded corners */
+  outline: none; /* remove the browser default blue glow on focus */
+}
+
+/* Highlight the border when the user is actively typing */
+.substring-input-section input:focus {
+  border-color: #0066cc;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2); /* subtle focus ring */
+}
+
+/* -------------------------------------------------------------
+   4. FILTER RESULTS — the <ul> list of matching states
+   `list-style: none` removes the default bullet dots.
+   `padding: 0` removes the browser's default left indent for lists.
+   `max-height` + `overflow-y: auto` makes the list scrollable
+   once there are many results, so the page doesn't grow endlessly.
+
+   Tells the browser what to do when content is taller than the box. 
+   auto = show a scrollbar only when needed. Other values: 
+   scroll (always show), 
+   hidden (clip and hide), 
+   visible (spill out, default).
+
+   ------------------------------------------------------------- */
+.filter-states-section {
+  margin-bottom: 20px;
+}
+
+.filter-states-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+/* Each state name row */
+.filter-states-section li {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0f0f0; /* thin divider between rows */
+  font-size: 15px;
+}
+
+/* Remove the divider from the very last item */
+.filter-states-section li:last-child {
+  border-bottom: none;
+}
+
+/* Light zebra-stripe: alternate rows get a faint background.
+   `nth-child(even)` targets every second <li>. */
+.filter-states-section li:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Hover highlight — gives visual feedback that the row is interactive */
+.filter-states-section li:hover {
+  background-color: #eef4ff;
+}
+
+/* "No matching states" message — shown in place of the list */
+.filter-states-section .no-results {
+  padding: 12px;
+  color: #888;
+  font-style: italic;
+}
+
+/* -------------------------------------------------------------
+   5. SUBSTRING OUTPUT — shows the active filter string
+   Uses a <p> or <span> to echo back what the user typed.
+   A coloured left border (called a "left accent") makes it easy
+   to spot at a glance.  `background-color` gives it a subtle tint.
+   ------------------------------------------------------------- */
+.substring-output-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background-color: #f0f6ff;
+  border-left: 4px solid #0066cc; /* left accent bar */
+  border-radius: 0 4px 4px 0; /* round only the right corners */
+  font-size: 15px;
+}
+
+.substring-output-section label {
+  font-weight: bold;
+  color: #555;
+}
+
+/* The read-only text that echoes the substring */
+.substring-output-section span,
+.substring-output-section textarea {
+  color: #0066cc;
+  font-family: monospace; /* monospace makes the typed string look distinct */
+  font-size: 15px;
+  background: none;
+  border: none;
+  resize: none;
+  outline: none;
+  padding: 0;
+}
