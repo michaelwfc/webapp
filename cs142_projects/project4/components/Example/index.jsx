@@ -22,7 +22,7 @@ class Example extends React.Component {
     // initialize it here. We read the example model data into the state
     // variable 'name'.
     this.state = {
-      // Script Loading Order: In the HTML files (like getting-started.html), 
+      // Script Loading Order: In the HTML files (like getting-started.html),
       // the model data scripts are loaded before the React application:
       name: window.cs142models.exampleModel().name,
       motto: window.cs142models.exampleModel().motto,
@@ -39,7 +39,6 @@ class Example extends React.Component {
     this.handleMottoChangeBound = (event) => this.handleMottoChange(event);
     this.handleMottoUpdateBound = (event) => this.handleMottoUpdate(event);
 
-    
     // Note: A commmon idiom in React code is to use JavaScript bind() to smash
     // the method to accomplish this passthrough to the method:
     //      this.handleChange = this.handleChange.bind(this);
@@ -79,14 +78,14 @@ class Example extends React.Component {
 
   // Method called when the motto input box is typed into.
   // Update handleMottoChange to write to inputMotto instead of motto:
-  handleMottoChange(event){
-    this.setState({inputMotto: event.target.value});
+  handleMottoChange(event) {
+    this.setState({ inputMotto: event.target.value });
   }
 
   // add a new method to update the motto:
   handleMottoUpdate(event) {
-    if(event.key === 'Enter'){
-      this.setState({motto: this.state.inputMotto, inputMotto: ''});
+    if (event.key === "Enter") {
+      this.setState({ motto: this.state.inputMotto, inputMotto: "" });
     }
   }
 
@@ -130,9 +129,7 @@ class Example extends React.Component {
         </div>
 
         <div className="motto-input-section">
-          <label htmlFor="motto-input">
-           Update your motto:
-          </label>
+          <label htmlFor="motto-input">Update your motto:</label>
           <input
             id="motto-input"
             type="text"
