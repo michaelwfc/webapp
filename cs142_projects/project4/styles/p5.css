@@ -1,0 +1,28 @@
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px;
+  background-color: antiquewhite;
+}
+
+.toolbar-link {
+  padding: 8px 20px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.1);
+  /* color: #e9d5ff; */
+  text-decoration: none; /* remove underline */
+  font-size: 14px;
+  font-weight: 500;
+  /* transition: background-color 0.2s; */
+}
+
+.toolbar-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Highlight the currently active link */
+.toolbar-link.active {
+  background-color: #7c3aed;
+  color: #fff;
+}
