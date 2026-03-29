@@ -73,6 +73,8 @@ http://example.com?id=3535#fragment
 
 ## Deep Linking
 
+Deep linking means the URL encodes enough context that directing a browser to that URL will restore the app to the exact same state. This enables bookmarking, sharing, and refreshing.
+
 - **Concept:** the URL should capture the web app's context so that directing the browser to the URL will result the app's execution to that context
   - Bookmarks
   - Sharing
@@ -85,9 +87,9 @@ http://example.com?id=3535#fragment
 
 ---
 
-## Deep Linking in Single Page Apps
+### Two approaches for Implementing Deep Linking
 
-Two approaches:
+
 
 1. **Maintain the app's context state in the URL**
    - \+ Works for browser navigation and refresh
@@ -97,11 +99,14 @@ Two approaches:
    - \+ Allows user to explicitly fetch a URL based on need
    - \+ Can keep URL in location bar pretty
 
+
 Either way, the web app needs to be able to initialize itself from a deep linked URL.
+
+When a user arrives at /Book/Moby/ch/3, the app must parse that URL and render the correct content — even on a cold start.
 
 ---
 
-## Ugly URLs
+### Ugly URLs
 
 ```
 http://www.example.org/dirmod?sid=789AB8&type=gen&mod=CorePages&gid=A6CD4967199
@@ -114,6 +119,8 @@ http://www.example.org/show/A6CD4967199
 ```
 
 > "What is that ugly thing in the location bar above my beautiful web application?"
+
+Use clean, semantic URL patterns. They're shareable, memorable, and communicate intent. This is one reason the `BrowserRouter` approach is preferred when server configuration allows it.
 
 ---
 
@@ -137,7 +144,7 @@ import {HashRouter, Route, Link, Redirect} from 'react-router-dom';
 
 ---
 
-### Example: React Router V5
+### HashRouter Example: React Router V5
 
 ```jsx
 <HashRouter>
