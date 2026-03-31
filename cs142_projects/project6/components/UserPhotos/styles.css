@@ -1,0 +1,29 @@
+.cs142-photo-paper {
+  margin: 16px 0;
+  padding: 16px;
+}
+
+.cs142-photo-img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.cs142-photo-date {
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 16px;
+  color: #666;
+}
+
+.cs142-comments-section {
+  margin-top: 16px;
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+}
+
+.cs142-comment-paper {
+  margin: 8px 0;
+  padding: 12px;
+  background-color: #f5f5f5;
+}
