@@ -1,29 +1,51 @@
 import React from "react";
 import { List, ListItem, ListItemText, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
-
+import fetchModel from "../../lib/fetchModelData";
 import "./styles.css";
 
-/**
- * Define UserList, a React component of CS142 Project 5.
- */
+// Using .then() / .catch()
+// fetchModel("/user/list")
+//   .then(result => {
+//     console.log(result.data);  // the parsed JSON object
+//   })
+//   .catch(err => {
+//     console.log(err.status);     // e.g. 404
+//     console.log(err.statusText); // e.g. "Not Found"
+//   });
+// Or with async/await (cleaner)
+// async function loadUsers() {
+//   try {
+//     const result = await fetchModel("/user/list");
+//     console.log(result.data);
+//     return result.data;
+//   } catch (err) {
+//     console.log(err.status, err.statusText);
+//   }
+// }
+
 class UserList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      users: window.cs142models.userListModel(),
+      users: [],
     };
+  }
+
+  componentDidMount() {
+    fetchModel("/user/list")
+      .then((result) => {
+        this.setState({ users: result.data });
+      })
+      .catch((err) => {
+        console.error("Failed to load users:", err.status, err.statusText);
+      });
   }
 
   render() {
     return (
       <div>
-        <Typography variant="Users">
-          {/* This is the user list, which takes up 3/12 of the window. You might
-          choose to use <a href="https://mui.com/components/lists/">Lists</a>{" "}
-          and <a href="https://mui.com/components/dividers/">Dividers</a> to
-          display your users like so: */}
-        </Typography>
+        <Typography variant="h6">Users</Typography>
         <List component="nav">
           {this.state.users.map((user) => (
             <ListItem

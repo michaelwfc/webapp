@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography, Paper } from "@mui/material";
 import { Link } from "react-router-dom";
-
+import fetchModel from "../../lib/fetchModelData";
 import "./styles.css";
 
 class UserPhotos extends React.Component {
@@ -9,13 +9,35 @@ class UserPhotos extends React.Component {
     super(props);
     this.state = {
       photos: [],
+      user: null,
     };
   }
 
   componentDidMount() {
+    this.loadData();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.match.params.userId !== this.props.match.params.userId) {
+      this.loadData();
+    }
+  }
+
+  loadData() {
     const userId = this.props.match.params.userId;
-    const photos = window.cs142models.photoOfUserModel(userId);
-    this.setState({ photos });
+    Promise.all([
+      fetchModel(`/photosOfUser/${userId}`),
+      fetchModel(`/user/${userId}`),
+    ])
+      .then(([photosResult, userResult]) => {
+        this.setState({
+          photos: photosResult.data,
+          user: userResult.data,
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to load data:", err.status, err.statusText);
+      });
   }
 
   static formatDate(dateString) {
@@ -24,9 +46,7 @@ class UserPhotos extends React.Component {
   }
 
   render() {
-    const { photos } = this.state;
-    const userId = this.props.match.params.userId;
-    const user = window.cs142models.userModel(userId);
+    const { photos, user } = this.state;
 
     if (photos.length === 0) {
       return (

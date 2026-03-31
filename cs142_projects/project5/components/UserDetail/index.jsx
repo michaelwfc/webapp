@@ -1,36 +1,40 @@
 import React from "react";
 import { Typography, Paper } from "@mui/material";
 import { Link } from "react-router-dom";
-
+import fetchModel from "../../lib/fetchModelData";
 import "./styles.css";
 
 class UserDetail extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      userId: null,
+      user: null,
     };
   }
 
   componentDidMount() {
-    const userId = this.props.match.params.userId;
-    // const user = window.cs142models.userModel(userId);
-    this.setState({ userId: userId });
+    this.loadUserData();
   }
 
-  // update user id when the route changes
   componentDidUpdate(prevProps) {
-    const prevUserId = prevProps.match.params.userId;
-    const currentUserId = this.props.match.params.userId;
-    if (prevUserId !== currentUserId) {
-      // const user = window.cs142models.userModel(currentUserId);
-      this.setState({ userId: currentUserId });
+    if (prevProps.match.params.userId !== this.props.match.params.userId) {
+      this.loadUserData();
     }
   }
 
+  loadUserData() {
+    const userId = this.props.match.params.userId;
+    fetchModel(`/user/${userId}`)
+      .then((result) => {
+        this.setState({ user: result.data });
+      })
+      .catch((err) => {
+        console.error("Failed to load user:", err.status, err.statusText);
+      });
+  }
+
   render() {
-    const { userId } = this.state;
-    const user = window.cs142models.userModel(userId);
+    const { user } = this.state;
     if (!user) {
       return <Typography variant="body1">Loading...</Typography>;
     }
@@ -38,11 +42,6 @@ class UserDetail extends React.Component {
     return (
       <div>
         <Typography variant="h4">
-          {/* This should be the UserDetail view of the PhotoShare app. Since it is
-        invoked from React Router the params from the route will be in property
-        match. So this should show details of user:
-        {this.props.match.params.userId}. You can fetch the model for the user
-        from window.cs142models.userModel(userId). */}
           {user.first_name} {user.last_name}
         </Typography>
         <Paper className="cs142-user-detail-paper">
