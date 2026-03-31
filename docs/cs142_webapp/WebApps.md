@@ -213,6 +213,48 @@ The `UserList` sidebar can use links to navigate:
 
 ---
 
+**Bookmarking** and **sharing** are two common features users expect from modern web apps, and **deep linking** is the technology that enables both:
+
+### Bookmarking
+When a user bookmarks a page, the browser saves the current URL. When they return later, clicking the bookmark should restore them to the **exact same view** they were looking at — not just the home page.
+
+**Example:** In a photo app, if you bookmark a specific user's photos page, the bookmark URL should be something like `http://yourapp.com/#/photos/57231f1a30e4351f4e9f4bd8` so you land directly on Ellen Ripley's photos, not the app's home screen.
+
+### Sharing
+When you share a link with someone, you want them to land on the **same content you're viewing**, not the home page.
+
+**Example:** Sending a friend a link `http://yourapp.com/#/photos/57231f1a30e4351f4e9f4bd8` shows them Ellen Ripley's photos directly, rather than them starting at the home screen and having to navigate there themselves.
+
+### Deep Linking Solution
+
+**Deep linking** uses unique URLs for different views/states in your app so that:
+- Each view has a **unique path** (e.g., `/users/:userId`, `/photos/:userId`)
+- The URL in the browser's address bar reflects the **current view**
+- Bookmarking or sharing the URL **bookmarks/shares that specific view**
+
+### How React Router Implements It
+
+React Router creates these unique paths and renders the right component based on the URL:
+
+```jsx
+<Switch>
+  <Route path="/users/:userId" component={UserDetail} />
+  <Route path="/photos/:userId" component={UserPhotos} />
+  <Route path="/users" component={UserList} />
+</Switch>
+```
+
+When the URL is `/photos/57231f1a30e4351f4e9f4bd8`, React Router automatically renders the `UserPhotos` component with that user's ID. This works whether the user:
+- Bookmarked the URL and returned later
+- Clicked a shared link from a friend
+- Refreshed the page mid-session
+
+**Without deep linking**, single-page apps (SPAs) would always return to their initial state on reload or bookmark — making bookmarking and sharing broken experiences.
+
+Similar code found with 1 license type
+
+
+
 ## Responsive Design
 
 - Uses **CSS flexbox** — relative sizing handles changes (`flex` attribute)

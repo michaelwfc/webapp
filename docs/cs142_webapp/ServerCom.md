@@ -255,6 +255,203 @@ DELETE /photos/:id   →   axios.delete("/photos/123")
 
 REST defines the _contract_; XHR/Axios _fulfills_ it. Your Controller's job is to know the REST contract of your server and use Axios to execute it, then hand the resulting model data to the View.
 
+## Promises
+
+### Promises vs Callbacks
+Callbacks are the traditional way to handle async code — but they have serious problems. Promises are a cleaner alternative.
+
+#### 😤 Problems with Callbacks
+
+- Out-of-order execution — code runs in non-obvious order
+
+  ```js
+  fs.ReadFile(fileName, function (error, fileData) {
+    console.log("Got error", error, "Data", fileData);
+  });
+  console.log("Finished reading file");
+  <!-- What order to the console.log statements appear? -->
+  ```
+
+- Pyramid of Doom — deeply nested callbacks are hard to read
+
+  ```js
+  fs.ReadFile(fileName, function (error, fileData) {
+    doSomethingOnData(fileData, function (tempData1) {
+      doSomethingMoreOnData(tempData1, function (tempData2) {
+        finalizeData(tempData2, function (result) {
+          doneCallback(result); // ← buried 4 levels deep!
+        });
+      });
+    });
+  });
+  ```
+
+- Scattered control flow — logic jumps between functions
+
+  ```js
+  fs.ReadFile(fileName, readDone);
+  function readDone(error, fileData) {
+    doSomethingOnData(fileData, doSomeDone);
+  }
+  function doSomeDone(someData) {
+    doSomethingMoreOnData(someData, doSomeMoreDone);
+  }
+  function doSomeMoreDone(someMoreData) {
+    finalizeData(someMoreData, doneCallback);
+  }
+  ```
+
+#### 💡 The Promise Idea
+
+Instead of passing a callback, return a promise that will be filled in when operation done:
+
+- Doesn't need to wait until you need the promise to be filled in
+- Still using callbacks - - under the covers
+
+```
+BEFORE (callback)
+doSomething(args, doneCallback);
+↓
+AFTER (promise)
+let donePromise = doSomething(args);
+// Filled in when operation completes
+```
+
+#### then() - Waiting on a promise
+
+Get the value of a promise (waiting if need be) with then
+
+```js
+donePromise.then(
+  function (value) {
+    // value is the promised result when successful
+  },
+  function (error) {
+    // Error case
+  },
+);
+```
+
+#### Promises
+
+- Note no Pyramid of Doom
+- Every variable is a promise
+  - A standard usage: Every variable - If `thenable` call then() on it otherwise just use the variable as is.
+
+```js
+let myFile = myReadFile(fileName);
+let tempData1 = myFile.then(function (fileData) {
+  return doSomethingOnData(fileData);
+});
+let finalData = tempData1.then(function (tempData2) {
+  return finalizeData(tempData2);
+});
+return finalData;
+```
+
+#### Chaining Promises (No Pyramid!)
+
+Promise → Callback: Easy — just call .then(callbackFunc): Waiting on a promise
+Get the value of a promise (waiting if need be) with `then`
+
+```js
+return myReadFile(fileName)
+  .then(function (fileData) {
+    return doSomethingOnData(fileData);
+  })
+  .then(function (data) {
+    return finalizeData(data);
+  })
+  .catch(errorHandlingFunc);
+```
+
+Add in ES6 JavaScript arrow functions:
+```js
+return (
+  myReadFile(fileName)
+    // fileData is the promised result when successful
+    // doSomethingOnData is the callback function, called when promise is fulfilled
+    .then((fileData) => doSomethingOnData(fileData))
+    .then((data) => finalizeData(data))
+    .catch(errorHandlingFunc)
+);
+```
+
+#### Promise VS Callback
+- Easy to go from Promise to Callback: Just call .then(callbackFunc) 
+  `axios.get(url).then(callback)`
+- Going from Callback to Promise requires creating a Promise 
+  let newPromise = new // calls  Promise( function (fulfill, reject) { fulfill (value) to have promise return value // calls reject });
+
+
+Callback → Promise: Wrap with new Promise(function(fulfill, reject) {...})
+
+```js
+function myReadFile(filename) {
+  return new Promise(function (fulfill, reject) {
+    fs.readFile(filename, function (err, res) {
+      if (err) reject(err);
+      else fulfill(res);
+    });
+  });
+}
+```
+------------------
+
+### What do resolve and reject mean?
+   
+```js
+new Promise(function(resolve, reject) {
+  //                ↑         ↑
+  //         "I succeeded"  "I failed"
+  //         call this to   call this to
+  //         return a value  signal an error
+});
+```
+
+Think of a Promise like an IOU note:
+```
+new Promise created
+      │
+      │ time passes... (network request, file read, etc.)
+      │
+      ├── resolve({ data })  → Promise is FULFILLED ✅
+      │                         .then(result => ...) runs
+      │
+      └── reject({ status }) → Promise is REJECTED ❌
+                                .catch(err => ...) runs
+```
+
+Concrete example:
+
+```js
+function fetchModel(url) {
+  return new Promise(function(resolve, reject) {
+
+    // SUCCESS case
+    resolve({ data: { name: "John" } });
+    // caller gets: .then(result => result.data.name) → "John"
+
+    // FAILURE case
+    reject({ status: 404, statusText: "Not Found" });
+    // caller gets: .catch(err => err.status) → 404
+
+  });
+}
+
+// How the caller uses it:
+fetchModel("/user/1")
+  .then(result => console.log(result.data))   // resolve value lands here
+  .catch(err  => console.log(err.status));    // reject value lands here
+
+```
+
+ -------------------
+
+
+
+
+
 ## 4. Axios
 
 React frameworks prefer higher-level HTTP clients over raw XMLHttpRequest. Axios is the most popular — a **Promise-based** wrapper that's cleaner and more powerful.
@@ -453,146 +650,6 @@ Axios and Flask/FastAPI/Tornado are partners, not competitors — one sends, the
 
 ---
 
-### Promises
-
-Callbacks are the traditional way to handle async code — but they have serious problems. Promises are a cleaner alternative.
-
-#### 😤 Problems with Callbacks
-
-- Out-of-order execution — code runs in non-obvious order
-
-  ```js
-  fs.ReadFile(fileName, function (error, fileData) {
-    console.log("Got error", error, "Data", fileData);
-  });
-  console.log("Finished reading file");
-  <!-- What order to the console.log statements appear? -->
-  ```
-
-- Pyramid of Doom — deeply nested callbacks are hard to read
-
-  ```js
-  fs.ReadFile(fileName, function (error, fileData) {
-    doSomethingOnData(fileData, function (tempData1) {
-      doSomethingMoreOnData(tempData1, function (tempData2) {
-        finalizeData(tempData2, function (result) {
-          doneCallback(result); // ← buried 4 levels deep!
-        });
-      });
-    });
-  });
-  ```
-
-- Scattered control flow — logic jumps between functions
-
-  ```js
-  fs.ReadFile(fileName, readDone);
-  function readDone(error, fileData) {
-    doSomethingOnData(fileData, doSomeDone);
-  }
-  function doSomeDone(someData) {
-    doSomethingMoreOnData(someData, doSomeMoreDone);
-  }
-  function doSomeMoreDone(someMoreData) {
-    finalizeData(someMoreData, doneCallback);
-  }
-  ```
-
-#### 💡 The Promise Idea
-
-Instead of passing a callback, return a promise that will be filled in when operation done:
-
-- Doesn't need to wait until you need the promise to be filled in
-- Still using callbacks - - under the covers
-
-```
-BEFORE (callback)
-doSomething(args, doneCallback);
-↓
-AFTER (promise)
-let donePromise = doSomething(args);
-// Filled in when operation completes
-```
-
-#### then() - Waiting on a promise
-
-Get the value of a promise (waiting if need be) with then
-
-```js
-donePromise.then(
-  function (value) {
-    // value is the promised result when successful
-  },
-  function (error) {
-    // Error case
-  },
-);
-```
-
-#### Promises
-
-- Note no Pyramid of Doom
-- Every variable is a promise
-  - A standard usage: Every variable - If `thenable` call then() on it otherwise just use the variable as is.
-
-```js
-let myFile = myReadFile(fileName);
-let tempData1 = myFile.then(function (fileData) {
-  return doSomethingOnData(fileData);
-});
-let finalData = tempData1.then(function (tempData2) {
-  return finalizeData(tempData2);
-});
-return finalData;
-```
-
-#### Chaining Promises (No Pyramid!)
-
-Promise → Callback: Easy — just call .then(callbackFunc): Waiting on a promise
-Get the value of a promise (waiting if need be) with `then`
-
-```js
-return myReadFile(fileName)
-  .then(function (fileData) {
-    return doSomethingOnData(fileData);
-  })
-  .then(function (data) {
-    return finalizeData(data);
-  })
-  .catch(errorHandlingFunc);
-```
-
-Add in ES6 JavaScript arrow functions:
-```js
-return (
-  myReadFile(fileName)
-    // fileData is the promised result when successful
-    // doSomethingOnData is the callback function, called when promise is fulfilled
-    .then((fileData) => doSomethingOnData(fileData))
-    .then((data) => finalizeData(data))
-    .catch(errorHandlingFunc)
-);
-```
-
-#### Promise VS Callback
-- Easy to go from Promise to Callback: Just call .then(callbackFunc) 
-  `axios.get(url).then(callback)`
-- Going from Callback to Promise requires creating a Promise 
-  let newPromise = new // calls  Promise( function (fulfill, reject) { fulfill (value) to have promise return value // calls reject });
-
-
-Callback → Promise: Wrap with new Promise(function(fulfill, reject) {...})
-
-```js
-function myReadFile(filename) {
-  return new Promise(function (fulfill, reject) {
-    fs.readFile(filename, function (err, res) {
-      if (err) reject(err);
-      else fulfill(res);
-    });
-  });
-}
-```
 
 ### async/await with Axios
 
