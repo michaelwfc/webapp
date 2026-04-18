@@ -1,0 +1,827 @@
+
+<style>
+:root { --accent: #00ED64; --dark: #001E2B; --mid: #023430; --pill-bg: #E1F5EE; --pill-text: #0F6E56; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-size: 15px; }
+
+.tut-wrap { font-family: var(--font-sans); padding: 0 0 2rem; }
+
+.hero { background: var(--dark); border-radius: var(--border-radius-lg); padding: 2rem 2rem 1.5rem; margin-bottom: 2rem; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:rgba(0,237,100,.07);pointer-events:none; }
+.hero-badge { display:inline-block;background:rgba(0,237,100,.15);color:#00ED64;font-size:12px;padding:4px 10px;border-radius:20px;margin-bottom:12px; }
+.hero h1 { color:#fff;font-size:22px;font-weight:500;margin-bottom:8px; }
+.hero p { color:rgba(255,255,255,.6);font-size:14px;line-height:1.6;max-width:560px; }
+.hero-tags { display:flex;gap:8px;flex-wrap:wrap;margin-top:14px; }
+.hero-tag { background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);font-size:12px;padding:4px 10px;border-radius:6px; }
+
+.nav-pills { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:2rem; }
+.nav-pill { background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:20px;padding:6px 14px;font-size:13px;color:var(--color-text-secondary);cursor:pointer;transition:all .15s; }
+.nav-pill:hover { background:var(--color-background-primary);color:var(--color-text-primary);border-color:var(--color-border-secondary); }
+.nav-pill.active { background:#E1F5EE;color:#0F6E56;border-color:#5DCAA5; }
+
+.section { margin-bottom: 2.5rem; }
+.section-header { display:flex;align-items:center;gap:10px;margin-bottom:1rem; }
+.section-num { width:28px;height:28px;border-radius:50%;background:#E1F5EE;color:#0F6E56;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.section h2 { font-size:18px;font-weight:500;color:var(--color-text-primary); }
+
+.explain-card { background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1rem; }
+.explain-card p { font-size:14px;color:var(--color-text-secondary);line-height:1.7;margin-bottom:0.75rem; }
+.explain-card p:last-child { margin-bottom:0; }
+
+.analogy-box { background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-left:3px solid #1D9E75;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;padding:1rem 1.25rem;margin:0.75rem 0; }
+.analogy-box .label { font-size:11px;font-weight:500;color:#1D9E75;letter-spacing:.04em;margin-bottom:4px; }
+.analogy-box p { font-size:14px;color:var(--color-text-secondary);line-height:1.6;margin:0; }
+
+.compare-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:1rem 0; }
+.compare-card { background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:1rem; }
+.compare-card .ch { font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:8px;padding-bottom:8px;border-bottom:0.5px solid var(--color-border-tertiary); }
+.compare-card ul { list-style:none;padding:0; }
+.compare-card ul li { font-size:13px;color:var(--color-text-secondary);padding:3px 0;display:flex;gap:6px;align-items:flex-start; }
+.compare-card ul li::before { content:'•';color:#1D9E75;flex-shrink:0; }
+
+.code-block { background:var(--dark);border-radius:var(--border-radius-md);overflow:hidden;margin:0.75rem 0; }
+.code-header { display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:0.5px solid rgba(255,255,255,.08); }
+.code-lang { font-size:11px;color:rgba(255,255,255,.4);font-family:var(--font-mono); }
+.copy-btn { font-size:11px;color:rgba(255,255,255,.4);background:none;border:0.5px solid rgba(255,255,255,.12);border-radius:4px;padding:3px 8px;cursor:pointer;transition:all .15s; }
+.copy-btn:hover { color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.3); }
+.code-body { padding:14px;overflow-x:auto; }
+.code-body pre { font-family:var(--font-mono);font-size:13px;line-height:1.65;color:#D4EFDF;white-space:pre; }
+.k { color:#00ED64; }
+.s { color:#F0A500; }
+.c { color:#5E8E7E; font-style:italic; }
+.n { color:#89C4FF; }
+.v { color:#F5A7B8; }
+.p { color:#ccc; }
+
+.step-group { display:flex;flex-direction:column;gap:12px;margin:1rem 0; }
+.step { display:flex;gap:14px;align-items:flex-start; }
+.step-icon { width:32px;height:32px;border-radius:50%;background:#E1F5EE;color:#0F6E56;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px; }
+.step-body h4 { font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px; }
+.step-body p { font-size:13px;color:var(--color-text-secondary);line-height:1.6; }
+
+.tip-box { display:flex;gap:10px;background:rgba(29,158,117,.08);border:0.5px solid rgba(29,158,117,.25);border-radius:var(--border-radius-md);padding:12px 14px;margin:1rem 0; }
+.tip-icon { font-size:14px;flex-shrink:0;margin-top:1px; }
+.tip-box p { font-size:13px;color:var(--color-text-secondary);line-height:1.6;margin:0; }
+
+.warn-box { display:flex;gap:10px;background:rgba(186,117,23,.08);border:0.5px solid rgba(186,117,23,.25);border-radius:var(--border-radius-md);padding:12px 14px;margin:1rem 0; }
+.warn-box p { font-size:13px;color:var(--color-text-secondary);line-height:1.6;margin:0; }
+
+.doc-grid { display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:1rem 0; }
+.doc-card { background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px; }
+.doc-card .dc-label { font-size:11px;font-weight:500;color:#1D9E75;margin-bottom:6px; }
+.doc-card pre { font-family:var(--font-mono);font-size:12px;color:var(--color-text-secondary);line-height:1.5;overflow-x:auto;white-space:pre; }
+
+.op-tabs { display:flex;gap:0;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden;margin-bottom:1rem; }
+.op-tab { flex:1;padding:8px;font-size:13px;text-align:center;cursor:pointer;background:var(--color-background-secondary);color:var(--color-text-secondary);border-right:0.5px solid var(--color-border-tertiary);transition:all .15s; }
+.op-tab:last-child { border-right:none; }
+.op-tab.active { background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500; }
+.op-panel { display:none; }
+.op-panel.active { display:block; }
+
+.idx-compare { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:1rem 0; }
+.idx-card { border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden; }
+.idx-card .ick-head { padding:10px 14px;font-size:13px;font-weight:500;color:var(--color-text-primary);border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary); }
+.idx-card .ick-body { padding:12px 14px; }
+.idx-card .ick-body p { font-size:13px;color:var(--color-text-secondary);line-height:1.6;margin-bottom:6px; }
+
+.agg-pipeline { display:flex;flex-direction:column;gap:6px;margin:1rem 0; }
+.agg-stage { display:flex;align-items:center;gap:10px; }
+.agg-stage .stage-pill { background:#E1F5EE;color:#0F6E56;font-size:12px;font-family:var(--font-mono);padding:4px 10px;border-radius:20px;white-space:nowrap; }
+.agg-stage .stage-arrow { color:var(--color-text-secondary);font-size:12px;flex-shrink:0; }
+.agg-stage .stage-desc { font-size:13px;color:var(--color-text-secondary); }
+
+.ask-btn { display:inline-flex;align-items:center;gap:6px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:20px;padding:6px 14px;font-size:13px;color:var(--color-text-secondary);cursor:pointer;transition:all .15s;margin-top:10px; }
+.ask-btn:hover { background:var(--color-background-primary);color:var(--color-text-primary); }
+.ask-btn::after { content:'↗';font-size:11px; }
+
+.hidden { display:none!important; }
+
+@media (max-width: 520px) {
+  .compare-grid, .doc-grid, .idx-compare { grid-template-columns:1fr; }
+}
+</style>
+
+<div class="tut-wrap">
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge">Complete tutorial</div>
+  <h1>MongoDB — from zero to productive</h1>
+  <p>Learn the world's most popular document database. No SQL experience needed — just bring curiosity.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">Documents</span>
+    <span class="hero-tag">Collections</span>
+    <span class="hero-tag">CRUD</span>
+    <span class="hero-tag">Indexes</span>
+    <span class="hero-tag">Aggregation</span>
+    <span class="hero-tag">Mongoose</span>
+  </div>
+</div>
+
+<!-- Nav pills -->
+<div class="nav-pills">
+  <div class="nav-pill active" onclick="goTo(0)">What is MongoDB?</div>
+  <div class="nav-pill" onclick="goTo(1)">Core concepts</div>
+  <div class="nav-pill" onclick="goTo(2)">CRUD operations</div>
+  <div class="nav-pill" onclick="goTo(3)">Queries & filters</div>
+  <div class="nav-pill" onclick="goTo(4)">Indexes</div>
+  <div class="nav-pill" onclick="goTo(5)">Aggregation</div>
+  <div class="nav-pill" onclick="goTo(6)">Mongoose (Node.js)</div>
+  <div class="nav-pill" onclick="goTo(7)">Best practices</div>
+</div>
+
+<!-- ── SECTION 0: What is MongoDB? ── -->
+<div class="section" id="sec-0">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <h2>What is MongoDB?</h2>
+  </div>
+
+  <div class="explain-card">
+    <p>MongoDB is a <strong>document database</strong> — instead of storing data in rows and columns like a spreadsheet (SQL), it stores data as <strong>JSON-like documents</strong>. That means your data can be nested, flexible, and shaped however your application actually needs it.</p>
+    <p>It's open-source, scales horizontally, and is the backbone of many major apps you use daily.</p>
+  </div>
+
+  <div class="analogy-box">
+    <div class="label">analogy</div>
+    <p>Think of a SQL database as a rigid Excel spreadsheet — every row must have the same columns. MongoDB is more like a folder of Post-it notes — each note can have different information, structured however makes sense for that note.</p>
+  </div>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="ch">SQL databases</div>
+      <ul>
+        <li>Tables with fixed columns</li>
+        <li>Schema must be defined upfront</li>
+        <li>Rows relate via foreign keys</li>
+        <li>Great for structured, relational data</li>
+        <li>Examples: PostgreSQL, MySQL</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <div class="ch">MongoDB (NoSQL)</div>
+      <ul>
+        <li>Collections of flexible documents</li>
+        <li>Schema is optional / evolves freely</li>
+        <li>Related data can be embedded</li>
+        <li>Great for hierarchical / JSON data</li>
+        <li>Horizontal scaling built-in</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-icon">💡</div>
+    <p>MongoDB shines when your data doesn't fit neatly into tables — think user profiles with varying fields, product catalogs with different attributes per category, or real-time event streams.</p>
+  </div>
+
+  <button class="ask-btn" onclick="sendPrompt('When should I choose MongoDB over a SQL database?')">When should I pick MongoDB over SQL?</button>
+</div>
+
+<!-- ── SECTION 1: Core concepts ── -->
+<div class="section hidden" id="sec-1">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <h2>Core concepts</h2>
+  </div>
+
+  <div class="explain-card">
+    <p>MongoDB has a simple mental model — just three levels: <strong>database → collection → document</strong>. Once you understand these, everything else clicks.</p>
+  </div>
+
+  <div class="step-group">
+    <div class="step">
+      <div class="step-icon">DB</div>
+      <div class="step-body">
+        <h4>Database</h4>
+        <p>The top-level container. One MongoDB server can run many databases (e.g. <code>myapp_dev</code>, <code>myapp_prod</code>). Each database holds collections.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-icon">[]</div>
+      <div class="step-body">
+        <h4>Collection</h4>
+        <p>Like a SQL table — but without a fixed schema. A collection groups related documents (e.g. <code>users</code>, <code>products</code>, <code>orders</code>). Documents in the same collection don't need identical fields.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-icon">{}</div>
+      <div class="step-body">
+        <h4>Document</h4>
+        <p>The actual data — a JSON object. Documents can be nested (objects inside objects), and fields can be arrays. Every document gets a unique <code>_id</code> automatically.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="analogy-box">
+    <div class="label">SQL vs MongoDB — quick map</div>
+    <p>Database → Database &nbsp;|&nbsp; Table → Collection &nbsp;|&nbsp; Row → Document &nbsp;|&nbsp; Column → Field &nbsp;|&nbsp; JOIN → Embedded doc or <code>$lookup</code></p>
+  </div>
+
+  <p style="font-size:14px;color:var(--color-text-secondary);margin:1rem 0 0.5rem;">A sample document — notice how address and hobbies are embedded right inside:</p>
+
+  <div class="doc-grid">
+    <div class="doc-card" style="grid-column:1/-1">
+      <div class="dc-label">users collection — one document</div>
+      <pre>{
+  <span class="k">"_id"</span>:       <span class="s">ObjectId("64ab12...")</span>,
+  <span class="k">"name"</span>:      <span class="s">"Maya Rodriguez"</span>,
+  <span class="k">"email"</span>:     <span class="s">"maya@example.com"</span>,
+  <span class="k">"age"</span>:       <span class="v">31</span>,
+  <span class="k">"address"</span>: {
+    <span class="k">"city"</span>:    <span class="s">"Tokyo"</span>,
+    <span class="k">"country"</span>: <span class="s">"Japan"</span>
+  },
+  <span class="k">"hobbies"</span>:   [<span class="s">"hiking"</span>, <span class="s">"coding"</span>],
+  <span class="k">"active"</span>:    <span class="v">true</span>
+}</pre>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-icon">💡</div>
+    <p><strong>_id</strong> is automatically added to every document. You can provide your own (e.g. a UUID string), or let MongoDB generate an <code>ObjectId</code> — a 12-byte unique identifier that encodes a timestamp.</p>
+  </div>
+
+  <button class="ask-btn" onclick="sendPrompt('How does embedding documents compare to using references in MongoDB?')">Embedding vs references — when to use each?</button>
+</div>
+
+<!-- ── SECTION 2: CRUD ── -->
+<div class="section hidden" id="sec-2">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <h2>CRUD operations</h2>
+  </div>
+
+  <div class="explain-card">
+    <p>CRUD stands for <strong>Create, Read, Update, Delete</strong> — the four fundamental operations for any database. In MongoDB, these map cleanly to shell commands (and driver methods in Node, Python, etc.).</p>
+  </div>
+
+  <div class="op-tabs">
+    <div class="op-tab active" onclick="setTab(this, 'create')">Create</div>
+    <div class="op-tab" onclick="setTab(this, 'read')">Read</div>
+    <div class="op-tab" onclick="setTab(this, 'update')">Update</div>
+    <div class="op-tab" onclick="setTab(this, 'delete')">Delete</div>
+  </div>
+
+  <div class="op-panel active" id="tab-create">
+    <div class="explain-card">
+      <p>Use <code>insertOne()</code> to add a single document, or <code>insertMany()</code> for a batch. MongoDB automatically adds <code>_id</code> if you don't provide one.</p>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">mongosh</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <div class="code-body"><pre><span class="c">// Insert one document</span>
+db.users.<span class="k">insertOne</span>({
+  name:  <span class="s">"Maya Rodriguez"</span>,
+  email: <span class="s">"maya@example.com"</span>,
+  age:   <span class="v">31</span>,
+  city:  <span class="s">"Tokyo"</span>
+})
+
+<span class="c">// Insert many at once</span>
+db.users.<span class="k">insertMany</span>([
+  { name: <span class="s">"Carlos Ruiz"</span>,  age: <span class="v">24</span>, city: <span class="s">"Madrid"</span> },
+  { name: <span class="s">"Aiko Tanaka"</span>, age: <span class="v">29</span>, city: <span class="s">"Osaka"</span>  }
+])</pre></div>
+    </div>
+  </div>
+
+  <div class="op-panel" id="tab-read">
+    <div class="explain-card">
+      <p><code>find()</code> returns a cursor (list) of matching documents. <code>findOne()</code> returns just the first match. Pass an empty object <code>{}</code> to get everything.</p>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">mongosh</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <div class="code-body"><pre><span class="c">// Find ALL users</span>
+db.users.<span class="k">find</span>({})
+
+<span class="c">// Find users in Tokyo</span>
+db.users.<span class="k">find</span>({ city: <span class="s">"Tokyo"</span> })
+
+<span class="c">// Find ONE user by email</span>
+db.users.<span class="k">findOne</span>({ email: <span class="s">"maya@example.com"</span> })
+
+<span class="c">// Find and return only name + email (projection)</span>
+db.users.<span class="k">find</span>({}, { name: <span class="v">1</span>, email: <span class="v">1</span>, _id: <span class="v">0</span> })</pre></div>
+    </div>
+    <div class="tip-box">
+      <div class="tip-icon">💡</div>
+      <p>Projections (the second argument to <code>find</code>) let you return only the fields you need — useful for reducing network transfer on large documents.</p>
+    </div>
+  </div>
+
+  <div class="op-panel" id="tab-update">
+    <div class="explain-card">
+      <p>Use <code>$set</code> to change specific fields without touching the rest. <code>updateOne()</code> changes the first match; <code>updateMany()</code> changes all matches.</p>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">mongosh</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <div class="code-body"><pre><span class="c">// Update one field on a specific user</span>
+db.users.<span class="k">updateOne</span>(
+  { email: <span class="s">"maya@example.com"</span> },
+  { <span class="n">$set</span>: { city: <span class="s">"Osaka"</span>, age: <span class="v">32</span> } }
+)
+
+<span class="c">// Update all users in Madrid — add a field</span>
+db.users.<span class="k">updateMany</span>(
+  { city: <span class="s">"Madrid"</span> },
+  { <span class="n">$set</span>: { country: <span class="s">"Spain"</span> } }
+)
+
+<span class="c">// Increment a number field</span>
+db.users.<span class="k">updateOne</span>(
+  { name: <span class="s">"Carlos Ruiz"</span> },
+  { <span class="n">$inc</span>: { age: <span class="v">1</span> } }
+)
+
+<span class="c">// upsert: insert if not found</span>
+db.users.<span class="k">updateOne</span>(
+  { email: <span class="s">"new@example.com"</span> },
+  { <span class="n">$set</span>: { name: <span class="s">"New User"</span> } },
+  { upsert: <span class="v">true</span> }
+)</pre></div>
+    </div>
+  </div>
+
+  <div class="op-panel" id="tab-delete">
+    <div class="explain-card">
+      <p>Be careful — <code>deleteMany({})</code> with an empty filter deletes everything! Always double-check your filter before running delete commands.</p>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">mongosh</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <div class="code-body"><pre><span class="c">// Delete one document</span>
+db.users.<span class="k">deleteOne</span>({ email: <span class="s">"maya@example.com"</span> })
+
+<span class="c">// Delete all inactive users</span>
+db.users.<span class="k">deleteMany</span>({ active: <span class="v">false</span> })
+
+<span class="c">// Drop the entire collection (irreversible!)</span>
+db.users.<span class="k">drop</span>()</pre></div>
+    </div>
+    <div class="warn-box">
+      <div class="tip-icon">⚠️</div>
+      <p>Always run a <code>find()</code> with your filter first to see what will be deleted before firing <code>deleteMany()</code>. Production accidents from empty filters are surprisingly common.</p>
+    </div>
+  </div>
+
+  <button class="ask-btn" onclick="sendPrompt('Show me MongoDB CRUD examples in Node.js with the official driver')">Show me CRUD in Node.js</button>
+</div>
+
+<!-- ── SECTION 3: Queries ── -->
+<div class="section hidden" id="sec-3">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <h2>Queries & filters</h2>
+  </div>
+
+  <div class="explain-card">
+    <p>MongoDB's query language uses special <strong>operator keywords</strong> that start with <code>$</code>. Combine them to filter, compare, and match documents with precision.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">comparison operators</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <div class="code-body"><pre><span class="c">// Greater than, less than</span>
+db.users.<span class="k">find</span>({ age: { <span class="n">$gt</span>: <span class="v">25</span>, <span class="n">$lte</span>: <span class="v">40</span> } })
+
+<span class="c">// Not equal</span>
+db.users.<span class="k">find</span>({ city: { <span class="n">$ne</span>: <span class="s">"Tokyo"</span> } })
+
+<span class="c">// Match any of a list (like SQL's IN)</span>
+db.users.<span class="k">find</span>({ city: { <span class="n">$in</span>: [<span class="s">"Tokyo"</span>, <span class="s">"Osaka"</span>, <span class="s">"Kyoto"</span>] } })
+
+<span class="c">// Exists check</span>
+db.users.<span class="k">find</span>({ phone: { <span class="n">$exists</span>: <span class="v">true</span> } })</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">logical operators</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <div class="code-body"><pre><span class="c">// AND — fields automatically AND together</span>
+db.users.<span class="k">find</span>({ age: { <span class="n">$gt</span>: <span class="v">25</span> }, city: <span class="s">"Tokyo"</span> })
+
+<span class="c">// Explicit $and</span>
+db.users.<span class="k">find</span>({
+  <span class="n">$and</span>: [
+    { age:  { <span class="n">$gt</span>: <span class="v">25</span> } },
+    { city: <span class="s">"Tokyo"</span>      }
+  ]
+})
+
+<span class="c">// OR</span>
+db.users.<span class="k">find</span>({
+  <span class="n">$or</span>: [
+    { city: <span class="s">"Tokyo"</span>  },
+    { city: <span class="s">"Madrid"</span> }
+  ]
+})
+
+<span class="c">// NOT</span>
+db.users.<span class="k">find</span>({ age: { <span class="n">$not</span>: { <span class="n">$gt</span>: <span class="v">30</span> } } })</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">array & nested queries</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <div class="code-body"><pre><span class="c">// Find docs where hobbies array contains "hiking"</span>
+db.users.<span class="k">find</span>({ hobbies: <span class="s">"hiking"</span> })
+
+<span class="c">// Array contains all of these values</span>
+db.users.<span class="k">find</span>({ hobbies: { <span class="n">$all</span>: [<span class="s">"coding"</span>, <span class="s">"hiking"</span>] } })
+
+<span class="c">// Query nested field with dot notation</span>
+db.users.<span class="k">find</span>({ <span class="s">"address.city"</span>: <span class="s">"Tokyo"</span> })
+
+<span class="c">// Sort, skip, limit — for pagination</span>
+db.users.<span class="k">find</span>({})
+  .<span class="k">sort</span>({ age: <span class="v">-1</span> })   <span class="c">// -1 = descending</span>
+  .<span class="k">skip</span>(<span class="v">20</span>)
+  .<span class="k">limit</span>(<span class="v">10</span>)</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">text search</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <div class="code-body"><pre><span class="c">// First create a text index</span>
+db.products.<span class="k">createIndex</span>({ name: <span class="s">"text"</span>, description: <span class="s">"text"</span> })
+
+<span class="c">// Then search</span>
+db.products.<span class="k">find</span>({ <span class="n">$text</span>: { <span class="n">$search</span>: <span class="s">"wireless headphones"</span> } })</pre></div>
+  </div>
+
+  <button class="ask-btn" onclick="sendPrompt('How do I do regex matching and full-text search in MongoDB?')">Regex and full-text search deep dive</button>
+</div>
+
+<!-- ── SECTION 4: Indexes ── -->
+<div class="section hidden" id="sec-4">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <h2>Indexes</h2>
+  </div>
+
+  <div class="explain-card">
+    <p>Without an index, MongoDB scans every document to find matches — called a <strong>collection scan</strong>. Indexes let the database jump directly to matching documents, like a book's index vs reading every page.</p>
+    <p>They're one of the biggest performance levers you have.</p>
+  </div>
+
+  <div class="idx-compare">
+    <div class="idx-card">
+      <div class="ick-head">Without index</div>
+      <div class="ick-body">
+        <p>Scans all 1,000,000 documents</p>
+        <p>Reads: ~1M</p>
+        <p>Time: potentially seconds</p>
+      </div>
+    </div>
+    <div class="idx-card">
+      <div class="ick-head">With index on <code>email</code></div>
+      <div class="ick-body">
+        <p>Jumps to exact match</p>
+        <p>Reads: 1</p>
+        <p>Time: milliseconds</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">creating indexes</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <div class="code-body"><pre><span class="c">// Single field index</span>
+db.users.<span class="k">createIndex</span>({ email: <span class="v">1</span> })
+
+<span class="c">// Unique index (enforces no duplicates)</span>
+db.users.<span class="k">createIndex</span>({ email: <span class="v">1</span> }, { unique: <span class="v">true</span> })
+
+<span class="c">// Compound index (covers queries on both fields)</span>
+db.orders.<span class="k">createIndex</span>({ userId: <span class="v">1</span>, createdAt: <span class="v">-1</span> })
+
+<span class="c">// TTL index — auto-delete after N seconds</span>
+db.sessions.<span class="k">createIndex</span>(
+  { createdAt: <span class="v">1</span> },
+  { expireAfterSeconds: <span class="v">3600</span> }  <span class="c">// 1 hour</span>
+)
+
+<span class="c">// List all indexes on a collection</span>
+db.users.<span class="k">getIndexes</span>()
+
+<span class="c">// Explain a query — see if index is used</span>
+db.users.<span class="k">find</span>({ email: <span class="s">"maya@example.com"</span> }).<span class="k">explain</span>(<span class="s">"executionStats"</span>)</pre></div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-icon">💡</div>
+    <p>Every index speeds up reads but slows down writes — the index must be updated on every insert, update, and delete. Don't index every field; index the fields you <em>actually</em> query frequently. Use <code>explain()</code> to verify an index is being used.</p>
+  </div>
+
+  <div class="warn-box">
+    <div class="tip-icon">⚠️</div>
+    <p>Compound indexes are directional — an index on <code>{userId: 1, createdAt: -1}</code> supports queries that filter on <code>userId</code> alone, or on both <code>userId + createdAt</code>. It does <em>not</em> efficiently support queries on <code>createdAt</code> alone (the leftmost rule).</p>
+  </div>
+
+  <button class="ask-btn" onclick="sendPrompt('How do I analyze slow MongoDB queries and figure out which indexes to add?')">How do I diagnose slow queries?</button>
+</div>
+
+<!-- ── SECTION 5: Aggregation ── -->
+<div class="section hidden" id="sec-5">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <h2>Aggregation pipeline</h2>
+  </div>
+
+  <div class="explain-card">
+    <p>The aggregation pipeline is MongoDB's answer to SQL's <code>GROUP BY</code>, <code>JOIN</code>, and complex transformations. Data flows through a series of <strong>stages</strong>, each transforming the documents before passing them to the next stage.</p>
+  </div>
+
+  <div class="agg-pipeline">
+    <div class="agg-stage">
+      <span class="stage-pill">$match</span>
+      <span class="stage-arrow">→</span>
+      <span class="stage-desc">Filter documents (like a WHERE clause)</span>
+    </div>
+    <div class="agg-stage">
+      <span class="stage-pill">$group</span>
+      <span class="stage-arrow">→</span>
+      <span class="stage-desc">Group by a field and compute aggregates (sum, avg, count)</span>
+    </div>
+    <div class="agg-stage">
+      <span class="stage-pill">$sort</span>
+      <span class="stage-arrow">→</span>
+      <span class="stage-desc">Order the results</span>
+    </div>
+    <div class="agg-stage">
+      <span class="stage-pill">$project</span>
+      <span class="stage-arrow">→</span>
+      <span class="stage-desc">Reshape documents — include, exclude, or compute new fields</span>
+    </div>
+    <div class="agg-stage">
+      <span class="stage-pill">$lookup</span>
+      <span class="stage-arrow">→</span>
+      <span class="stage-desc">Join with another collection (like SQL LEFT JOIN)</span>
+    </div>
+    <div class="agg-stage">
+      <span class="stage-pill">$limit / $skip</span>
+      <span class="stage-arrow">→</span>
+      <span class="stage-desc">Paginate the output</span>
+    </div>
+    <div class="agg-stage">
+      <span class="stage-pill">$unwind</span>
+      <span class="stage-arrow">→</span>
+      <span class="stage-desc">Flatten an array field into multiple documents</span>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">example — orders by city</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <div class="code-body"><pre>db.orders.<span class="k">aggregate</span>([
+  <span class="c">// Stage 1: only look at completed orders</span>
+  { <span class="n">$match</span>: { status: <span class="s">"completed"</span> } },
+
+  <span class="c">// Stage 2: group by city, sum the totals</span>
+  { <span class="n">$group</span>: {
+      _id:        <span class="s">"$city"</span>,
+      totalSales: { <span class="n">$sum</span>: <span class="s">"$amount"</span> },
+      orderCount: { <span class="n">$sum</span>: <span class="v">1</span> }
+  }},
+
+  <span class="c">// Stage 3: sort highest sales first</span>
+  { <span class="n">$sort</span>: { totalSales: <span class="v">-1</span> } },
+
+  <span class="c">// Stage 4: top 10 cities only</span>
+  { <span class="n">$limit</span>: <span class="v">10</span> }
+])</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">$lookup — joining collections</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <div class="code-body"><pre>db.orders.<span class="k">aggregate</span>([
+  <span class="c">// Join the 'users' collection on userId</span>
+  { <span class="n">$lookup</span>: {
+      from:         <span class="s">"users"</span>,
+      localField:   <span class="s">"userId"</span>,
+      foreignField: <span class="s">"_id"</span>,
+      as:           <span class="s">"userInfo"</span>
+  }},
+
+  <span class="c">// Flatten the array (lookup returns an array)</span>
+  { <span class="n">$unwind</span>: <span class="s">"$userInfo"</span> },
+
+  <span class="c">// Shape the output</span>
+  { <span class="n">$project</span>: {
+      orderId:   <span class="s">"$_id"</span>,
+      amount:    <span class="v">1</span>,
+      userName:  <span class="s">"$userInfo.name"</span>,
+      userEmail: <span class="s">"$userInfo.email"</span>
+  }}
+])</pre></div>
+  </div>
+
+  <button class="ask-btn" onclick="sendPrompt('Show me more aggregation pipeline examples — average, percentiles, date grouping')">More aggregation examples</button>
+</div>
+
+<!-- ── SECTION 6: Mongoose ── -->
+<div class="section hidden" id="sec-6">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <h2>Mongoose (Node.js)</h2>
+  </div>
+
+  <div class="explain-card">
+    <p>Mongoose is an <strong>Object Document Mapper (ODM)</strong> for Node.js. It adds schemas, validation, and a clean API on top of MongoDB — making it much easier to work with in a real application.</p>
+  </div>
+
+  <div class="analogy-box">
+    <div class="label">analogy</div>
+    <p>Mongoose is to MongoDB what Sequelize or Prisma is to SQL — it adds structure, type safety, and convenience methods so you're not manually constructing queries everywhere.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">install & connect</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <div class="code-body"><pre><span class="c">// npm install mongoose</span>
+
+<span class="k">const</span> mongoose = <span class="k">require</span>(<span class="s">'mongoose'</span>);
+
+<span class="k">async function</span> <span class="n">connect</span>() {
+  <span class="k">await</span> mongoose.<span class="k">connect</span>(<span class="s">'mongodb://localhost:27017/myapp'</span>);
+  console.<span class="k">log</span>(<span class="s">'Connected to MongoDB'</span>);
+}
+
+connect().<span class="k">catch</span>(console.error);</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">define a schema</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <div class="code-body"><pre><span class="k">const</span> userSchema = <span class="k">new</span> mongoose.<span class="n">Schema</span>({
+  name:  { type: <span class="n">String</span>,  required: <span class="v">true</span> },
+  email: { type: <span class="n">String</span>,  required: <span class="v">true</span>, unique: <span class="v">true</span> },
+  age:   { type: <span class="n">Number</span>,  min: <span class="v">0</span>,  max: <span class="v">120</span> },
+  city:  { type: <span class="n">String</span>,  default: <span class="s">'Unknown'</span> },
+  tags:  [<span class="n">String</span>],
+  createdAt: { type: <span class="n">Date</span>, default: <span class="n">Date</span>.now }
+});
+
+<span class="c">// Compile schema → Model (a class)</span>
+<span class="k">const</span> User = mongoose.<span class="k">model</span>(<span class="s">'User'</span>, userSchema);</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">CRUD with Mongoose</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <div class="code-body"><pre><span class="c">// Create</span>
+<span class="k">const</span> maya = <span class="k">await</span> User.<span class="k">create</span>({
+  name:  <span class="s">'Maya Rodriguez'</span>,
+  email: <span class="s">'maya@example.com'</span>,
+  age:   <span class="v">31</span>
+});
+
+<span class="c">// Read</span>
+<span class="k">const</span> allUsers = <span class="k">await</span> User.<span class="k">find</span>({});
+<span class="k">const</span> one      = <span class="k">await</span> User.<span class="k">findById</span>(maya._id);
+<span class="k">const</span> byEmail  = <span class="k">await</span> User.<span class="k">findOne</span>({ email: <span class="s">'maya@example.com'</span> });
+
+<span class="c">// Read with chaining</span>
+<span class="k">const</span> page1 = <span class="k">await</span> User
+  .<span class="k">find</span>({ city: <span class="s">'Tokyo'</span> })
+  .<span class="k">select</span>(<span class="s">'name email'</span>)
+  .<span class="k">sort</span>({ name: <span class="v">1</span> })
+  .<span class="k">limit</span>(<span class="v">10</span>);
+
+<span class="c">// Update</span>
+<span class="k">await</span> User.<span class="k">findByIdAndUpdate</span>(maya._id, { age: <span class="v">32</span> }, { new: <span class="v">true</span> });
+
+<span class="c">// Delete</span>
+<span class="k">await</span> User.<span class="k">findByIdAndDelete</span>(maya._id);</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">validation & middleware</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <div class="code-body"><pre><span class="c">// Custom validator</span>
+email: {
+  type:     <span class="n">String</span>,
+  validate: {
+    validator: (v) => <span class="s">/\S+@\S+\.\S+/</span>.<span class="k">test</span>(v),
+    message:   <span class="s">'Invalid email format'</span>
+  }
+}
+
+<span class="c">// Pre-save middleware (e.g. hash a password)</span>
+userSchema.<span class="k">pre</span>(<span class="s">'save'</span>, <span class="k">async function</span>() {
+  <span class="k">if</span> (<span class="k">this</span>.isModified(<span class="s">'password'</span>)) {
+    <span class="k">this</span>.password = <span class="k">await</span> bcrypt.<span class="k">hash</span>(<span class="k">this</span>.password, <span class="v">12</span>);
+  }
+});</pre></div>
+  </div>
+
+  <button class="ask-btn" onclick="sendPrompt('How do I set up relationships between Mongoose models using references and populate?')">Mongoose relationships and populate()</button>
+</div>
+
+<!-- ── SECTION 7: Best practices ── -->
+<div class="section hidden" id="sec-7">
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <h2>Best practices</h2>
+  </div>
+
+  <div class="explain-card">
+    <p>A few principles that will save you a lot of pain as your app grows.</p>
+  </div>
+
+  <div class="step-group">
+    <div class="step">
+      <div class="step-icon">1</div>
+      <div class="step-body">
+        <h4>Design your schema around your queries, not your data</h4>
+        <p>In SQL, you normalize data. In MongoDB, ask "what does my app need to read?" and design around that. Embedding data that is always read together avoids expensive lookups.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-icon">2</div>
+      <div class="step-body">
+        <h4>Index early — but not everything</h4>
+        <p>Add indexes on fields you query frequently or sort by. Use <code>explain("executionStats")</code> regularly. Too many indexes slow down writes and waste disk space.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-icon">3</div>
+      <div class="step-body">
+        <h4>Avoid unbounded arrays</h4>
+        <p>Arrays that grow without limit (e.g. storing all events on a document) will eventually cause document size issues. Store high-volume sub-items in a separate collection instead.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-icon">4</div>
+      <div class="step-body">
+        <h4>Use projection to limit returned data</h4>
+        <p>Always pass a projection as the second argument to <code>find()</code> when you don't need all fields. Transferring less data = faster responses.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-icon">5</div>
+      <div class="step-body">
+        <h4>Use connection pooling in production</h4>
+        <p>Don't open a new connection per request. Use a single Mongoose connection (or the official driver's pool) shared across your entire app. Connection pools are the default — don't call <code>connect()</code> inside request handlers.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-icon">6</div>
+      <div class="step-body">
+        <h4>Enable transactions for multi-document operations</h4>
+        <p>MongoDB supports multi-document ACID transactions (replica sets required). Use them when you need atomicity across multiple documents — e.g. transferring balance between two accounts.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">transaction example</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <div class="code-body"><pre><span class="k">const</span> session = <span class="k">await</span> mongoose.<span class="k">startSession</span>();
+session.<span class="k">startTransaction</span>();
+
+<span class="k">try</span> {
+  <span class="k">await</span> Account.<span class="k">updateOne</span>(
+    { _id: fromId },
+    { <span class="n">$inc</span>: { balance: <span class="v">-100</span> } },
+    { session }
+  );
+  <span class="k">await</span> Account.<span class="k">updateOne</span>(
+    { _id: toId },
+    { <span class="n">$inc</span>: { balance: <span class="v">+100</span> } },
+    { session }
+  );
+  <span class="k">await</span> session.<span class="k">commitTransaction</span>();
+} <span class="k">catch</span> (err) {
+  <span class="k">await</span> session.<span class="k">abortTransaction</span>();
+  <span class="k">throw</span> err;
+} <span class="k">finally</span> {
+  session.<span class="k">endSession</span>();
+}</pre></div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-icon">💡</div>
+    <p>For local development, <strong>MongoDB Atlas</strong> (cloud) has a free tier that takes 2 minutes to set up — no local installation needed. <a href="https://www.mongodb.com/atlas" style="color:var(--color-text-info)">mongodb.com/atlas</a></p>
+  </div>
+
+  <button class="ask-btn" onclick="sendPrompt('How do I set up MongoDB Atlas and connect to it from a Node.js app?')">Set up MongoDB Atlas →</button>
+</div>
+
+</div>
+
+<script>
+const sections = document.querySelectorAll('.section');
+const pills = document.querySelectorAll('.nav-pill');
+
+function goTo(idx) {
+  sections.forEach((s, i) => s.classList.toggle('hidden', i !== idx));
+  pills.forEach((p, i) => p.classList.toggle('active', i === idx));
+  document.querySelector('.tut-wrap').scrollIntoView({ behavior: 'smooth' });
+}
+
+function setTab(el, id) {
+  el.closest('.section').querySelectorAll('.op-tab').forEach(t => t.classList.remove('active'));
+  el.closest('.section').querySelectorAll('.op-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+function copyCode(btn) {
+  const code = btn.closest('.code-block').querySelector('pre').innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'copied!';
+    setTimeout(() => btn.textContent = orig, 1500);
+  });
+}
+</script>
