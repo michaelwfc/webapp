@@ -1,7 +1,7 @@
 {
-  "workbench.colorTheme": "Default Dark+",
+  "workbench.colorTheme": "Dark+",
   "files.autoSave": "onFocusChange",
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
   "terminal.integrated.defaultProfile.windows": "Git Bash",
 
   "window.zoomLevel": 1,
@@ -32,10 +32,31 @@
   "[python]": {
     "editor.formatOnType": true
   },
+  "mcpServers": {
+    "mui-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@mui/mcp@latest"]
+    }
+  },
+
+  "chat.mcp": {
+    "enabled": true,
+    "discovery": {
+      "enabled": true
+    }
+  },
   "vsicons.dontShowNewVersionMessage": true,
 
   "files.associations": {
     "string.h": "c",
     "stdio.h": "c"
-  }
+  },
+  "chat.mcp.discovery.enabled": {
+    "claude-desktop": true,
+    "windsurf": true,
+    "cursor-global": true,
+    "cursor-workspace": true
+  },
+  "chat.mcp.access": "all"
 }

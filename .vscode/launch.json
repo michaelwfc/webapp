@@ -1,5 +1,6 @@
 {
   "version": "0.2.0",
+  
   "configurations": [
     {
       "type": "node",
@@ -9,9 +10,47 @@
       "console": "integratedTerminal"
     },
     {
+      // $ node_modules/.bin/nodemon webServer.js
       "type": "node",
       "request": "launch",
-      "name": "Debug Project 2 Tests",
+      "name": "Debug Project6",
+      "runtimeExecutable": "${workspaceFolder}/cs142_projects/project6/node_modules/.bin/nodemon",
+      "runtimeArgs": ["webServer.js"],
+      "program": "${workspaceFolder}/cs142_projects/project6/webServer.js",
+      "cwd": "${workspaceFolder}/cs142_projects/project6",
+      "console": "integratedTerminal",
+      "restart": true
+    },
+    {
+      // $ node_modules/.bin/nodemon webServer.js
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Project5-Server",
+      "runtimeExecutable": "${workspaceFolder}/cs142_projects/project6/node_modules/.bin/nodemon",
+      "runtimeArgs": ["webServer.js"],
+      "program": "${workspaceFolder}/cs142_projects/project5/webServer.js",
+      "cwd": "${workspaceFolder}/cs142_projects/project5",
+      "console": "integratedTerminal",
+      "restart": true,
+      "serverReadyAction": {
+        "pattern": "Listening at http://localhost:([0-9]+)",
+        "uriFormat": "http://localhost:%s",
+        "action": "openExternally"
+      }
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug Project5 Client",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/cs142_projects/project5",
+      "timeout": 30000
+    },
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Project2",
       "program": "${workspaceFolder}/cs142_projects/project2/run-tests-using-node.js",
       "cwd": "${workspaceFolder}/cs142_projects/project2",
       "console": "integratedTerminal"
@@ -60,6 +99,12 @@
       "request": "attach",
       "name": "Attach to browser",
       "port": 9222
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug Project5",
+      "configurations": ["Debug Project5-Server", "Debug Project5 Client"]
     }
   ]
 }

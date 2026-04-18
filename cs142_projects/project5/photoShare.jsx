@@ -36,20 +36,28 @@ class PhotoShare extends React.Component {
                     path="/"
                     render={() => (
                       <Typography variant="body1">
-                        Welcome to your photosharing app! This{" "}
+                        Welcome to your photosharing app! <br></br>
+
+                        This{" "}
                         <a href="https://mui.com/components/paper/">Paper</a>{" "}
-                        component displays the main content of the application.
+                        component displays the main content of the application. <br></br>
+
                         The {"sm={9}"} prop in the{" "}
                         <a href="https://mui.com/components/grid/">Grid</a> item
                         component makes it responsively display 9/12 of the
-                        window. The Switch component enables us to conditionally
-                        render different components to this part of the screen.
-                        You don&apos;t need to display anything here on the
-                        homepage, so you should delete this Route component once
-                        you get started.
+                        window.  <br></br>
+
+                        The Switch component enables us to
+                        conditionally render different components to this part
+                        of the screen.  <br></br>
+                        
+                        You don&apos;t need to display anything
+                        here on the homepage, so you should delete this Route
+                        component once you get started.
                       </Typography>
                     )}
                   />
+                  
                   <Route
                     path="/users/:userId"
                     render={(props) => <UserDetail {...props} />}
