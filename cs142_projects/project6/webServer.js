@@ -47,7 +47,7 @@ const SchemaInfo = require("./schema/schemaInfo.js");
 
 // XXX - Your submission should work without this line. Comment out or delete
 // this line for tests and before submission!
-// const cs142models = require("./modelData/photoApp.js").cs142models;
+
 
 mongoose.set("strictQuery", false);
 mongoose.connect("mongodb://127.0.0.1/cs142project6", {
@@ -96,13 +96,13 @@ app.get("/test/:p1", function (request, response) {
         // Query returned an error. We pass it back to the browser with an
         // Internal Service Error (500) error code.
         console.error("Error in /user/info:", err);
-        response.status(500).send(JSON.stringify(err));
+        response.status(400).send(JSON.stringify(err));
         return;
       }
       if (info.length === 0) {
         // Query didn't return an error but didn't find the SchemaInfo object -
         // This is also an internal error return.
-        response.status(500).send("Missing SchemaInfo");
+        response.status(400).send("Missing SchemaInfo");
         return;
       }
 
@@ -151,7 +151,7 @@ app.get("/test/:p1", function (request, response) {
  * URL /user/list - Returns all the User objects.
  */
 app.get("/user/list", function (request, response) {
-  // response.status(200).send(cs142models.userListModel());
+
   User.find({}, function (err, users) {
     if (err) {
       // Query returned an error. We pass it back to the browser with an
@@ -163,7 +163,14 @@ app.get("/user/list", function (request, response) {
     // Query didn't return an error.
     // Now we build the array of objects with the information we want to
     // return.
-    response.status(200).send(users);
+    // Updated the server (webServer.js): Changed the /user/list endpoint to return only 
+    // the required properties (_id, first_name, last_name) by mapping the user objects.
+    const userList = users.map(user => ({
+      _id: user._id,
+      first_name: user.first_name,
+      last_name: user.last_name
+    }));
+    response.status(200).send(userList);
   });
 });
 
@@ -172,13 +179,13 @@ app.get("/user/list", function (request, response) {
  */
 app.get("/user/:id", function (request, response) {
   const id = request.params.id;
-  // const user = cs142models.userModel(id);
+
   User.findOne({ _id: id }, function (err, user) {
     if (err) {
       // Query returned an error. We pass it back to the browser with an
       // Internal Service Error (500) error code.
       console.error("Error in /user/:id:", err);
-      response.status(500).send(JSON.stringify(err));
+      response.status(400).send(JSON.stringify(err));
       return;
     }
     // Query didn't return an error but didn't find the user - This is a
@@ -188,8 +195,22 @@ app.get("/user/:id", function (request, response) {
       response.status(400).send("Not found");
       return;
     }
+
+    // Object.keys(user)
+    // (7) ['_id', 'first_name', 'last_name', 'location', 'description', 'occupation', '__v']
+    // Your /user/:id response is a Mongoose document, so it includes MongoDB metadata like __v. The current failure means the returned object contain
+
+    const userInfo = {
+      _id: user._id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      location: user.location,
+      description: user.description,
+      occupation: user.occupation,
+    };
+
     // We got the user - return it in JSON format.
-    response.status(200).send(user);
+    response.status(200).send(userInfo);
   });
 });
 
@@ -242,7 +263,11 @@ This simply renames the field:
  */
 app.get("/photosOfUser/:id", function (request, response) {
   const id = request.params.id;
-  // const photos = cs142models.photoOfUserModel(id);
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    response.status(400).send("Invalid id");
+    return;
+  }
+
   Photo.find({ user_id: id })
      
      // Replace the user_id (which is just an ObjectId) with the actual User document.

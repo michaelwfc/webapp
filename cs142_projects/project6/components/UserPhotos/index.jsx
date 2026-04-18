@@ -1,7 +1,8 @@
 import React from "react";
 import { Typography, Paper } from "@mui/material";
 import { Link } from "react-router-dom";
-import fetchModel from "../../lib/fetchModelData";
+// import fetchModel from "../../lib/fetchModelData";
+import axios from "axios";
 import "./styles.css";
 
 class UserPhotos extends React.Component {
@@ -70,8 +71,10 @@ class UserPhotos extends React.Component {
      * You handle those outcomes with .then() and .catch():
     */
     Promise.all([
-      fetchModel(`/photosOfUser/${userId}`),
-      fetchModel(`/user/${userId}`),
+      // fetchModel(`/photosOfUser/${userId}`),
+      // fetchModel(`/user/${userId}`),
+      axios.get(`/photosOfUser/${userId}`),
+      axios.get(`/user/${userId}`),
     ])
       .then(([photosResult, userResult]) => {
         // runs when the data arrives successfully

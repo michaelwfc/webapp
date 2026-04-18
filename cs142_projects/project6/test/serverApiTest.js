@@ -203,7 +203,8 @@ describe("CS142 Photo App: Web API Tests", function () {
                 assert.strictEqual(userInfo.location, realUser.location);
                 assert.strictEqual(userInfo.description, realUser.description);
                 assert.strictEqual(userInfo.occupation, realUser.occupation);
-
+                
+                
                 const extraProps = _.difference(
                   Object.keys(removeMongoProperties(userInfo)),
                   userDetailProperties
