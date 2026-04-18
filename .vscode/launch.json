@@ -1,6 +1,6 @@
 {
   "version": "0.2.0",
-  
+
   "configurations": [
     {
       "type": "node",
@@ -13,14 +13,28 @@
       // $ node_modules/.bin/nodemon webServer.js
       "type": "node",
       "request": "launch",
-      "name": "Debug Project6",
+      "name": "Debug Project6-Server",
       "runtimeExecutable": "${workspaceFolder}/cs142_projects/project6/node_modules/.bin/nodemon",
       "runtimeArgs": ["webServer.js"],
       "program": "${workspaceFolder}/cs142_projects/project6/webServer.js",
       "cwd": "${workspaceFolder}/cs142_projects/project6",
       "console": "integratedTerminal",
-      "restart": true
+      "restart": true,
+      "serverReadyAction": {
+        "pattern": "Listening at http://localhost:([0-9]+)",
+        "uriFormat": "http://localhost:%s",
+        "action": "openExternally"
+      }
     },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug Project6-Client",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/cs142_projects/project6",
+      "timeout": 30000
+    },
+
     {
       // $ node_modules/.bin/nodemon webServer.js
       "type": "node",
@@ -41,7 +55,7 @@
     {
       "type": "chrome",
       "request": "launch",
-      "name": "Debug Project5 Client",
+      "name": "Debug Project5-Client",
       "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}/cs142_projects/project5",
       "timeout": 30000
@@ -103,8 +117,13 @@
   ],
   "compounds": [
     {
+      "name": "Debug Project6",
+      "configurations": ["Debug Project6-Server", "Debug Project6-Client"]
+    },
+
+    {
       "name": "Debug Project5",
-      "configurations": ["Debug Project5-Server", "Debug Project5 Client"]
+      "configurations": ["Debug Project5-Server", "Debug Project5-Client"]
     }
   ]
 }
