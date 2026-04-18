@@ -40,13 +40,15 @@ const express = require("express");
 const app = express();
 
 // Load the Mongoose schema for User, Photo, and SchemaInfo
+// This line connects your code to the users collection in MongoDB.
 const User = require("./schema/user.js");
 const Photo = require("./schema/photo.js");
 const SchemaInfo = require("./schema/schemaInfo.js");
 
 // XXX - Your submission should work without this line. Comment out or delete
 // this line for tests and before submission!
-const cs142models = require("./modelData/photoApp.js").cs142models;
+// const cs142models = require("./modelData/photoApp.js").cs142models;
+
 mongoose.set("strictQuery", false);
 mongoose.connect("mongodb://127.0.0.1/cs142project6", {
   useNewUrlParser: true,
@@ -65,7 +67,7 @@ app.get("/", function (request, response) {
  * Use express to handle argument passing in the URL. This .get will cause
  * express to accept URLs with /test/<something> and return the something in
  * request.params.p1.
- * 
+ *
  * If implement the get as follows:
  * /test        - Returns the SchemaInfo object of the database in JSON format.
  *                This is good for testing connectivity with MongoDB.
@@ -81,8 +83,14 @@ app.get("/test/:p1", function (request, response) {
   const param = request.params.p1 || "info";
 
   if (param === "info") {
-    // Fetch the SchemaInfo. There should only one of them. The query of {} will
-    // match it.
+    // SchemaInfo.find(query, callback):
+    // Fetch the SchemaInfo. There should only one of them. The query of {} will  match it.
+    // - query is an object specifying the search criteria,
+    // - function (err, info)The second argument is a callback function:
+    // callback is a function that will be called with the results of the query.
+    //  - err is the error object if the query fails.
+    //  - info is the array of documents returned by the query
+    // The callback runs after the database returns results. If err is non-null, the query failed; otherwise info contains the found documents.
     SchemaInfo.find({}, function (err, info) {
       if (err) {
         // Query returned an error. We pass it back to the browser with an
@@ -130,7 +138,7 @@ app.get("/test/:p1", function (request, response) {
           }
           response.end(JSON.stringify(obj));
         }
-      }
+      },
     );
   } else {
     // If we know understand the parameter we return a (Bad Parameter) (400)
@@ -143,7 +151,20 @@ app.get("/test/:p1", function (request, response) {
  * URL /user/list - Returns all the User objects.
  */
 app.get("/user/list", function (request, response) {
-  response.status(200).send(cs142models.userListModel());
+  // response.status(200).send(cs142models.userListModel());
+  User.find({}, function (err, users) {
+    if (err) {
+      // Query returned an error. We pass it back to the browser with an
+      // Internal Service Error (500) error code.
+      console.error("Error in /user/list:", err);
+      response.status(500).send(JSON.stringify(err));
+      return;
+    }
+    // Query didn't return an error.
+    // Now we build the array of objects with the information we want to
+    // return.
+    response.status(200).send(users);
+  });
 });
 
 /**
@@ -151,28 +172,129 @@ app.get("/user/list", function (request, response) {
  */
 app.get("/user/:id", function (request, response) {
   const id = request.params.id;
-  const user = cs142models.userModel(id);
-  if (user === null) {
-    console.log("User with _id:" + id + " not found.");
-    response.status(400).send("Not found");
-    return;
-  }
-  response.status(200).send(user);
+  // const user = cs142models.userModel(id);
+  User.findOne({ _id: id }, function (err, user) {
+    if (err) {
+      // Query returned an error. We pass it back to the browser with an
+      // Internal Service Error (500) error code.
+      console.error("Error in /user/:id:", err);
+      response.status(500).send(JSON.stringify(err));
+      return;
+    }
+    // Query didn't return an error but didn't find the user - This is a
+    // Bad Param error return.
+    if (user === null) {
+      console.log("User with _id:" + id + " not found.");
+      response.status(400).send("Not found");
+      return;
+    }
+    // We got the user - return it in JSON format.
+    response.status(200).send(user);
+  });
 });
 
 /**
  * URL /photosOfUser/:id - Returns the Photos for User (id).
+ * 
+ * Right now /photosOfUser/:id is returning raw Mongoose Photo documents, 
+ * which do NOT include populated user info inside comments.
+
+* console.log(JSON.stringify(photos[0], null, 2));
+ {
+  "_id": "69e17487fc1da694a91330e8",
+  "file_name": "malcolm2.jpg",
+  "date_time": "2009-09-13T12:00:00.000Z",
+  "user_id": "69e17486fc1da694a91330d6",
+  "comments": [
+    {
+      "comment": "If there is one thing the history of evolution has taught us it's that life will not be contained. Life breaks free, it expands to new territories and crashes through barriers, painfully, maybe even dangerously, but, uh... well, there it is. Life finds a way.",
+      "date_time": "2009-09-14T10:07:00.000Z",
+      "user_id": "69e17486fc1da694a91330d6",
+      "_id": "69e17487fc1da694a9133100"
+    }
+  ],
+  "__v": 1
+}
+
+2. After .populate() : .populate("comments.user_id", "_id first_name last_name")
+Now Mongoose transforms the data into:
+{
+  "comment": "...",
+  "user_id": {
+    "_id": "69e17486fc1da694a91330d6",
+    "first_name": "Ian",
+    "last_name": "Malcolm"
+  }
+}
+user_id is NO LONGER an ID — it's now a full object with the fields we specified in the .populate() call.
+
+2. Transform Code : user: comment.user_id
+This simply renames the field:
+
+  MongoDB (ObjectId reference)
+          ↓
+  Mongoose populate (JOIN-like)
+          ↓
+  Transform to API model (rename user_id → user)
+          ↓
+  Frontend uses clean object
+ * 
  */
 app.get("/photosOfUser/:id", function (request, response) {
   const id = request.params.id;
-  const photos = cs142models.photoOfUserModel(id);
-  if (photos.length === 0) {
-    console.log("Photos for user with _id:" + id + " not found.");
-    response.status(400).send("Not found");
-    return;
-  }
-  response.status(200).send(photos);
+  // const photos = cs142models.photoOfUserModel(id);
+  Photo.find({ user_id: id })
+     
+     // Replace the user_id (which is just an ObjectId) with the actual User document.
+     // .populate() is basically a JOIN.
+    .populate("comments.user_id", "_id first_name last_name")  // ✅ populate user
+  
+    // populate the user_id field in comments with the user's _id, first_name, and last_name
+    // "comments.user_id": Go inside comments, find field user_id
+    // "_id first_name last_name" : Only fetch these fields from User, controls exactly which fields appear:
+    // The first_name and last_name come from the User collection via populate
+    // “For each comment, replace user_id with the corresponding User object, but only include _id, first_name, and last_name.”
+    .exec(function (err, photos) {
+    if (err) {
+      // Query returned an error. We pass it back to the browser with an
+      // Internal Service Error (500) error code.
+      console.error("Error in /photosOfUser/:id:", err);
+      response.status(500).send(JSON.stringify(err));
+      return;
+    }
+    // Query didn't return an error but didn't find the photos - This is a
+    // Bad Param error return.
+    if (photos.length === 0) {
+      console.log("Photos for user with _id:" + id + " not found.");
+      response.status(400).send("Not found");
+      return;
+    }
+    // We got the photos - return them in JSON format.
+    console.log("Photos of user with _id:" + id + " found:\n", JSON.stringify(photos, null, 2));
+    console.log(JSON.stringify(photos[0], null, 2));
+
+    // transform the photos to API model (rename user_id → user)
+    const transformedResults = photos.map((photo) => {
+      return {
+        _id: photo._id,
+        file_name: photo.file_name,
+        date_time: photo.date_time,
+        user_id: photo.user_id,
+        comments: photo.comments.map((comment) => (
+          {
+            _id: comment._id,
+            user: comment.user_id, // rename user_id → user, populated user object
+            comment: comment.comment,
+            date_time: comment.date_time,
+          }))
+        };  
+    });
+
+    response.status(200).send(transformedResults);
+  });
 });
+
+
 
 const server = app.listen(3000, function () {
   const port = server.address().port;
@@ -180,6 +302,6 @@ const server = app.listen(3000, function () {
     "Listening at http://localhost:" +
       port +
       " exporting the directory " +
-      __dirname
+      __dirname,
   );
 });

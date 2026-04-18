@@ -45,6 +45,30 @@
  *   load_date_time (date)  - The date the schema was made in ISO format.
  */
 
+/**
+The code in `photoApp.js` is wrapped in an immediately invoked function expression (IIFE), which is the pattern `(function () { ... })();`. This is a deliberate design choice for several reasons:
+
+### 1. **Creating a Private Scope**
+   - JavaScript variables declared with `var` (or `let`/`const` in modern code) inside the IIFE are not accessible outside it. This prevents accidental pollution of the global scope.
+   - Without the IIFE, variables like `users`, `photos`, `comments`, and functions like `userListModel` could leak into the global namespace, potentially causing conflicts with other scripts.
+
+### 2. **Encapsulation and Modularity**
+   - The IIFE acts like a module, grouping related code together. It defines the data (users, photos, comments) and functions (models) internally, then exposes only what's needed via `cs142models`.
+   - This mimics early JavaScript module patterns before ES6 modules (`import`/`export`) became standard.
+
+### 3. **Environment-Agnostic Export**
+   - At the end, the code checks the environment:
+     - If `exports` exists (Node.js/CommonJS), it assigns `cs142models` to `exports.cs142models`.
+     - Otherwise (browser), it assigns to `window.cs142models`.
+   - The IIFE ensures this logic runs immediately and safely, without exposing intermediate variables.
+
+### 4. **Historical Context**
+   - This file appears to be from a CS142 (Stanford Web Applications) project, likely using older JavaScript practices. IIFEs were common before ES6 for achieving modularity in browsers or Node.js without build tools like Webpack/Babel.
+   - In modern code, you'd use ES6 modules or CommonJS directly, but here it's a simple, self-contained way to handle both environments.
+
+If you were to remove the IIFE, the code would still work but risk global conflicts—e.g., `users` could overwrite a global variable elsewhere. For a Node.js app, you could refactor to use `module.exports` directly, but the IIFE keeps it flexible for browser testing. If this is causing issues or you want to modernize it, let me know! 
+ * */
+
 (function () {
   // Create fake test Schema
   const schemaInfo = {
