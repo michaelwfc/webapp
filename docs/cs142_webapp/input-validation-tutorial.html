@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Input & Validation — CS142 Web Applications</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ── Reset & Variables ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --accent:       #1e8a6e;
+  --accent-light: #e8f5f1;
+  --accent-mid:   #c3e8de;
+  --ink:          #18181b;
+  --ink-2:        #3f3f46;
+  --ink-3:        #71717a;
+  --paper:        #fafaf9;
+  --paper-2:      #f4f4f0;
+  --paper-3:      #ebebе5;
+  --border:       #e4e4e0;
+  --code-bg:      #141418;
+  --code-text:    #d4d0f0;
+  --kw-color:     #f4a261;
+  --str-color:    #6fcf97;
+  --fn-color:     #79c5f0;
+  --cmt-color:    #666688;
+  --nav-h:        56px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+/* ── Utility ───────────────────────────────────────────────── */
+.container { max-width: 740px; margin: 0 auto; padding: 0 1.5rem; }
+
+/* ── Navigation ────────────────────────────────────────────── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(250,250,249,0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  height: var(--nav-h);
+}
+.nav-inner {
+  max-width: 740px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding-right: 1.25rem;
+  margin-right: 0.5rem;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+.nav-links a {
+  display: block;
+  padding: 0 14px;
+  height: var(--nav-h);
+  line-height: var(--nav-h);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-3);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s;
+  border-bottom: 2px solid transparent;
+}
+.nav-links a:hover { color: var(--ink); }
+.nav-links a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Hero ──────────────────────────────────────────────────── */
+.hero {
+  padding: 5.5rem 1.5rem 4.5rem;
+  max-width: 740px;
+  margin: 0 auto;
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+}
+.hero-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.hero h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(2.6rem, 6vw, 4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+.hero h1 span { color: var(--accent); }
+.hero-intro {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--ink-2);
+  max-width: 580px;
+  border-left: 3px solid var(--accent-mid);
+  padding-left: 1.25rem;
+}
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2rem;
+}
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-3);
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: 100px;
+  letter-spacing: 0.04em;
+}
+
+/* ── Divider ───────────────────────────────────────────────── */
+.page-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
+
+/* ── Sections ──────────────────────────────────────────────── */
+section {
+  padding: 5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+section:last-of-type { border-bottom: none; }
+
+.sec-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sec-eyebrow::after {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.5;
+}
+
+section h2 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.015em;
+}
+
+section h3 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--ink-2);
+  margin: 2.5rem 0 1rem;
+}
+
+section p {
+  color: var(--ink-2);
+  margin-bottom: 1.25rem;
+  font-size: 1rem;
+  line-height: 1.85;
+}
+section p:last-child { margin-bottom: 0; }
+
+section p strong { color: var(--ink); font-weight: 500; }
+
+section a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+section a:hover { opacity: 0.8; }
+
+/* ── Inline code ───────────────────────────────────────────── */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.84em;
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ── Code blocks ───────────────────────────────────────────── */
+.code-wrap { margin: 2rem 0; }
+.code-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+pre {
+  background: var(--code-bg);
+  border-radius: 10px;
+  padding: 1.5rem 1.75rem;
+  overflow-x: auto;
+  border: 1px solid rgba(255,255,255,0.05);
+  line-height: 1;
+}
+pre code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--code-text);
+  background: none;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+}
+.kw  { color: var(--kw-color); }
+.str { color: var(--str-color); }
+.fn  { color: var(--fn-color); }
+.cmt { color: var(--cmt-color); font-style: italic; }
+.ok  { color: #6fcf97; }
+.bad { color: #eb5757; }
+
+.code-note {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--ink-3);
+  margin-top: 0.85rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--border);
+  line-height: 1.65;
+}
+
+/* ── Key Takeaway ──────────────────────────────────────────── */
+blockquote {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-light);
+  padding: 1.25rem 1.5rem 1.25rem 1.75rem;
+  border-radius: 0 8px 8px 0;
+  margin: 2.5rem 0 0;
+}
+blockquote .bq-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+blockquote p {
+  color: var(--ink-2) !important;
+  font-size: 0.97rem !important;
+  margin: 0 !important;
+  line-height: 1.75 !important;
+}
+blockquote p strong { color: var(--ink) !important; }
+
+/* ── Two-column rule box ────────────────────────────────────── */
+.rule-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 1.75rem 0;
+}
+.rule-cell {
+  background: var(--paper-2);
+  padding: 1.25rem 1.5rem;
+}
+.rule-cell .rule-n {
+  font-family: 'Fraunces', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  opacity: 0.18;
+  line-height: 1;
+  margin-bottom: 0.4rem;
+}
+.rule-cell h4 {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.01em;
+}
+.rule-cell p {
+  font-size: 0.88rem !important;
+  color: var(--ink-3) !important;
+  margin: 0 !important;
+  line-height: 1.6 !important;
+}
+@media (max-width: 500px) { .rule-grid { grid-template-columns: 1fr; } }
+
+/* ── Options list (for binding options) ────────────────────── */
+.option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 1.75rem 0;
+}
+.option-row {
+  background: var(--paper-2);
+  padding: 1rem 1.25rem;
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+.option-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  text-align: center;
+  margin-top: 2px;
+  display: inline-block;
+}
+.badge-ok  { background: rgba(30,138,110,0.1);  color: var(--accent); border: 1px solid rgba(30,138,110,0.25); }
+.badge-bad { background: rgba(235,87,87,0.08);  color: #c0392b;       border: 1px solid rgba(235,87,87,0.2); }
+.option-row p { margin: 0 !important; font-size: 0.92rem !important; color: var(--ink-2) !important; }
+@media (max-width: 500px) { .option-row { grid-template-columns: 1fr; gap: 0.5rem; } }
+
+/* ── Axios method table ─────────────────────────────────────── */
+.method-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 1.75rem 0;
+}
+.method-cell {
+  background: var(--paper-2);
+  padding: 0.9rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.method-verb {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.v-get    { background: rgba(30,138,110,0.12); color: var(--accent); }
+.v-post   { background: rgba(37,99,168,0.12);  color: #1d4ed8; }
+.v-put    { background: rgba(180,140,0,0.12);  color: #92610a; }
+.v-delete { background: rgba(235,87,87,0.1);   color: #b91c1c; }
+.method-desc { font-size: 0.88rem; color: var(--ink-3); }
+
+/* ── Summary section ────────────────────────────────────────── */
+#summary {
+  background: var(--ink);
+  border-radius: 14px;
+  padding: 3.5rem;
+  margin-top: 5rem;
+  border-bottom: none !important;
+}
+#summary .sec-eyebrow { color: var(--accent-mid); }
+#summary .sec-eyebrow::after { background: var(--accent-mid); }
+#summary h2 { color: #fff; }
+.sum-list { list-style: none; margin-top: 2rem; }
+.sum-item {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  padding: 1.5rem 0;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.sum-item:first-child { border-top: none; padding-top: 0; }
+.sum-num {
+  font-family: 'Fraunces', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.1);
+  line-height: 1;
+  flex-shrink: 0;
+  width: 40px;
+  padding-top: 2px;
+}
+.sum-body h4 {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent-mid);
+  margin-bottom: 0.35rem;
+  letter-spacing: 0.01em;
+}
+.sum-body p {
+  font-size: 0.93rem !important;
+  color: rgba(255,255,255,0.5) !important;
+  line-height: 1.7 !important;
+  margin: 0 !important;
+}
+
+/* ── Footer ─────────────────────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .hero { padding: 3.5rem 1.25rem 3rem; }
+  section { padding: 3.5rem 0; }
+  .container { padding: 0 1.25rem; }
+  pre { padding: 1.25rem; }
+  pre code { font-size: 12px; }
+  #summary { padding: 2.5rem 1.5rem; margin-top: 3rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────────────────────── -->
+<nav aria-label="Tutorial navigation">
+  <div class="nav-inner">
+    <span class="nav-brand">CS142</span>
+    <ul class="nav-links">
+      <li><a href="#html-forms">HTML Forms</a></li>
+      <li><a href="#rails-pattern">Rails Pattern</a></li>
+      <li><a href="#why-validate">Why Validate</a></li>
+      <li><a href="#react-forms">React Forms</a></li>
+      <li><a href="#event-handling">Event Handling</a></li>
+      <li><a href="#this-binding">this Binding</a></li>
+      <li><a href="#client-validation">Client Validation</a></li>
+      <li><a href="#async-validation">Async Validation</a></li>
+      <li><a href="#spa-input">SPA & Axios</a></li>
+      <li><a href="#server-validation">Server Validation</a></li>
+      <li><a href="#summary">Summary</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── Hero ───────────────────────────────────────────────── -->
+<header>
+  <div class="hero">
+    <div class="hero-eyebrow">CS142 · Web Applications · Stanford</div>
+    <h1>Input &amp; <span>Validation</span></h1>
+    <p class="hero-intro">
+      Collecting data from users is one of the most common things a web app does — and one of the easiest to get wrong. This tutorial walks you through the full journey: how traditional HTML forms work, why React handles input differently, how to validate data both in the browser and on the server, and how modern single-page apps send data without ever reloading the page. By the end, you'll understand not just <em>how</em> each technique works, but <em>why</em> it exists.
+    </p>
+    <div class="hero-tags">
+      <span class="tag">HTML Forms</span>
+      <span class="tag">React Controlled Components</span>
+      <span class="tag">Client Validation</span>
+      <span class="tag">Axios</span>
+      <span class="tag">Mongoose</span>
+      <span class="tag">Server-side Validation</span>
+    </div>
+  </div>
+</header>
+
+<hr class="page-divider">
+
+<main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 1 — HTML FORMS
+════════════════════════════════════════════════════════════ -->
+<section id="html-forms">
+  <div class="container">
+    <div class="sec-eyebrow">Section 01</div>
+    <h2>The Original Approach: HTML Forms</h2>
+
+    <p>Before JavaScript frameworks like React existed, every web application collected user input the same way: through the native HTML <code>&lt;form&gt;</code> element. Think of a form as a container that bundles up everything the user typed and sends it to the server in one go — like stuffing a letter into an envelope and mailing it.</p>
+
+    <p>A form has two essential attributes: <code>action</code> (the URL to send the data to) and <code>method</code> (how to send it). Here's a simple example with a text field, a checkbox, and a submit button:</p>
+
+    <div class="code-wrap">
+      <div class="code-label">A basic HTML form that submits product data</div>
+      <pre><code><span class="fn">&lt;form</span> <span class="kw">action</span>=<span class="str">"/product/update"</span> <span class="kw">method</span>=<span class="str">"post"</span><span class="fn">&gt;</span>
+  Product: <span class="fn">&lt;input</span> <span class="kw">type</span>=<span class="str">"text"</span> <span class="kw">name</span>=<span class="str">"product"</span> <span class="fn">/&gt;</span>
+  Deluxe:  <span class="fn">&lt;input</span> <span class="kw">type</span>=<span class="str">"checkbox"</span> <span class="kw">name</span>=<span class="str">"delux"</span> <span class="fn">/&gt;</span>
+  <span class="fn">&lt;input</span> <span class="kw">type</span>=<span class="str">"submit"</span> <span class="kw">value</span>=<span class="str">"Submit"</span> <span class="fn">/&gt;</span>
+<span class="fn">&lt;/form&gt;</span></code></pre>
+    </div>
+    <p class="code-note">When the user clicks "Submit", the browser collects all the named inputs and packages them into an HTTP request directed at <code>/product/update</code>.</p>
+
+    <h3>GET vs POST: Two ways to send data</h3>
+
+    <p>The <code>method</code> attribute controls how the data travels. There are two options, and the difference matters more than it might seem at first.</p>
+
+    <p>With <strong><code>method="get"</code></strong>, the form data gets appended directly to the URL as query parameters. You've seen these before — they're the <code>?key=value</code> parts at the end of a web address. This approach is fine for things like search queries, but bad for sensitive data because the values are visible in the browser's address bar, in server logs, and in browser history.</p>
+
+    <div class="code-wrap">
+      <div class="code-label">GET — data encoded in the URL itself</div>
+      <pre><code><span class="cmt">// The browser constructs this URL and navigates to it</span>
+HTTP GET /product/update?product=foobar&amp;delux=on</code></pre>
+    </div>
+    <p class="code-note">Notice that <code>product=foobar</code> and <code>delux=on</code> are right there in the URL — anyone watching the network or checking browser history can read them.</p>
+
+    <p>With <strong><code>method="post"</code></strong>, the data is placed in the body of the HTTP request rather than the URL. This keeps it out of the address bar and server logs, making it far more appropriate for passwords, payment details, or any user data you'd rather keep discreet.</p>
+
+    <div class="code-wrap">
+      <div class="code-label">POST — data hidden inside the request body</div>
+      <pre><code><span class="cmt">// The URL stays clean; data travels in the message body</span>
+HTTP POST /product/update
+Content-Type: application/x-www-form-urlencoded
+
+product=foobar&amp;delux=on</code></pre>
+    </div>
+    <p class="code-note">The request body carries the same data, but it's no longer visible in the URL — the <code>Content-Type</code> header tells the server how to decode it.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>HTML forms send data to a server by packaging field values into an HTTP request. Use <strong>GET</strong> for safe, bookmark-able queries (like search), and <strong>POST</strong> for actions that change data or handle sensitive information. The difference is where the data travels — in the URL vs. in the request body.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 2 — RAILS PATTERN
+════════════════════════════════════════════════════════════ -->
+<section id="rails-pattern">
+  <div class="container">
+    <div class="sec-eyebrow">Section 02</div>
+    <h2>The Classic Server-Side Flow: Rails Pattern</h2>
+
+    <p>Before single-page applications existed, the standard flow for handling form input was what's called the <strong>POST/Redirect/GET pattern</strong>, popularized by frameworks like Ruby on Rails. Understanding it gives you a mental model for why things work the way they do — even in modern apps.</p>
+
+    <p>Imagine signing up for a new account. Here's what happens under the hood in a traditional server-rendered app:</p>
+
+    <p>First, your browser makes a <strong>GET request</strong> to load the signup page. The server responds with an HTML page containing a form. So far, nothing has been submitted — you're just looking at the form.</p>
+
+    <p>When you fill in your details and click "Submit", the browser fires a <strong>POST request</strong> to the server with your form data in the body. This is where the interesting logic happens. The server now has three possible paths:</p>
+
+    <p>If everything is valid and the operation succeeds — say, your new account was created — the server doesn't return a page directly. Instead it sends back a <strong>redirect</strong> telling the browser to make a new GET request for a "success" page. This redirect is deliberate: it ensures that if the user hits the browser's refresh button, they're re-loading the success page (a harmless GET), not re-submitting the form (which would try to create a duplicate account).</p>
+
+    <p>If the submitted data fails validation — for example, a required field was blank — the server redirects back to the original form page, this time with the invalid fields highlighted so the user knows exactly what to fix.</p>
+
+    <p>If something went wrong on the server's end — a database error, a network timeout — the server redirects to an error page explaining what happened.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>The POST/Redirect/GET pattern solves a real problem: it prevents duplicate form submissions on browser refresh. Success → redirect to a new page. Validation failure → redirect back to the form with errors shown. Server error → redirect to an error page. React and single-page apps replace the redirect with in-page state updates, but the same logical flow applies.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 3 — WHY VALIDATE
+════════════════════════════════════════════════════════════ -->
+<section id="why-validate">
+  <div class="container">
+    <div class="sec-eyebrow">Section 03</div>
+    <h2>Why Validation Exists: Two Very Different Reasons</h2>
+
+    <p>Validation isn't one thing — it's two things that happen to share the same name. Mixing them up leads to bad decisions about where to put your validation code and how seriously to take each layer. Let's separate them clearly.</p>
+
+    <div class="rule-grid">
+      <div class="rule-cell">
+        <div class="rule-n">1</div>
+        <h4>Protect storage integrity</h4>
+        <p>Prevent bad, malicious, or malformed data from reaching your database. Required fields, correct data types, security constraints. This is non-negotiable — the server must enforce it.</p>
+      </div>
+      <div class="rule-cell">
+        <div class="rule-n">2</div>
+        <h4>Provide a good user experience</h4>
+        <p>Warn users about mistakes as early as possible — ideally while they're still typing, not after they've submitted. The closer to the user, the less frustrating the experience.</p>
+      </div>
+    </div>
+
+    <p>Here's the critical insight: <strong>these two goals require validation in two different places.</strong> Protecting your database requires server-side validation that runs no matter what. Improving UX requires client-side validation that runs in the browser in real time. You need both.</p>
+
+    <p>Think of it like airport security. The metal detector at the gate is client-side validation — it catches obvious problems early and is a great experience for everyone. But there are also checks that happen behind the scenes, in databases and watchlists, that passengers never see. Those backend checks exist because the front-of-house checks can be bypassed. Anyone with technical knowledge can send an HTTP request directly to your server using tools like <code>curl</code> or Postman, completely bypassing your React form and its validation. The server has no way of knowing whether a request came from your app or from a custom script.</p>
+
+    <p>This leads to the two golden rules for validation in any JavaScript framework:</p>
+
+    <div class="rule-grid">
+      <div class="rule-cell">
+        <div class="rule-n">✓</div>
+        <h4>Rule 1 — Always validate server-side</h4>
+        <p>Client-side checks can be bypassed. Server-side validation is the real protection for your data. Never treat browser validation as sufficient on its own.</p>
+      </div>
+      <div class="rule-cell">
+        <div class="rule-n">✓</div>
+        <h4>Rule 2 — Show errors as early as possible</h4>
+        <p>The sooner you tell a user something is wrong, the less frustrating the experience. Inline, real-time feedback as they type is far better than a page reload with errors.</p>
+      </div>
+    </div>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Validation serves two masters: <strong>data integrity</strong> (server-side, non-negotiable) and <strong>user experience</strong> (client-side, real-time). You always need both — client-side validation is a UX convenience, not a security measure. Anyone can bypass it with a direct HTTP request.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 4 — REACT FORMS
+════════════════════════════════════════════════════════════ -->
+<section id="react-forms">
+  <div class="container">
+    <div class="sec-eyebrow">Section 04</div>
+    <h2>Input in React: Controlled Components</h2>
+
+    <p>React uses the same HTML form elements you already know — <code>&lt;input&gt;</code>, <code>&lt;textarea&gt;</code>, and <code>&lt;select&gt;</code> — but it introduces a new way of thinking about them called <strong>controlled components</strong>.</p>
+
+    <p>In a plain HTML form, the DOM is the source of truth. The input field holds its own value, and you read it when the form is submitted. In React, the component's <strong>state</strong> is the source of truth instead. The input's value is always whatever <code>this.state</code> says it is, and every keystroke updates the state — which then updates the input. It's a continuous loop: state → render → user types → state update → render again.</p>
+
+    <p>This might sound like extra work, but it gives you precise control. At any moment, <code>this.state</code> has the exact current value of every input, which makes validation and form submission dramatically simpler.</p>
+
+    <div class="code-wrap">
+      <div class="code-label">A React form with text, textarea, and select — all controlled</div>
+      <pre><code><span class="fn">render</span>() {
+  <span class="kw">return</span> (
+    <span class="fn">&lt;form</span> <span class="kw">onSubmit</span>={<span class="kw">this</span>.handleSubmit}<span class="fn">&gt;</span>
+
+      <span class="fn">&lt;label&gt;</span>
+        Name:
+        <span class="fn">&lt;input</span>
+          <span class="kw">type</span>=<span class="str">"text"</span>
+          <span class="kw">value</span>={<span class="kw">this</span>.state.inputValue}   <span class="cmt">// controlled by state</span>
+          <span class="kw">onChange</span>={<span class="kw">this</span>.handleChangeInput}  <span class="cmt">// updates state on each keystroke</span>
+        <span class="fn">/&gt;</span>
+      <span class="fn">&lt;/label&gt;</span>
+
+      <span class="fn">&lt;label&gt;</span>
+        Essay:
+        <span class="fn">&lt;textarea</span>
+          <span class="kw">value</span>={<span class="kw">this</span>.state.textValue}
+          <span class="kw">onChange</span>={<span class="kw">this</span>.handleChangeText}
+        <span class="fn">/&gt;</span>
+      <span class="fn">&lt;/label&gt;</span>
+
+      <span class="fn">&lt;label&gt;</span>
+        Pick:
+        <span class="fn">&lt;select</span> <span class="kw">value</span>={<span class="kw">this</span>.state.selValue} <span class="kw">onChange</span>={<span class="kw">this</span>.handleChangeSelect}<span class="fn">&gt;</span>
+          <span class="fn">&lt;option</span> <span class="kw">value</span>=<span class="str">"yes"</span><span class="fn">&gt;</span>Yes<span class="fn">&lt;/option&gt;</span>
+          <span class="fn">&lt;option</span> <span class="kw">value</span>=<span class="str">"no"</span><span class="fn">&gt;</span>No<span class="fn">&lt;/option&gt;</span>
+          <span class="fn">&lt;option</span> <span class="kw">value</span>=<span class="str">"maybe"</span><span class="fn">&gt;</span>Maybe<span class="fn">&lt;/option&gt;</span>
+        <span class="fn">&lt;/select&gt;</span>
+      <span class="fn">&lt;/label&gt;</span>
+
+      <span class="fn">&lt;input</span> <span class="kw">type</span>=<span class="str">"submit"</span> <span class="kw">value</span>=<span class="str">"Submit"</span> <span class="fn">/&gt;</span>
+    <span class="fn">&lt;/form&gt;</span>
+  );
+}</code></pre>
+    </div>
+    <p class="code-note">Every element's <code>value</code> is driven by <code>this.state</code>, and every <code>onChange</code> handler updates that state. React re-renders the component after each state change, keeping the UI perfectly in sync.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>In React, form inputs are <strong>controlled</strong> — their values live in component state, not in the DOM. This gives you a single source of truth for all form data, making validation, conditional logic, and submission straightforward. Every change goes through <code>onChange</code> → <code>setState</code> → re-render.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 5 — EVENT HANDLING
+════════════════════════════════════════════════════════════ -->
+<section id="event-handling">
+  <div class="container">
+    <div class="sec-eyebrow">Section 05</div>
+    <h2>Handling Form Events in a React Class Component</h2>
+
+    <p>Now that the form's structure is clear, let's look at the JavaScript that powers it. In a class-based React component, you define event handlers as methods on the class, then wire them up via JSX props like <code>onChange</code> and <code>onSubmit</code>.</p>
+
+    <div class="code-wrap">
+      <div class="code-label">A complete React class component with change and submit handlers</div>
+      <pre><code><span class="kw">class</span> <span class="fn">MyForm</span> <span class="kw">extends</span> React.Component {
+  <span class="fn">constructor</span>(props) {
+    <span class="kw">super</span>(props);
+    <span class="kw">this</span>.state = {};
+
+    <span class="cmt">// Bind handlers so `this` works correctly (more on this next)</span>
+    <span class="kw">this</span>.handleChange = <span class="kw">this</span>.handleChange.<span class="fn">bind</span>(<span class="kw">this</span>);
+    <span class="kw">this</span>.handleSubmit = <span class="kw">this</span>.handleSubmit.<span class="fn">bind</span>(<span class="kw">this</span>);
+  }
+
+  <span class="fn">handleChange</span>(event) {
+    <span class="cmt">// event.target.value is whatever the user just typed</span>
+    <span class="kw">this</span>.<span class="fn">setState</span>({ value: event.target.value });
+  }
+
+  <span class="fn">handleSubmit</span>(event) {
+    <span class="cmt">// Prevent the browser's default form submission (full page reload)</span>
+    event.<span class="fn">preventDefault</span>();
+    <span class="cmt">// Now process this.state — it has all current form values</span>
+  }
+}</code></pre>
+    </div>
+    <p class="code-note"><code>handleChange</code> runs on every single keystroke, keeping state in sync. <code>handleSubmit</code> calls <code>event.preventDefault()</code> — without this line, the browser would do its default thing: make a full-page HTTP POST request, losing all your React state.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p><code>event.preventDefault()</code> is essential in React form handlers. Without it, the browser's default form submission takes over and causes a full page reload, wiping out your component's state. Always call it at the top of your <code>onSubmit</code> handler.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 6 — THIS BINDING
+════════════════════════════════════════════════════════════ -->
+<section id="this-binding">
+  <div class="container">
+    <div class="sec-eyebrow">Section 06</div>
+    <h2>The <code>this</code> Binding Problem — and Three Solutions</h2>
+
+    <p>This is one of the most common gotchas for JavaScript developers learning React, and it trips up nearly everyone at least once. Here's the problem: when you pass a class method as a callback to a DOM event, JavaScript doesn't automatically keep the correct value of <code>this</code>. The method loses its context, and <code>this</code> becomes <code>undefined</code> inside it.</p>
+
+    <div class="code-wrap">
+      <div class="code-label">The broken approach — this is undefined when the handler fires</div>
+      <pre><code><span class="cmt">// ❌ Wrong — this.formSubmit will be called with this = undefined</span>
+<span class="fn">&lt;form</span> <span class="kw">onSubmit</span>={<span class="kw">this</span>.formSubmit}<span class="fn">&gt;</span></code></pre>
+    </div>
+    <p class="code-note">When the browser calls <code>formSubmit</code> in response to a submit event, it calls it as a plain function — not as a method on the component instance. The result is that <code>this</code> is lost and you'll get a runtime error when you try to call <code>this.setState</code>.</p>
+
+    <p>There's no single "correct" fix — React leaves the choice to you. Here are the three standard solutions, each with its own tradeoffs:</p>
+
+    <div class="option-list">
+      <div class="option-row">
+        <span class="option-badge badge-ok">Option 1</span>
+        <p><strong>Arrow function in JSX.</strong> <code>&lt;form onSubmit=&#123;event =&gt; this.formSubmit(event)&#125;&gt;</code> — The arrow function captures <code>this</code> from the surrounding scope. Clean and simple, but creates a new function on every render, which can affect performance in large lists.</p>
+      </div>
+      <div class="option-row">
+        <span class="option-badge badge-ok">Option 2</span>
+        <p><strong>Bind in the constructor.</strong> <code>this.formSubmit = this.formSubmit.bind(this);</code> — Done once in the constructor, so no new function is created on each render. Slightly more boilerplate, but the most explicit and predictable approach.</p>
+      </div>
+      <div class="option-row">
+        <span class="option-badge badge-ok">Option 3</span>
+        <p><strong>Class field arrow function.</strong> <code>formSubmit = (event) =&gt; &#123; ... &#125;;</code> — The modern syntax. Arrow functions defined as class fields automatically bind <code>this</code>. Requires a Babel transform (already included in most React setups).</p>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">All three solutions side by side</div>
+      <pre><code><span class="cmt">// Option 1: Inline arrow function</span>
+<span class="fn">&lt;form</span> <span class="kw">onSubmit</span>={event => <span class="kw">this</span>.<span class="fn">formSubmit</span>(event)}<span class="fn">&gt;</span>
+
+<span class="cmt">// Option 2: Bind in constructor (then use normally in JSX)</span>
+<span class="kw">this</span>.formSubmit = <span class="kw">this</span>.formSubmit.<span class="fn">bind</span>(<span class="kw">this</span>); <span class="cmt">// in constructor</span>
+<span class="fn">&lt;form</span> <span class="kw">onSubmit</span>={<span class="kw">this</span>.formSubmit}<span class="fn">&gt;</span>             <span class="cmt">// in JSX</span>
+
+<span class="cmt">// Option 3: Class field — no binding needed</span>
+<span class="fn">formSubmit</span> = (event) => { <span class="cmt">/* this works correctly here */</span> };</code></pre>
+    </div>
+    <p class="code-note">Pick one approach and use it consistently throughout your codebase. Mixing strategies makes code harder to read and debug.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Passing a class method as a DOM callback loses <code>this</code>. Fix it with one of three approaches: an inline arrow function in JSX, binding in the constructor, or defining the method as a class field arrow function. Choose one and stick to it — <strong>consistency matters more than which option you pick</strong>.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 7 — CLIENT VALIDATION
+════════════════════════════════════════════════════════════ -->
+<section id="client-validation">
+  <div class="container">
+    <div class="sec-eyebrow">Section 07</div>
+    <h2>Validation in React: Flexible by Design</h2>
+
+    <p>Unlike some frameworks that ship with a built-in form library, React is deliberately <strong>unopinionated</strong> about validation. There is no "official" way to validate a form. This gives you the flexibility to pick the approach that fits your needs — but it also means you need to make an informed choice.</p>
+
+    <p>For teams that want a battle-tested solution, libraries like <a href="https://formik.org" target="_blank" rel="noopener">Formik</a> handle all the boilerplate: tracking which fields have been touched, running validation functions, and rendering error messages. This is a great starting point for complex forms.</p>
+
+    <p>But if you want to understand what's happening under the hood — or if your validation logic is simple — you can write it yourself directly in the <code>handleChange</code> handler. Since <code>handleChange</code> runs on every keystroke, you can validate as the user types and update the UI immediately:</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Inline validation — checking input on every keystroke</div>
+      <pre><code><span class="fn">handleChange</span>(event) {
+  <span class="kw">const</span> value = event.target.value;
+
+  <span class="cmt">// Run your validation logic against the new value and current state</span>
+  <span class="kw">if</span> (!<span class="kw">this</span>.<span class="fn">validateIt</span>(value, <span class="kw">this</span>.state)) {
+    <span class="kw">this</span>.<span class="fn">setState</span>({ renderValidationError: <span class="kw">true</span> });
+  } <span class="kw">else</span> {
+    <span class="kw">this</span>.<span class="fn">setState</span>({ renderValidationError: <span class="kw">false</span> });
+  }
+
+  <span class="cmt">// Always update the value — don't block typing, just show an error</span>
+  <span class="kw">this</span>.<span class="fn">setState</span>({ value: value });
+}</code></pre>
+    </div>
+    <p class="code-note">Setting <code>renderValidationError: true</code> in state triggers a re-render. Your render method can then show or hide an error message based on that flag — the user sees feedback the instant they make a mistake.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>React validation is flexible — you can use a library like Formik or write it yourself in <code>handleChange</code>. Because controlled components update state on every keystroke, you can validate in real time and show errors immediately, without waiting for the user to submit the form.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 8 — ASYNC VALIDATION
+════════════════════════════════════════════════════════════ -->
+<section id="async-validation">
+  <div class="container">
+    <div class="sec-eyebrow">Section 08</div>
+    <h2>Asynchronous Validation: When the Browser Needs to Ask the Server</h2>
+
+    <p>Some validation simply cannot happen in the browser alone — because the answer lives on the server. The most common example is checking whether a username is already taken. Your client-side code has no way of knowing what names are in the database without asking.</p>
+
+    <p>The solution is <strong>asynchronous validation</strong>: while the user is typing, the browser quietly sends a request to the server in the background and waits for the answer. If the server says the name is taken, the UI shows an error — all without the user ever clicking Submit.</p>
+
+    <p>A library like <a href="https://github.com/moroshko/react-autosuggest" target="_blank" rel="noopener">React-AutoSuggest</a> takes this idea further by not just validating, but actively <em>suggesting</em> valid options as the user types — turning a validation problem into a discovery feature:</p>
+
+    <div class="code-wrap">
+      <div class="code-label">React-AutoSuggest — fetching suggestions from the server as you type</div>
+      <pre><code><span class="fn">&lt;Autosuggest</span>
+  <span class="kw">suggestions</span>={suggestions}
+  <span class="kw">onSuggestionsFetchRequested</span>={<span class="kw">this</span>.onSuggestionsFetchRequested}
+  <span class="kw">onSuggestionsClearRequested</span>={<span class="kw">this</span>.onSuggestionsClearRequested}
+  <span class="kw">getSuggestionValue</span>={getSuggestionValue}
+  <span class="kw">renderSuggestion</span>={renderSuggestion}
+  <span class="kw">inputProps</span>={inputProps}
+<span class="fn">/&gt;</span></code></pre>
+    </div>
+    <p class="code-note"><code>onSuggestionsFetchRequested</code> is called as the user types — it's where you'd make an API call to fetch matching options. The component handles debouncing and rendering the dropdown automatically.</p>
+
+    <p>The broader trend in modern web apps is shifting from "block the user until they get it right" toward "guide the user toward valid input." Autocomplete, suggestions, and real-time availability checks are all expressions of this philosophy.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Some validation requires a server round-trip — for example, checking username availability. This is done asynchronously in the background while the user types, keeping the UI responsive. The modern approach goes even further: rather than waiting for errors, <strong>proactively suggest valid options</strong> as the user types.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 9 — SPA INPUT & AXIOS
+════════════════════════════════════════════════════════════ -->
+<section id="spa-input">
+  <div class="container">
+    <div class="sec-eyebrow">Section 09</div>
+    <h2>Single-Page App Input: Axios and the End of Page Reloads</h2>
+
+    <p>Traditional form submission causes a full page reload — the browser packages the data, sends it to the server, and then loads whatever the server sends back. In a single-page application (SPA), this would destroy all your React component state and feel jarring to the user. SPAs need a different approach.</p>
+
+    <p>The solution is to send data using JavaScript in the background, using <strong>XMLHttpRequest</strong> or a library that wraps it. The most popular library for this in the React ecosystem is <a href="https://axios-http.com" target="_blank" rel="noopener">Axios</a> — a promise-based HTTP client that works in both the browser and Node.js.</p>
+
+    <p>Axios exposes a clean API that maps directly to HTTP methods:</p>
+
+    <div class="method-grid">
+      <div class="method-cell"><span class="method-verb v-get">GET</span><span class="method-desc">Fetch data from the server</span></div>
+      <div class="method-cell"><span class="method-verb v-post">POST</span><span class="method-desc">Send new data to create a resource</span></div>
+      <div class="method-cell"><span class="method-verb v-put">PUT</span><span class="method-desc">Send data to update an existing resource</span></div>
+      <div class="method-cell"><span class="method-verb v-delete">DELETE</span><span class="method-desc">Request deletion of a resource</span></div>
+    </div>
+
+    <h3>Fetching data with Axios</h3>
+
+    <p>Every Axios call returns a <strong>Promise</strong> — a JavaScript object that represents a value that isn't available yet. You chain <code>.then()</code> to handle a successful response, and <code>.catch()</code> to handle errors:</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Fetching data — handling success and error separately</div>
+      <pre><code>axios.<span class="fn">get</span>(<span class="str">'/api/users'</span>)
+  .<span class="fn">then</span>((response) => {
+    <span class="cmt">// response.status     — e.g. 200 (OK)</span>
+    <span class="cmt">// response.statusText — e.g. "OK"</span>
+    <span class="cmt">// response.data       — the response body, already JSON-parsed</span>
+    <span class="kw">this</span>.<span class="fn">setState</span>({ users: response.data });
+  })
+  .<span class="fn">catch</span>((err) => {
+    <span class="cmt">// err.response.status  — e.g. 404, 500</span>
+    <span class="cmt">// err.response.data    — error details from the server</span>
+    <span class="cmt">// !err.response        — no response at all (network error)</span>
+    console.<span class="fn">error</span>(<span class="str">'Request failed:'</span>, err);
+  });</code></pre>
+    </div>
+    <p class="code-note">Axios automatically parses the JSON response body into a JavaScript object — you never have to call <code>JSON.parse()</code> yourself. Non-2xx status codes (like 404 or 500) automatically land in the <code>.catch()</code> block.</p>
+
+    <p>There's also an alternative error handling style where you pass both a success callback and an error callback as arguments to <code>.then()</code>:</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Alternative — both callbacks inside a single .then() call</div>
+      <pre><code>axios.<span class="fn">get</span>(<span class="str">'/api/users'</span>)
+  .<span class="fn">then</span>(
+    (response) => { <span class="cmt">/* handle success */</span> },
+    (err)      => { <span class="cmt">/* handle error   */</span> }
+  );</code></pre>
+    </div>
+    <p class="code-note">This style is functionally similar but subtly different: errors thrown inside the success callback won't be caught by the second argument. Use <code>.catch()</code> at the end of the chain for broader error coverage.</p>
+
+    <h3>Uploading data with Axios</h3>
+
+    <p>Sending data to the server — for a new comment, a photo upload, a registration — uses <code>axios.post()</code>. You pass the URL and a plain JavaScript object; Axios serializes it to JSON automatically:</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Posting new data to the server</div>
+      <pre><code>axios.<span class="fn">post</span>(<span class="str">'/api/comments'</span>, {
+  photoId: <span class="str">'abc123'</span>,
+  text: <span class="str">'Great photo!'</span>
+})
+  .<span class="fn">then</span>((response) => {
+    <span class="cmt">// response.data — the newly created comment, returned by the server</span>
+    <span class="kw">this</span>.<span class="fn">setState</span>({ comments: [...<span class="kw">this</span>.state.comments, response.data] });
+  })
+  .<span class="fn">catch</span>((err) => {
+    <span class="cmt">// Handle validation errors, auth errors, etc.</span>
+  });</code></pre>
+    </div>
+    <p class="code-note">The object you pass as the second argument is automatically serialized to JSON and sent as the request body. The server reads it with something like <code>req.body</code> in Express (assuming <code>express.json()</code> middleware is set up).</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Single-page apps replace full-page form submissions with background HTTP requests using Axios (or similar libraries). Axios returns Promises — chain <code>.then()</code> for success and <code>.catch()</code> for errors. It handles JSON serialization and parsing automatically, so you work with plain JavaScript objects throughout.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 10 — SERVER VALIDATION
+════════════════════════════════════════════════════════════ -->
+<section id="server-validation">
+  <div class="container">
+    <div class="sec-eyebrow">Section 10</div>
+    <h2>Server-Side Validation: The Last Line of Defense</h2>
+
+    <p>No matter how thorough your client-side validation is, the server must <strong>always validate again</strong>. This isn't redundancy for its own sake — it's a fundamental security requirement. Anyone with basic technical knowledge can send an HTTP request directly to your API, completely bypassing your React form, your JavaScript validation, and every check you've built in the browser.</p>
+
+    <p>Think of client-side validation like the bouncer at the door of a club — friendly, fast, and good for most cases. Server-side validation is the ID check behind the bar. You need both, but only the second one is actually enforcing the rules.</p>
+
+    <h3>Schema-level validation with Mongoose</h3>
+
+    <p>If you're using MongoDB with Mongoose, you can attach validator functions directly to your schema fields. These validators run every time a document is saved, regardless of where that save was triggered from:</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Mongoose schema validator — enforcing a phone number format at the database layer</div>
+      <pre><code><span class="kw">var</span> userSchema = <span class="kw">new</span> <span class="fn">Schema</span>({
+  phone: {
+    <span class="kw">type</span>: String,
+    <span class="kw">validate</span>: {
+      <span class="cmt">// Returns true if valid, false if not</span>
+      <span class="kw">validator</span>: <span class="kw">function</span>(v) {
+        <span class="kw">return</span> <span class="str">/\d{3}-\d{3}-\d{4}/</span>.<span class="fn">test</span>(v);
+      },
+      <span class="kw">message</span>: <span class="str">'{VALUE} is not a valid phone number!'</span>
+    }
+  }
+});</code></pre>
+    </div>
+    <p class="code-note">If the validator returns <code>false</code>, Mongoose rejects the save operation and returns the error message. This happens at the database layer — no invalid data reaches persistent storage, even if someone bypasses every other check.</p>
+
+    <h3>When schema validators aren't enough</h3>
+
+    <p>Some integrity rules are too complex for a simple field validator. They require custom application logic because they involve relationships between multiple objects or cross-cutting concerns:</p>
+
+    <p><strong>Relationship enforcement:</strong> Imagine a photo comment — only the person who wrote it, or an admin, should be able to delete it. A field validator on the comment schema can't know who is making the request. You need application-level code that checks the logged-in user's ID against the comment's author field before allowing the delete.</p>
+
+    <p><strong>Resource quotas:</strong> If free-tier users can only upload 50 photos, you can't encode that as a schema validator on a single photo document. You need to count how many photos the user already has before allowing a new upload. This is application logic, not schema logic.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Server-side validation is non-negotiable. Schema-level validators (like Mongoose's <code>validate</code>) are great for field format checks. But rules involving relationships between objects, user permissions, or resource quotas require custom application code. <strong>Always assume that any data arriving at your API could have been crafted by hand — validate accordingly.</strong></p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SUMMARY
+════════════════════════════════════════════════════════════ -->
+<section id="summary">
+  <div class="container">
+    <div class="sec-eyebrow">Summary</div>
+    <h2>Five Things to Remember</h2>
+    <ul class="sum-list">
+      <li class="sum-item">
+        <span class="sum-num">1</span>
+        <div class="sum-body">
+          <h4>GET vs POST is about more than just where data goes</h4>
+          <p>GET encodes data in the URL (visible, bookmarkable, cacheable). POST puts it in the request body (hidden, appropriate for sensitive data and mutations). Use POST for anything that changes state on the server.</p>
+        </div>
+      </li>
+      <li class="sum-item">
+        <span class="sum-num">2</span>
+        <div class="sum-body">
+          <h4>React forms use controlled components — state is the source of truth</h4>
+          <p>Every input's value lives in <code>this.state</code>, not the DOM. <code>onChange</code> updates state on every keystroke, and React re-renders the input to reflect it. This gives you precise, real-time control over form data.</p>
+        </div>
+      </li>
+      <li class="sum-item">
+        <span class="sum-num">3</span>
+        <div class="sum-body">
+          <h4>Always bind <code>this</code> — pick one strategy and be consistent</h4>
+          <p>Class methods passed as event callbacks lose their <code>this</code> context. Fix it with an inline arrow function, constructor binding, or a class field arrow function. Inconsistency here is a reliable source of confusing bugs.</p>
+        </div>
+      </li>
+      <li class="sum-item">
+        <span class="sum-num">4</span>
+        <div class="sum-body">
+          <h4>Client-side validation is UX — server-side validation is security</h4>
+          <p>Browser validation gives users fast, friendly feedback. But anyone can bypass it with a direct HTTP request. The server must always validate independently. Schema validators handle field-level rules; custom application code handles permissions and quotas.</p>
+        </div>
+      </li>
+      <li class="sum-item">
+        <span class="sum-num">5</span>
+        <div class="sum-body">
+          <h4>Axios replaces form POSTs in single-page apps</h4>
+          <p>Use <code>axios.get()</code> to fetch data and <code>axios.post()</code> to send it — both return Promises and handle JSON automatically. No page reloads, no lost state, and a clean separation between fetching data and rendering it.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  CS142 · Web Applications · Stanford University · Mendel Rosenblum
+</footer>
+
+<script>
+  // Active nav link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.nav-links a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

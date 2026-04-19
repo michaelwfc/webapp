@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>State Management — CS142 Web Applications</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ── Reset & Variables ──────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --accent:       #1e8a6e;
+  --accent-light: #e8f5f1;
+  --accent-mid:   #b8ddd4;
+  --ink:          #18181b;
+  --ink-2:        #3f3f46;
+  --ink-3:        #71717a;
+  --paper:        #fafaf9;
+  --paper-2:      #f4f4f0;
+  --border:       #e4e4e0;
+  --code-bg:      #141418;
+  --code-text:    #d4d0f0;
+  --kw-color:     #f4a261;
+  --str-color:    #6fcf97;
+  --fn-color:     #79c5f0;
+  --cmt-color:    #5a5a7a;
+  --nav-h:        56px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+/* ── Utility ────────────────────────────────────────────────── */
+.container { max-width: 740px; margin: 0 auto; padding: 0 1.5rem; }
+
+/* ── Navigation ─────────────────────────────────────────────── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(250,250,249,0.93);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  height: var(--nav-h);
+}
+.nav-inner {
+  max-width: 740px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding-right: 1.25rem;
+  margin-right: 0.5rem;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+.nav-links a {
+  display: block;
+  padding: 0 13px;
+  height: var(--nav-h);
+  line-height: var(--nav-h);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-3);
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+.nav-links a:hover { color: var(--ink); }
+.nav-links a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Hero ───────────────────────────────────────────────────── */
+.hero {
+  padding: 5.5rem 1.5rem 4.5rem;
+  max-width: 740px;
+  margin: 0 auto;
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+}
+.hero-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.hero h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(2.6rem, 6vw, 4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+}
+.hero h1 span { color: var(--accent); }
+.hero-intro {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--ink-2);
+  max-width: 600px;
+  border-left: 3px solid var(--accent-mid);
+  padding-left: 1.25rem;
+}
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2rem;
+}
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-3);
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: 100px;
+  letter-spacing: 0.03em;
+}
+
+/* ── Page Divider ───────────────────────────────────────────── */
+.page-divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+/* ── Sections ───────────────────────────────────────────────── */
+section {
+  padding: 5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+section:last-of-type { border-bottom: none; }
+
+.sec-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sec-eyebrow::after {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.45;
+}
+
+section h2 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+}
+
+section h3 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--ink-2);
+  margin: 2.5rem 0 1rem;
+}
+
+section p {
+  color: var(--ink-2);
+  margin-bottom: 1.25rem;
+  font-size: 1rem;
+  line-height: 1.85;
+}
+section p:last-child { margin-bottom: 0; }
+section p strong { color: var(--ink); font-weight: 500; }
+section a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+section a:hover { opacity: 0.8; }
+
+/* ── Inline code ─────────────────────────────────────────────── */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.84em;
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ── Code Blocks ─────────────────────────────────────────────── */
+.code-wrap { margin: 2rem 0; }
+.code-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+pre {
+  background: var(--code-bg);
+  border-radius: 10px;
+  padding: 1.5rem 1.75rem;
+  overflow-x: auto;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+pre code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--code-text);
+  background: none;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+}
+.kw  { color: var(--kw-color); }
+.str { color: var(--str-color); }
+.fn  { color: var(--fn-color); }
+.cmt { color: var(--cmt-color); font-style: italic; }
+.hl  { color: #c3e8de; }
+
+.code-note {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--ink-3);
+  margin-top: 0.85rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--border);
+  line-height: 1.65;
+}
+
+/* ── Key Takeaway ────────────────────────────────────────────── */
+blockquote {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-light);
+  padding: 1.25rem 1.5rem 1.25rem 1.75rem;
+  border-radius: 0 8px 8px 0;
+  margin: 2.5rem 0 0;
+}
+blockquote .bq-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+blockquote p {
+  color: var(--ink-2) !important;
+  font-size: 0.97rem !important;
+  margin: 0 !important;
+  line-height: 1.75 !important;
+}
+blockquote p strong { color: var(--ink) !important; }
+
+/* ── Architecture Diagram ────────────────────────────────────── */
+.arch {
+  background: var(--code-bg);
+  border-radius: 10px;
+  padding: 1.75rem 2rem;
+  margin: 2rem 0;
+  border: 1px solid rgba(255,255,255,0.04);
+  overflow-x: auto;
+}
+.arch-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5a5a7a;
+  margin-bottom: 1.25rem;
+}
+.arch-rows { display: flex; flex-direction: column; gap: 10px; }
+.arch-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.arch-box {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.box-component { background: rgba(121,197,240,0.12); color: #79c5f0; border: 1px solid rgba(121,197,240,0.2); }
+.box-manager   { background: rgba(30,138,110,0.15);  color: #40c99a; border: 1px solid rgba(30,138,110,0.3); }
+.box-server    { background: rgba(244,162,97,0.12);  color: #f4a261; border: 1px solid rgba(244,162,97,0.2); }
+.box-cache     { background: rgba(111,207,151,0.1);  color: #6fcf97; border: 1px solid rgba(111,207,151,0.2); }
+.arch-arrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #3a3a5a;
+}
+.arch-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #5a5a7a;
+  font-style: italic;
+}
+.arch-sep {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  margin: 12px 0;
+}
+
+/* ── Strategy Table ──────────────────────────────────────────── */
+.strategy-table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.93rem; }
+.strategy-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.strategy-table td {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink-2);
+  vertical-align: top;
+  line-height: 1.6;
+}
+.strategy-table td:first-child {
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.strategy-table tr:last-child td { border-bottom: none; }
+.strategy-table tr:hover td { background: var(--paper-2); }
+.badge {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.badge-easy   { background: rgba(111,207,151,0.12); color: #27896b; border: 1px solid rgba(111,207,151,0.25); }
+.badge-medium { background: rgba(244,162,97,0.12);  color: #a0601e; border: 1px solid rgba(244,162,97,0.25); }
+.badge-hard   { background: rgba(235,87,87,0.1);    color: #b83232; border: 1px solid rgba(235,87,87,0.2); }
+
+/* ── Two-column options ──────────────────────────────────────── */
+.option-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 1.75rem 0;
+}
+.option-cell {
+  background: var(--paper-2);
+  padding: 1.25rem 1.5rem;
+}
+.option-cell .opt-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+.option-cell h4 { font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 0.4rem; }
+.option-cell p { font-size: 0.88rem !important; color: var(--ink-3) !important; margin: 0 !important; line-height: 1.6 !important; }
+@media (max-width: 500px) { .option-grid { grid-template-columns: 1fr; } }
+
+/* ── Library cards ───────────────────────────────────────────── */
+.lib-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 1.75rem 0;
+}
+.lib-row {
+  background: var(--paper-2);
+  padding: 1.1rem 1.4rem;
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+.lib-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  padding: 3px 0;
+}
+.lib-row p { margin: 0 !important; font-size: 0.92rem !important; color: var(--ink-2) !important; line-height: 1.65 !important; }
+@media (max-width: 500px) { .lib-row { grid-template-columns: 1fr; gap: 0.4rem; } }
+
+/* ── Summary ─────────────────────────────────────────────────── */
+#summary {
+  background: var(--ink);
+  border-radius: 14px;
+  padding: 3.5rem;
+  margin-top: 5rem;
+  border-bottom: none !important;
+  padding-bottom: 3.5rem !important;
+}
+#summary .sec-eyebrow { color: var(--accent-mid); }
+#summary .sec-eyebrow::after { background: var(--accent-mid); }
+#summary h2 { color: #fff; }
+.sum-list { list-style: none; margin-top: 2rem; }
+.sum-item {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  padding: 1.5rem 0;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.sum-item:first-child { border-top: none; padding-top: 0; }
+.sum-num {
+  font-family: 'Fraunces', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.1);
+  line-height: 1;
+  flex-shrink: 0;
+  width: 40px;
+  padding-top: 2px;
+}
+.sum-body h4 { font-size: 14px; font-weight: 500; color: var(--accent-mid); margin-bottom: 0.35rem; }
+.sum-body p { font-size: 0.93rem !important; color: rgba(255,255,255,0.5) !important; line-height: 1.7 !important; margin: 0 !important; }
+
+/* ── Footer ──────────────────────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .hero { padding: 3.5rem 1.25rem 3rem; }
+  section { padding: 3.5rem 0; }
+  .container { padding: 0 1.25rem; }
+  pre { padding: 1.25rem; }
+  pre code { font-size: 12px; }
+  #summary { padding: 2.5rem 1.5rem; margin-top: 3rem; }
+  .arch { padding: 1.25rem 1.25rem; }
+  .strategy-table { font-size: 0.85rem; }
+  .strategy-table td, .strategy-table th { padding: 10px 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ───────────────────────────────────────────── -->
+<nav aria-label="Tutorial navigation">
+  <div class="nav-inner">
+    <span class="nav-brand">CS142</span>
+    <ul class="nav-links">
+      <li><a href="#complexity">The Problem</a></li>
+      <li><a href="#session-sync">Session Sync</a></li>
+      <li><a href="#model-updates">Model Updates</a></li>
+      <li><a href="#communication">Communication</a></li>
+      <li><a href="#libraries">Libraries</a></li>
+      <li><a href="#before-after">Before & After</a></li>
+      <li><a href="#offline">Offline Support</a></li>
+      <li><a href="#live-changes">Live Changes</a></li>
+      <li><a href="#sessions-input">Sessions & Input</a></li>
+      <li><a href="#summary">Summary</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────────────── -->
+<header>
+  <div class="hero">
+    <div class="hero-eyebrow">CS142 · Web Applications · Stanford</div>
+    <h1>State <span>Management</span></h1>
+    <p class="hero-intro">
+      A simple, read-only app is easy to reason about. But the moment users can log in, create content, and change data, you face a hard question: when something changes in one part of your app, how does every other part find out? This tutorial takes you from the chaos of ad-hoc callbacks to the clarity of centralized state management — explaining not just what each pattern is, but why it exists and when you need it.
+    </p>
+    <div class="hero-tags">
+      <span class="tag">React State</span>
+      <span class="tag">Session Sync</span>
+      <span class="tag">FLUX / Redux</span>
+      <span class="tag">Listener/Emitter</span>
+      <span class="tag">React Router</span>
+      <span class="tag">Model Refresh</span>
+    </div>
+  </div>
+</header>
+
+<hr class="page-divider">
+
+<main>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 1 — THE COMPLEXITY PROBLEM
+════════════════════════════════════════════════ -->
+<section id="complexity">
+  <div class="container">
+    <div class="sec-eyebrow">Section 01</div>
+    <h2>Why Simple Apps Are Deceptively Easy</h2>
+
+    <p>Imagine you're building a photo-sharing app in React. In the early stages, it's read-only: users can browse photos and view profiles, but nothing changes. Each component — <code>TopBar</code>, <code>UserList</code>, <code>UserDetail</code>, <code>UserPhotos</code> — fetches its own data when it mounts, renders it, and that's that. Life is good.</p>
+
+    <p>This arrangement follows the classic <strong>Model-View-Controller</strong> (MVC) pattern — the model is your data, the view is what the user sees, and the controller is the logic that connects them. When everything is static, this works beautifully. Components are modular and independent. Each one knows exactly what data it needs and goes to get it.</p>
+
+    <p>But the moment users can actually <em>do</em> things — log in, add a photo, post a comment — the picture changes dramatically. Consider two scenarios that break the simple model immediately.</p>
+
+    <p>First: a user posts a new comment on a photo. The <code>UserPhotos</code> component is currently displaying that photo, but it fetched its data when it first loaded. The new comment exists on the server, but the component has no idea. Its model data is now stale — and it will stay stale until something forces a refresh.</p>
+
+    <p>Second: a user logs out and logs back in as a different account. Suddenly, everything your components fetched and cached is wrong. The sidebar user list, the profile details, the photos — all of it belongs to the old session. Your entire app is looking at data for the wrong person.</p>
+
+    <p>These aren't edge cases. They're the normal reality of any interactive web application. And they reveal a fundamental truth: <strong>state management is the hard problem at the center of frontend development.</strong></p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Read-only apps with static data are straightforward to build — components can fetch their own data at startup and be done with it. But as soon as users can <strong>create, update, or delete data</strong>, or <strong>change session state</strong>, components need a way to stay in sync with a world that keeps changing around them.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 2 — SESSION SYNC
+════════════════════════════════════════════════ -->
+<section id="session-sync">
+  <div class="container">
+    <div class="sec-eyebrow">Section 02</div>
+    <h2>Session State: Keeping the Browser and Server in Sync</h2>
+
+    <p>Session state — who is currently logged in, and what they're allowed to do — is a special kind of data that has to exist in two places at once: in the browser (so the UI knows what to show) and on the server (so it can authorize requests). Keeping these two copies in sync is one of the trickiest parts of building a web application.</p>
+
+    <p>Here's the core tension: the server enforces authentication on every single request. If a user isn't logged in, the server won't return their data — it will respond with an error, typically a 401 (Unauthorized). This means that if your React components try to fetch their models when they first mount, and the user isn't logged in yet, those fetches will all fail silently or throw errors.</p>
+
+    <h3>The login transition</h3>
+
+    <p>Think about what happens when a user first opens your app before signing in. The sidebar that shows a list of all users? That requires an authenticated request — the server won't serve it to an anonymous visitor. The photo feed? Same story. At startup, most of the app's data is <em>unavailable</em> — it's locked behind the login wall.</p>
+
+    <p>Once the user successfully logs in, the floodgates open. The session is established, and suddenly all those models that were previously off-limits can be fetched. But the components that wanted to fetch them at startup have already given up. Something needs to tell them: "now's your chance — go get the data."</p>
+
+    <h3>The logout transition</h3>
+
+    <p>Logout is the mirror image, and arguably harder to handle correctly. Everything was working fine — components had their data, the user was browsing happily — and then they click "Sign Out." From this moment, every HTTP request your app makes will fail. The session cookie is gone. The server will reject all of them with a 401 error.</p>
+
+    <p>If your app doesn't handle this gracefully, the user gets a broken experience: stale data on screen, failed background requests, and confusing error states. The app needs to know about the logout event and react to it — clearing cached data, redirecting to the login page, and resetting itself to an unauthenticated state.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Login and logout are <strong>major state transitions</strong> that affect every component in your app. Login unlocks data that was previously unavailable; logout invalidates data that was previously valid. Components that fetch data only at startup will be caught off-guard by both transitions — your state management strategy needs to account for them explicitly.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 3 — MODEL UPDATES
+════════════════════════════════════════════════ -->
+<section id="model-updates">
+  <div class="container">
+    <div class="sec-eyebrow">Section 03</div>
+    <h2>Model Updates: When Data Changes After the Page Loads</h2>
+
+    <p>There's another category of state problem that's separate from sessions: what happens when the underlying data <em>changes</em> while the user is actively using the app?</p>
+
+    <p>In a photo-sharing app, this happens constantly. A user uploads a new photo. Another user posts a comment. Someone edits their profile description. Each of these events modifies the data that your React components are currently displaying — or should be displaying.</p>
+
+    <p>The problem is that React components are only aware of the data they fetched. A component is like a snapshot: it captures the state of the world at the moment it loaded, and unless something explicitly tells it to update, it keeps showing that snapshot forever — even as the underlying reality drifts further and further away.</p>
+
+    <p>This creates a concrete, practical problem in the photo app. Imagine a user adds a new comment to a photo. Where does that comment get added? On the server. Does the <code>UserPhotos</code> component know about it? Not unless something triggers a refresh. The component is blissfully showing an out-of-date list of comments, because it has no mechanism to notice that the server's version has changed.</p>
+
+    <p>The solution — whatever form it takes — has to answer a specific question: <strong>when something changes somewhere, how do the components that care about it find out?</strong> This is the central design question of state management.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Data changes after the page loads. A component that fetched its data at startup is showing a <strong>frozen snapshot</strong> of the world — not the live reality. State management exists to solve this: ensuring that when data changes, the components displaying that data are notified and can re-render with fresh information.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 4 — COMMUNICATION PATTERNS
+════════════════════════════════════════════════ -->
+<section id="communication">
+  <div class="container">
+    <div class="sec-eyebrow">Section 04</div>
+    <h2>How Components Talk to Each Other</h2>
+
+    <p>So how does a component find out that something outside of it has changed? React gives you the building blocks, but not the answer. There are two main approaches, and understanding both will help you see why the second one exists.</p>
+
+    <h3>Option 1: Passing callbacks — the simple approach</h3>
+
+    <p>The most direct approach is to pass a function from a parent component down to a child as a prop. When the child does something interesting — adds a photo, posts a comment — it calls that function, and the parent reacts. This is the communication approach you learn first in React, and it works well for simple parent-child relationships.</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Passing a callback function down to a child component via props</div>
+      <pre><code><span class="cmt">// Parent passes a function down; child calls it when something happens</span>
+&lt;<span class="fn">Component</span> <span class="kw">commInfo</span>={<span class="kw">this</span>.callMeWithInfo.<span class="fn">bind</span>(<span class="kw">this</span>)} /&gt;</code></pre>
+    </div>
+    <p class="code-note">The child component receives <code>commInfo</code> as a prop and calls it when it has information to report. The parent's method <code>callMeWithInfo</code> runs in response, potentially updating state and triggering a re-render.</p>
+
+    <p>The problem with callbacks is that they don't scale. Imagine you have a photo add component that's nested several levels deep in the component tree, and three different components at different levels all want to know when a new photo is added. You'd have to thread that callback all the way down through every intermediate component — even the ones that don't care about it at all. This phenomenon has an unglamorous name in the React world: <strong>prop drilling</strong>.</p>
+
+    <h3>Option 2: Listener/Emitter — the scalable approach</h3>
+
+    <p>The listener/emitter pattern (also called publish/subscribe) solves this elegantly. Instead of components directly calling each other's functions, there's an intermediary: an event system. A component that cares about an event <strong>listens</strong> for it by registering a handler. A component that produces an event <strong>emits</strong> it when something happens. The two components don't need to know anything about each other — they only need to know about the shared event system.</p>
+
+    <p>Think of it like a radio station and its listeners. The station broadcasts on a frequency. Anyone who tunes into that frequency hears the broadcast. The station doesn't know — or care — how many listeners there are or where they are. The listeners don't need a direct line to the station. Both parties just agree on the frequency.</p>
+
+    <div class="option-grid">
+      <div class="option-cell">
+        <span class="opt-label">Callbacks</span>
+        <h4>Direct coupling</h4>
+        <p>Producer must know about the consumer. Works for 1-to-1 parent-child relationships. Breaks down at scale — requires prop drilling through intermediate components.</p>
+      </div>
+      <div class="option-cell">
+        <span class="opt-label">Listener / Emitter</span>
+        <h4>Decoupled broadcast</h4>
+        <p>Producer and consumer only know about the shared event system. Any number of components can subscribe. No prop drilling. This is the foundation of Redux, FLUX, and similar tools.</p>
+      </div>
+    </div>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Callbacks work for simple parent-child communication, but break down as your component tree grows. The <strong>listener/emitter pattern</strong> decouples producers from consumers — components broadcast events without knowing who's listening, and interested components subscribe without knowing who's broadcasting. This is the conceptual foundation of every major state management library.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 5 — LIBRARIES
+════════════════════════════════════════════════ -->
+<section id="libraries">
+  <div class="container">
+    <div class="sec-eyebrow">Section 05</div>
+    <h2>State Management Libraries: React's Ecosystem</h2>
+
+    <p>React itself is deliberately silent on the question of state management. The core library gives you local component state (<code>this.state</code> and <code>setState</code>) and a way to pass data down the tree via props — but it offers nothing for sharing state across distant components or coordinating data fetching globally. This was an intentional design choice: React wanted to be a view library, not an entire framework.</p>
+
+    <p>The result is a rich ecosystem of third-party libraries that fill this gap, each with a distinct philosophy about how state should flow through an application.</p>
+
+    <div class="lib-grid">
+      <div class="lib-row">
+        <span class="lib-name">FLUX</span>
+        <p>Facebook's original architecture for building user interfaces with React. Introduced the concept of a <strong>unidirectional data flow</strong>: user actions trigger dispatched events, a Store updates its state in response, and views re-render from the Store. FLUX is more of a pattern than a library — it defines how data should flow, and you implement the pieces.</p>
+      </div>
+      <div class="lib-row">
+        <span class="lib-name">Redux</span>
+        <p>The most widely adopted state management library in the React ecosystem. Redux formalizes the FLUX pattern with a single global Store, pure functions called <strong>reducers</strong> that specify how state changes in response to actions, and a strict one-way data flow. Its predictability makes debugging significantly easier — you can replay actions to reproduce any state.</p>
+      </div>
+      <div class="lib-row">
+        <span class="lib-name">Relay</span>
+        <p>Facebook's production GraphQL client for React. Rather than managing state globally, Relay co-locates <strong>data requirements with the components that need them</strong> — each component declares what data it needs using GraphQL fragments, and Relay handles fetching, caching, and updating. Best suited for apps with a GraphQL backend.</p>
+      </div>
+    </div>
+
+    <p>All three share the same underlying insight: components shouldn't be responsible for fetching and managing their own data in isolation. There should be a <strong>single source of truth</strong> — a central place where state lives — and components should derive their view from that source rather than maintaining their own private copies.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>React leaves global state management to the ecosystem. FLUX, Redux, and Relay all share the same core idea: state should have <strong>a single source of truth</strong>, changes should flow through a predictable path, and components should react to state changes rather than managing their own data in isolation. Choose the one that matches your app's complexity and backend.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 6 — BEFORE & AFTER
+════════════════════════════════════════════════ -->
+<section id="before-after">
+  <div class="container">
+    <div class="sec-eyebrow">Section 06</div>
+    <h2>Before and After: The Photo App Architecture</h2>
+
+    <p>The difference between an app without state management and one with it is best understood by seeing both architectures side by side. Let's use the photo app as a concrete example.</p>
+
+    <h3>Without a state manager</h3>
+
+    <p>In the current photo app, every component is an island. When <code>TopBar</code> needs data, it fetches it. When <code>UserList</code> needs data, it fetches it — even if <code>TopBar</code> already fetched the same user list moments ago. Coordination between components happens only when someone explicitly passes a callback, and that callback has to travel all the way through the component tree to get where it's needed.</p>
+
+    <div class="arch">
+      <div class="arch-title">Without state management — each component is on its own</div>
+      <div class="arch-rows">
+        <div class="arch-row">
+          <span class="arch-box box-component">TopBar</span>
+          <span class="arch-arrow">→</span>
+          <span class="arch-label">fetches its own model data</span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-box box-component">UserDetail</span>
+          <span class="arch-arrow">→</span>
+          <span class="arch-label">fetches its own model data</span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-box box-component">UserPhotos</span>
+          <span class="arch-arrow">→</span>
+          <span class="arch-label">fetches its own model data</span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-box box-component">UserList</span>
+          <span class="arch-arrow">→</span>
+          <span class="arch-label">fetches its own model data (possibly duplicate!)</span>
+        </div>
+        <hr class="arch-sep">
+        <div class="arch-row">
+          <span class="arch-label">ad-hoc callbacks ↕ — only when someone thought to add them</span>
+        </div>
+      </div>
+    </div>
+    <p class="code-note">Each component fetches data independently at startup. If the same user data is needed by three components, it gets fetched three times. When data changes, there's no systematic way to notify everyone — only the components that received a callback will know.</p>
+
+    <h3>With a state manager</h3>
+
+    <p>With a central state manager, the architecture flips. Components no longer go out to fetch data themselves — instead, they <strong>subscribe</strong> to the specific slices of state they care about. The state manager is responsible for fetching data from the server, caching it, and pushing updates to every subscribed component whenever something changes.</p>
+
+    <div class="arch">
+      <div class="arch-title">With a state manager — centralized, coordinated, and reactive</div>
+      <div class="arch-rows">
+        <div class="arch-row">
+          <span class="arch-box box-component">TopBar</span>
+          <span class="arch-arrow">←</span>
+          <span class="arch-label">subscribes to: Context (current user, page title)</span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-box box-component">UserDetail</span>
+          <span class="arch-arrow">←</span>
+          <span class="arch-label">subscribes to: Current User Detail</span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-box box-component">UserPhotos</span>
+          <span class="arch-arrow">←</span>
+          <span class="arch-label">subscribes to: Current Photos</span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-box box-component">UserList</span>
+          <span class="arch-arrow">←</span>
+          <span class="arch-label">subscribes to: UserList</span>
+        </div>
+        <hr class="arch-sep">
+        <div class="arch-row">
+          <span class="arch-box box-manager">State Manager</span>
+          <span class="arch-arrow">↔</span>
+          <span class="arch-box box-server">Web Server</span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-label">User Actions → State Manager → dispatches to server → updates flow back to all subscribers</span>
+        </div>
+      </div>
+    </div>
+    <p class="code-note">Data flows in one direction: from the server to the state manager to subscribed components. When the server's data changes, the state manager updates, and every component subscribed to that slice of state automatically re-renders with fresh data.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Without a state manager, components are islands that fetch data independently and communicate through ad-hoc callbacks. With one, there's a <strong>single source of truth</strong>: components subscribe to what they need, user actions flow through a predictable path, and updates propagate automatically to every component that cares.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 7 — OFFLINE SUPPORT
+════════════════════════════════════════════════ -->
+<section id="offline">
+  <div class="container">
+    <div class="sec-eyebrow">Section 07</div>
+    <h2>A Bonus Benefit: Offline Support</h2>
+
+    <p>One of the less obvious benefits of centralizing state management is how naturally it enables offline support — the ability for your app to keep working when the user has no internet connection.</p>
+
+    <p>When every component fetches its own data directly from the server, offline support is nearly impossible to retrofit. Each component would need its own caching logic, its own fallback behavior, its own way of queuing requests for when connectivity returns. The surface area is enormous.</p>
+
+    <p>With a state manager sitting between components and the server, the picture is completely different. The state manager becomes the <strong>single point of contact</strong> with the network. Components don't know — or care — whether their data came from a live server request or a local cache. They just subscribe and render whatever the state manager gives them.</p>
+
+    <div class="arch">
+      <div class="arch-title">State manager as network intermediary — transparent to components</div>
+      <div class="arch-rows">
+        <div class="arch-row">
+          <span class="arch-box box-manager">State Manager</span>
+          <span class="arch-arrow">↔</span>
+          <span class="arch-box box-server">Web Server</span>
+          <span class="arch-label">(when online)</span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-box box-manager">State Manager</span>
+          <span class="arch-arrow">↔</span>
+          <span class="arch-box box-cache">Local Cache</span>
+          <span class="arch-label">(when offline)</span>
+        </div>
+        <hr class="arch-sep">
+        <div class="arch-row">
+          <span class="arch-box box-component">All Components</span>
+          <span class="arch-arrow">←</span>
+          <span class="arch-label">always read from State Manager — no network knowledge needed</span>
+        </div>
+      </div>
+    </div>
+    <p class="code-note">The state manager handles the difference between online and offline transparently. When offline, it serves cached data to components. When connectivity restores, it syncs changes with the server and updates the cache. Components never need to handle either scenario themselves.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>A centralized state manager is the natural place to implement offline support. Components always get their data from the state manager — it abstracts away whether data came from the network or a local cache. This means <strong>offline capability is something you add once, in one place</strong>, rather than retrofitting into every component.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 8 — LIVE CHANGES
+════════════════════════════════════════════════ -->
+<section id="live-changes">
+  <div class="container">
+    <div class="sec-eyebrow">Section 08</div>
+    <h2>When Other Users Change the Data: Three Strategies</h2>
+
+    <p>There's one more dimension of the state problem that's easy to overlook: what happens when it's not <em>your</em> user making changes, but someone else entirely? In a multi-user app like a photo-sharing platform, data is changing all the time — other users are uploading photos, posting comments, and updating their profiles — and your app needs a strategy for handling those changes.</p>
+
+    <p>There are three fundamentally different approaches, each with a distinct set of tradeoffs:</p>
+
+    <div style="overflow-x: auto;">
+      <table class="strategy-table">
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>How it works</th>
+            <th>Complexity</th>
+            <th>Tradeoff</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Do nothing</td>
+            <td>Fetch data once at startup. Never refresh unless the user triggers it manually.</td>
+            <td><span class="badge badge-easy">easy</span></td>
+            <td>Users see stale data until they navigate or refresh. Particularly confusing for changes they made themselves — imagine posting a comment and not seeing it appear.</td>
+          </tr>
+          <tr>
+            <td>Poll</td>
+            <td>Periodically re-fetch the model on a timer, or offer a manual "Refresh" button in the UI.</td>
+            <td><span class="badge badge-medium">medium</span></td>
+            <td>A good practical balance. Stale data for at most one polling interval. A manual refresh button gives users control and sets clear expectations.</td>
+          </tr>
+          <tr>
+            <td>Server push</td>
+            <td>The server pushes changes to the browser the instant they happen, using WebSockets or Server-Sent Events.</td>
+            <td><span class="badge badge-hard">hard</span></td>
+            <td>Users see updates in real time. But implementation is complex, and incoming changes can conflict with edits the user is currently making — requiring careful conflict resolution.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>For most applications at an early stage, polling is the sweet spot. It's simple to implement, easy to reason about, and gives users a reasonable experience. Server push is worth the investment only when real-time updates are a core part of the product — think collaborative editing tools or live chat.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Other users changing data is a reality in any multi-user app. <strong>Do nothing</strong> is simplest but produces confusing stale views. <strong>Polling</strong> is a pragmatic middle ground — easy to implement and good enough for most apps. <strong>Server push</strong> gives real-time updates but adds significant complexity. Start with polling; graduate to server push when the product demands it.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 9 — SESSIONS & INPUT IN REACT
+════════════════════════════════════════════════ -->
+<section id="sessions-input">
+  <div class="container">
+    <div class="sec-eyebrow">Section 09</div>
+    <h2>Putting It Together: Sessions and Input in a React App</h2>
+
+    <p>Now that we've covered the theory, let's look at how these concepts come together in a concrete React application — specifically, how you track who is logged in and how you protect routes from unauthenticated access.</p>
+
+    <h3>Tracking login state</h3>
+
+    <p>The app needs to know, at all times, whether a user is logged in. The cleanest way to manage this is in a <strong>state store</strong> — the same Redux or FLUX store that manages the rest of your app's state. If you don't have a full state management library yet, keeping it in the top-level component's state (and distributing it via React Context) is a perfectly valid starting point.</p>
+
+    <p>The key is that this <code>userIsLoggedIn</code> flag (or the logged-in user object itself) is accessible everywhere in the component tree. When login succeeds, you set it. When logout happens, you clear it. Every component that depends on authentication status subscribes to it and responds appropriately.</p>
+
+    <h3>Guarding routes with React Router</h3>
+
+    <p>React Router lets you conditionally render different components for the same URL path. This is how you protect routes: if the user is logged in, show the real component; if not, redirect them to the login page instead.</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Conditionally routing based on authentication state</div>
+      <pre><code>{
+  <span class="kw">this</span>.state.userIsLoggedIn
+    ? &lt;<span class="fn">Route</span> <span class="kw">path</span>=<span class="str">"/users/:id"</span> <span class="kw">component</span>={UserDetail} /&gt;
+    : &lt;<span class="fn">Redirect</span> <span class="kw">path</span>=<span class="str">"/users/:id"</span> <span class="kw">to</span>=<span class="str">"/login-register"</span> /&gt;
+}</code></pre>
+    </div>
+    <p class="code-note">When <code>userIsLoggedIn</code> is <code>true</code>, React Router renders <code>UserDetail</code> as normal. When it's <code>false</code>, any attempt to visit <code>/users/:id</code> silently redirects to the login page. Updating <code>this.state.userIsLoggedIn</code> after login or logout causes an immediate re-render — and all protected routes respond instantly.</p>
+
+    <h3>Notifying components to refresh their models</h3>
+
+    <p>After a user logs in, every component that was blocked by authentication needs to re-fetch its data. After a user logs out, every component needs to discard its data. How do you trigger this cascade?</p>
+
+    <p>This is exactly what a state management system is designed to handle. When the login action completes, the state manager updates the session state — and every subscribed component re-renders and re-fetches automatically. For simpler apps without a full state manager, you can achieve the same effect with callbacks passed down from the top-level component, though this becomes unwieldy as the app grows.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Authentication state should live <strong>high in the component tree</strong> — ideally in a state store, or at minimum in the top-level component via React Context. React Router's conditional rendering lets you <strong>protect entire routes</strong> from unauthenticated access with a single check. When auth state changes — login or logout — the right state management approach propagates the update to every component automatically.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SUMMARY
+════════════════════════════════════════════════ -->
+<section id="summary">
+  <div class="container">
+    <div class="sec-eyebrow">Summary</div>
+    <h2>Five Things to Remember</h2>
+    <ul class="sum-list">
+      <li class="sum-item">
+        <span class="sum-num">1</span>
+        <div class="sum-body">
+          <h4>Static apps are easy; interactive apps are hard</h4>
+          <p>When components can only read data, fetching at startup and rendering once is fine. The moment users can create, update, or delete data — or change session state — you need a systematic way to keep components in sync with a changing world.</p>
+        </div>
+      </li>
+      <li class="sum-item">
+        <span class="sum-num">2</span>
+        <div class="sum-body">
+          <h4>Login and logout are major state transitions — handle them explicitly</h4>
+          <p>Login unlocks models that were previously unavailable. Logout invalidates everything. Components that fetch at startup are blind to both. Your architecture needs to account for these transitions and trigger the right re-fetches when they occur.</p>
+        </div>
+      </li>
+      <li class="sum-item">
+        <span class="sum-num">3</span>
+        <div class="sum-body">
+          <h4>Callbacks work for small trees; the listener/emitter pattern scales</h4>
+          <p>Prop drilling callbacks through intermediate components is painful and fragile. The listener/emitter pattern — the conceptual foundation of FLUX, Redux, and Relay — decouples producers from consumers: components subscribe to what they need, and changes propagate automatically.</p>
+        </div>
+      </li>
+      <li class="sum-item">
+        <span class="sum-num">4</span>
+        <div class="sum-body">
+          <h4>A central state manager creates a single source of truth</h4>
+          <p>Instead of every component fetching its own data (with duplicated requests and no coordination), a state manager centralizes fetching, caching, and update propagation. Components subscribe to slices of state and re-render reactively — no manual orchestration needed.</p>
+        </div>
+      </li>
+      <li class="sum-item">
+        <span class="sum-num">5</span>
+        <div class="sum-body">
+          <h4>Start with polling; graduate to server push when you need it</h4>
+          <p>Handling changes made by other users requires a deliberate strategy. Polling is the pragmatic starting point — simple, understandable, and good enough for most apps. Server push (via WebSockets) delivers real-time updates but adds significant complexity. Let your product requirements drive the choice.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  CS142 · Web Applications · Stanford University · Mendel Rosenblum
+</footer>
+
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.nav-links a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
