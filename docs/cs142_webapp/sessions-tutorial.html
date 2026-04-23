@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sessions — CS142 Web Applications</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ── Reset & Variables ──────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --accent:        #1e8a6e;
+  --accent-light:  #e8f5f1;
+  --accent-mid:    #b8ddd4;
+  --accent-dark:   #155f4c;
+  --ink:           #18181b;
+  --ink-2:         #3f3f46;
+  --ink-3:         #71717a;
+  --paper:         #fafaf9;
+  --paper-2:       #f4f4f0;
+  --paper-3:       #eeeee8;
+  --border:        #e4e4e0;
+  --code-bg:       #131318;
+  --code-text:     #d4d0f0;
+  --kw-color:      #f4a261;
+  --str-color:     #6fcf97;
+  --fn-color:      #79c5f0;
+  --cmt-color:     #565670;
+  --nav-h:         56px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+/* ── Layout ─────────────────────────────────────────────────── */
+.container { max-width: 740px; margin: 0 auto; padding: 0 1.5rem; }
+
+/* ── Navigation ─────────────────────────────────────────────── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(250,250,249,0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  height: var(--nav-h);
+}
+.nav-inner {
+  max-width: 740px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  white-space: nowrap;
+  padding-right: 1.25rem;
+  margin-right: 0.5rem;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+.nav-links a {
+  display: block;
+  padding: 0 13px;
+  height: var(--nav-h);
+  line-height: var(--nav-h);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-3);
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+.nav-links a:hover { color: var(--ink); }
+.nav-links a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Hero ───────────────────────────────────────────────────── */
+.hero {
+  padding: 5.5rem 1.5rem 4.5rem;
+  max-width: 740px;
+  margin: 0 auto;
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+}
+.hero-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.hero h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(2.8rem, 6.5vw, 4.2rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+}
+.hero h1 span { color: var(--accent); font-style: italic; }
+.hero-intro {
+  font-size: 1.05rem;
+  line-height: 1.82;
+  color: var(--ink-2);
+  max-width: 600px;
+  border-left: 3px solid var(--accent-mid);
+  padding-left: 1.25rem;
+}
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2rem;
+}
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-3);
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: 100px;
+  letter-spacing: 0.03em;
+}
+
+/* ── Page divider ────────────────────────────────────────────── */
+.page-divider { border: none; border-top: 1px solid var(--border); }
+
+/* ── Sections ───────────────────────────────────────────────── */
+section {
+  padding: 5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+section:last-of-type { border-bottom: none; }
+
+.sec-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sec-eyebrow::after {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.45;
+}
+
+section h2 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(1.75rem, 4vw, 2.45rem);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+}
+
+section h3 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--ink-2);
+  margin: 2.5rem 0 1rem;
+}
+
+section p {
+  color: var(--ink-2);
+  margin-bottom: 1.25rem;
+  font-size: 1rem;
+  line-height: 1.87;
+}
+section p:last-child { margin-bottom: 0; }
+section p strong { color: var(--ink); font-weight: 500; }
+section a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+section a:hover { opacity: 0.8; }
+
+/* ── Inline code ─────────────────────────────────────────────── */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.83em;
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ── Code Blocks ─────────────────────────────────────────────── */
+.code-wrap { margin: 2rem 0; }
+.code-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+pre {
+  background: var(--code-bg);
+  border-radius: 10px;
+  padding: 1.5rem 1.75rem;
+  overflow-x: auto;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+pre code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--code-text);
+  background: none;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+}
+.kw  { color: var(--kw-color); }
+.str { color: var(--str-color); }
+.fn  { color: var(--fn-color); }
+.cmt { color: var(--cmt-color); font-style: italic; }
+.hl  { color: #c3e8de; }
+.danger { color: #f28b82; }
+
+.code-note {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--ink-3);
+  margin-top: 0.85rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--border);
+  line-height: 1.65;
+}
+
+/* ── Key Takeaway ────────────────────────────────────────────── */
+blockquote {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-light);
+  padding: 1.25rem 1.5rem 1.25rem 1.75rem;
+  border-radius: 0 8px 8px 0;
+  margin: 2.5rem 0 0;
+}
+blockquote .bq-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+blockquote p {
+  color: var(--ink-2) !important;
+  font-size: 0.97rem !important;
+  margin: 0 !important;
+  line-height: 1.75 !important;
+}
+blockquote p strong { color: var(--ink) !important; }
+
+/* ── Architecture Diagram ────────────────────────────────────── */
+.arch-diagram {
+  background: var(--code-bg);
+  border-radius: 10px;
+  padding: 2rem;
+  margin: 2rem 0;
+  border: 1px solid rgba(255,255,255,0.04);
+  overflow-x: auto;
+}
+.arch-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cmt-color);
+  margin-bottom: 1.5rem;
+}
+.arch-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.arch-row:last-child { margin-bottom: 0; }
+.arch-node {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 7px 16px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.node-browser { background: rgba(121,197,240,0.12); color: #79c5f0; border: 1px solid rgba(121,197,240,0.2); }
+.node-server  { background: rgba(244,162,97,0.12);  color: #f4a261; border: 1px solid rgba(244,162,97,0.2); }
+.node-storage { background: rgba(30,138,110,0.15);  color: #40c99a; border: 1px solid rgba(30,138,110,0.3); }
+.node-neutral { background: rgba(180,180,200,0.1);  color: #a0a0c0; border: 1px solid rgba(180,180,200,0.15); }
+.arch-arrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: rgba(255,255,255,0.2);
+}
+.arch-note {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--cmt-color);
+  font-style: italic;
+}
+.arch-sep { border: none; border-top: 1px solid rgba(255,255,255,0.05); margin: 14px 0; }
+
+/* ── Cookie Flow Steps ───────────────────────────────────────── */
+.flow-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 2rem 0;
+  counter-reset: step;
+}
+.flow-step {
+  background: var(--paper-2);
+  padding: 1rem 1.25rem 1rem 4rem;
+  position: relative;
+  counter-increment: step;
+}
+.flow-step::before {
+  content: counter(step);
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Fraunces', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  opacity: 0.22;
+  line-height: 1;
+}
+.flow-step h4 {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+.flow-step p {
+  font-size: 0.88rem !important;
+  color: var(--ink-3) !important;
+  margin: 0 !important;
+  line-height: 1.6 !important;
+}
+
+/* ── Storage Comparison Table ────────────────────────────────── */
+.storage-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-size: 0.92rem;
+}
+.storage-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.storage-table td {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.storage-table td:first-child { font-weight: 500; color: var(--ink); white-space: nowrap; }
+.storage-table tr:last-child td { border-bottom: none; }
+.storage-table tr:hover td { background: var(--paper-2); }
+.badge {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.badge-fast   { background: rgba(111,207,151,0.12); color: #1e8a4a; border: 1px solid rgba(111,207,151,0.25); }
+.badge-medium { background: rgba(244,162,97,0.12);  color: #a06020; border: 1px solid rgba(244,162,97,0.25); }
+.badge-slow   { background: rgba(235,87,87,0.1);    color: #b83232; border: 1px solid rgba(235,87,87,0.2); }
+
+/* ── Cookie Properties Grid ──────────────────────────────────── */
+.props-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 2rem 0;
+}
+.prop-cell {
+  background: var(--paper-2);
+  padding: 1.25rem 1.4rem;
+}
+.prop-cell .prop-icon {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+.prop-cell h4 { font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 0.35rem; }
+.prop-cell p  { font-size: 0.86rem !important; color: var(--ink-3) !important; margin: 0 !important; line-height: 1.55 !important; }
+@media (max-width: 540px) { .props-grid { grid-template-columns: 1fr; } }
+
+/* ── Warning Box ─────────────────────────────────────────────── */
+.warn-box {
+  border: 1px solid rgba(242,139,130,0.35);
+  background: rgba(242,139,130,0.06);
+  border-left: 3px solid #e05a50;
+  border-radius: 0 8px 8px 0;
+  padding: 1.1rem 1.4rem;
+  margin: 1.75rem 0;
+}
+.warn-box .warn-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #c04040;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+.warn-box p { font-size: 0.92rem !important; color: var(--ink-2) !important; margin: 0 !important; line-height: 1.7 !important; }
+.warn-box p strong { color: var(--ink) !important; }
+
+/* ── Web Storage Comparison ──────────────────────────────────── */
+.storage-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 2rem 0;
+}
+.sc-cell {
+  background: var(--paper-2);
+  padding: 1.25rem 1.4rem;
+}
+.sc-cell .sc-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+.sc-cell h4 { font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 0.4rem; }
+.sc-cell p  { font-size: 0.88rem !important; color: var(--ink-3) !important; margin: 0 !important; line-height: 1.6 !important; }
+@media (max-width: 500px) { .storage-compare { grid-template-columns: 1fr; } }
+
+/* ── Summary section ─────────────────────────────────────────── */
+#summary {
+  background: var(--ink);
+  border-radius: 14px;
+  padding: 3.5rem;
+  margin-top: 5rem;
+  border-bottom: none !important;
+  padding-bottom: 3.5rem !important;
+}
+#summary .sec-eyebrow { color: var(--accent-mid); }
+#summary .sec-eyebrow::after { background: var(--accent-mid); }
+#summary h2 { color: #fff; }
+.sum-list { list-style: none; margin-top: 2rem; }
+.sum-item {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  padding: 1.5rem 0;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.sum-item:first-child { border-top: none; padding-top: 0; }
+.sum-num {
+  font-family: 'Fraunces', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.1);
+  line-height: 1;
+  flex-shrink: 0;
+  width: 40px;
+  padding-top: 2px;
+}
+.sum-body h4 { font-size: 14px; font-weight: 500; color: var(--accent-mid); margin-bottom: 0.35rem; }
+.sum-body p  { font-size: 0.93rem !important; color: rgba(255,255,255,0.5) !important; line-height: 1.7 !important; margin: 0 !important; }
+
+/* ── Footer ──────────────────────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .hero { padding: 3.5rem 1.25rem 3rem; }
+  section { padding: 3.5rem 0; }
+  .container { padding: 0 1.25rem; }
+  pre { padding: 1.25rem; }
+  pre code { font-size: 12px; }
+  #summary { padding: 2rem 1.5rem; margin-top: 3rem; }
+  .arch-diagram { padding: 1.25rem; }
+  .storage-table { font-size: 0.84rem; }
+  .storage-table td, .storage-table th { padding: 9px 10px; }
+  .flow-step { padding-left: 3.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ───────────────────────────────────────────── -->
+<nav aria-label="Tutorial navigation">
+  <div class="nav-inner">
+    <span class="nav-brand">CS142</span>
+    <ul class="nav-links">
+      <li><a href="#the-problem">The Problem</a></li>
+      <li><a href="#statelessness">HTTP Statelessness</a></li>
+      <li><a href="#lookup">Session Lookup</a></li>
+      <li><a href="#cookies-intro">How Cookies Work</a></li>
+      <li><a href="#cookie-contents">Cookie Contents</a></li>
+      <li><a href="#cookie-limits">Cookie Limits</a></li>
+      <li><a href="#session-cookies">Session Cookies</a></li>
+      <li><a href="#security">Security</a></li>
+      <li><a href="#storage-options">Storage Options</a></li>
+      <li><a href="#express-session">Express Session</a></li>
+      <li><a href="#web-storage">Web Storage API</a></li>
+      <li><a href="#summary">Summary</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────────────── -->
+<header>
+  <div class="hero">
+    <div class="hero-eyebrow">CS142 · Web Applications · Stanford</div>
+    <h1>Sessions &amp; <span>Cookies</span></h1>
+    <p class="hero-intro">
+      HTTP is a protocol with no memory — every request arrives at the server as if it's the first time the two have ever met. Yet websites remember you, keep you logged in, and maintain your preferences across dozens of page loads. How? This tutorial traces the full story, from the fundamental statelessness problem all the way to modern Express session middleware and the Web Storage API.
+    </p>
+    <div class="hero-tags">
+      <span class="tag">HTTP Cookies</span>
+      <span class="tag">Session State</span>
+      <span class="tag">express-session</span>
+      <span class="tag">Redis / Memcache</span>
+      <span class="tag">Web Storage API</span>
+      <span class="tag">Cryptographic Signing</span>
+    </div>
+  </div>
+</header>
+
+<hr class="page-divider">
+
+<main>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 1 — THE CORE PROBLEM
+════════════════════════════════════════════════ -->
+<section id="the-problem">
+  <div class="container">
+    <div class="sec-eyebrow">Section 01</div>
+    <h2>The Core Problem: Recognizing Who's Talking</h2>
+
+    <p>Picture a bank teller with a very unusual condition: they have no short-term memory. Every single customer who walks up to the counter is a complete stranger. To do anything useful — check an account balance, process a transfer, approve a withdrawal — the teller needs to figure out who this person is before they can do anything else.</p>
+
+    <p>Web servers face exactly this challenge. When an HTTP request arrives, it carries almost no inherent identity. The server knows the request came from <em>some</em> IP address, but IP addresses are shared, dynamic, and easy to spoof. There's nothing in the raw request that reliably says "this is Alice" or "this request is a continuation of the session that started ten minutes ago."</p>
+
+    <p>And yet every useful web application needs exactly this. When you're browsing a shopping site, the server needs to know whose cart you're looking at. When you click "Checkout," the server needs to be sure you're the same person who added those items. When you load your inbox, the server needs to know which emails belong to you — not to the next person who happens to send a request from a shared WiFi network.</p>
+
+    <p>This need is called <strong>session state</strong> — a persistent record of who you are and what you've been doing, that travels with you across every request in a browsing session. Without it, every request is anonymous, and every interaction starts from scratch.</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Every route handler faces the same question: who is making this request?</div>
+      <pre><code>expressApp.<span class="fn">get</span>(<span class="str">'/user/:user_id'</span>, <span class="kw">function</span> (httpRequest, httpResponse) {
+  <span class="cmt">// Before doing anything useful, we need to know who this is.</span>
+  <span class="cmt">// Can we trust this request? Is the user authenticated?</span>
+  <span class="kw">let</span> sessionState = <span class="fn">GetSessionState</span>(httpRequest);
+
+  <span class="cmt">// Only then can we decide: serve the data, or reject the request.</span>
+});</code></pre>
+    </div>
+    <p class="code-note">This pattern repeats in every single route handler across the entire app. Session state is the foundation everything else is built on — get it wrong, and your app either leaks data to the wrong people or rejects legitimate users.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Web applications need to know who is making each request and maintain that identity across many separate HTTP requests. This is called <strong>session state</strong> — and solving the problem of how to create, store, and securely transmit it is what this entire tutorial is about.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 2 — HTTP STATELESSNESS
+════════════════════════════════════════════════ -->
+<section id="statelessness">
+  <div class="container">
+    <div class="sec-eyebrow">Section 02</div>
+    <h2>Why HTTP Has No Memory: Statelessness Explained</h2>
+
+    <p>To understand why session state is hard, you first need to understand a foundational property of HTTP: it is <strong>stateless</strong>. This isn't a bug — it was a deliberate design decision. And once you understand why, the solutions start to make intuitive sense.</p>
+
+    <p>When the web was being designed in the early 1990s, the goal was simplicity and scalability. HTTP was designed as a request-response protocol where each request is completely independent of every other request. The server receives a request, does its work, sends back a response, and then forgets everything. There is no persistent connection, no memory of previous interactions, no concept of a "conversation."</p>
+
+    <p>This design choice made the web incredibly scalable: any server in a cluster can handle any request because no server needs to remember anything about previous requests. You can add more servers, take servers offline, and route requests however you like. The protocol simply doesn't care.</p>
+
+    <p>The tradeoff is that the protocol has no concept of identity. Look at where session state <em>could</em> live in the system, and you'll see the problem immediately:</p>
+
+    <div class="arch-diagram">
+      <div class="arch-title">Where does session state live in a web architecture?</div>
+      <div class="arch-row">
+        <span class="arch-node node-browser">Web Browser</span>
+        <span class="arch-arrow">←——— HTTP ———→</span>
+        <span class="arch-node node-server">Web Server</span>
+        <span class="arch-arrow">←——— LAN ———→</span>
+        <span class="arch-node node-storage">Storage System</span>
+      </div>
+      <hr class="arch-sep">
+      <div class="arch-row">
+        <span class="arch-note">Maybe here?</span>
+        <span style="flex:1"></span>
+        <span class="arch-note">❌ Stateless — can't store anything here</span>
+        <span style="flex:1"></span>
+        <span class="arch-note">✓ Here — persistent storage</span>
+      </div>
+    </div>
+    <p class="code-note">The web server sits in the middle but cannot hold state — it processes a request and moves on. Session data must be stored either in the browser or in a persistent storage system, with a reference passed through HTTP so the server can find it.</p>
+
+    <p>The web server is the one place you <em>can't</em> reliably store session data. It processes each request in isolation and may be one of many servers behind a load balancer. The browser and the storage system are the two candidates — and the challenge is deciding what to put where, and how to pass the reference between them securely.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>HTTP is <strong>stateless by design</strong> — each request is independent, and the web server remembers nothing between them. Session data must live in the browser or in a backend storage system. The web server's job is to look up the right session using a reference that arrives with each request.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 3 — SESSION LOOKUP PROBLEM
+════════════════════════════════════════════════ -->
+<section id="lookup">
+  <div class="container">
+    <div class="sec-eyebrow">Section 03</div>
+    <h2>The Session Lookup Problem: Connecting Requests to Identity</h2>
+
+    <p>So session data must live outside the web server. But that immediately raises a practical question: if each HTTP request is anonymous, how does the server know which session it belongs to?</p>
+
+    <p>The answer is that <strong>something must be included in the request itself</strong> — a token, an identifier, a reference — that tells the server "this request belongs to session #12345." The server receives this token, looks up the associated session data, and uses it to authenticate and personalize the response.</p>
+
+    <p>This sounds simple, but there's an important constraint: the system must be resistant to forgery. If session identifiers are easy to guess or manufacture, then a malicious user could craft a request that pretends to belong to someone else's session. Imagine guessing a session ID and suddenly seeing — or acting as — a different user. This is called <strong>session hijacking</strong>, and it's a real attack that has affected many systems.</p>
+
+    <p>Over the history of the web, two main mechanisms have emerged for carrying this session reference:</p>
+
+    <p><strong>Cookies</strong> were the original solution, introduced in the early days of the commercial web. The server tells the browser to store a small piece of data, and the browser dutifully includes that data in every subsequent request to the same server. Cookies became the standard way to maintain session state for decades.</p>
+
+    <p>The <strong>Web Storage API</strong> (<code>localStorage</code> and <code>sessionStorage</code>) is a more modern alternative. Unlike cookies, Web Storage data isn't automatically sent to the server — you have to explicitly include it in requests. This gives developers more control, but also more responsibility.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Every request needs to carry a <strong>session token</strong> that tells the server which session it belongs to. This token must be hard to guess or forge — otherwise, an attacker could impersonate another user. Cookies and the Web Storage API are the two standard mechanisms for carrying this token in the browser.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 4 — HOW COOKIES WORK
+════════════════════════════════════════════════ -->
+<section id="cookies-intro">
+  <div class="container">
+    <div class="sec-eyebrow">Section 04</div>
+    <h2>How HTTP Cookies Work</h2>
+
+    <p>A cookie is a small piece of data — a name-value pair — that the server plants in the browser during one response, and then receives back automatically in every subsequent request to the same domain. Think of it like a coat check ticket: the venue (server) gives you a numbered stub (cookie) when you arrive, and you hand it back every time you want to retrieve something from the coat room.</p>
+
+    <p>The mechanics work through two HTTP headers. When the server wants to set a cookie, it includes <code>Set-Cookie</code> headers in its response. The browser stores these cookies locally and automatically includes them in a <code>Cookie</code> header on every future request to that domain.</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Server sets cookies in the HTTP response headers</div>
+      <pre><code><span class="cmt">// The server adds these to its HTTP response</span>
+Set-Cookie: <span class="hl">cookie_name1</span>=<span class="str">cookie_value1</span>
+Set-Cookie: <span class="hl">cookie_name2</span>=<span class="str">cookie_value2</span>; expires=Sun, 16 Jul 2016 06:23:41 GMT</code></pre>
+    </div>
+    <p class="code-note">Each <code>Set-Cookie</code> header creates one cookie. The browser stores both and will include them in future requests. The optional <code>expires</code> attribute tells the browser when to automatically delete the cookie.</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Browser sends cookies back automatically on every subsequent request</div>
+      <pre><code><span class="cmt">// The browser automatically adds this header to every request</span>
+Cookie: <span class="hl">cookie_name1</span>=<span class="str">cookie_value1</span>; <span class="hl">cookie_name2</span>=<span class="str">cookie_value2</span></code></pre>
+    </div>
+    <p class="code-note">The browser bundles all matching cookies into a single <code>Cookie</code> header. The server reads this header and knows exactly which session to look up — without the user doing anything at all.</p>
+
+    <p>The word "automatically" is key here. The developer doesn't write JavaScript to send cookies — the browser handles that entirely. This is both the power of cookies (zero developer effort to transmit) and a source of their security concerns (the browser sends them everywhere, including to malicious pages that trigger requests to your domain).</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Cookies work through a two-step handshake: the server sets them with <code>Set-Cookie</code> response headers, and the browser sends them back with every request via the <code>Cookie</code> header — <strong>automatically, without any JavaScript required</strong>. This automation is what makes cookies so effective for session management, and what also makes them a frequent security consideration.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 5 — COOKIE CONTENTS
+════════════════════════════════════════════════ -->
+<section id="cookie-contents">
+  <div class="container">
+    <div class="sec-eyebrow">Section 05</div>
+    <h2>What Lives Inside a Cookie</h2>
+
+    <p>A cookie is more than just a key-value pair — it comes with a set of attributes that control when, where, and to whom it's sent. Understanding these attributes is essential for writing secure, well-behaved web applications.</p>
+
+    <div class="props-grid">
+      <div class="prop-cell">
+        <span class="prop-icon">Name &amp; Data</span>
+        <h4>The payload</h4>
+        <p>The actual key-value pair. The name identifies the cookie; the value is the data. For session cookies, the value is typically an opaque session ID — not readable data.</p>
+      </div>
+      <div class="prop-cell">
+        <span class="prop-icon">Domain</span>
+        <h4>Scope restriction</h4>
+        <p>Specifies which server (and optionally which port and URL prefix) the cookie is sent to. The browser <em>only</em> includes a cookie in requests that match its domain — cookies from your bank don't go to your shopping site.</p>
+      </div>
+      <div class="prop-cell">
+        <span class="prop-icon">Expiration</span>
+        <h4>Lifetime control</h4>
+        <p>An optional date after which the browser automatically deletes the cookie. Without an expiration, the cookie is a "session cookie" — it lives only as long as the browser tab is open.</p>
+      </div>
+    </div>
+
+    <p>Two hard limits constrain how cookies can be used as storage. First, cookies are tiny: browsers typically enforce a maximum size of <strong>4 KB per cookie</strong>. That's enough for an ID or a small amount of metadata, but far too small for anything substantial. Second, browsers limit the number of cookies per domain — typically around <strong>50 cookies</strong>. These limits exist to prevent abuse and to keep HTTP headers from ballooning in size.</p>
+
+    <p>These constraints are a hint about the intended use. Cookies were designed to carry session <em>references</em>, not session <em>data</em>. The right pattern is to store a small, opaque identifier in the cookie, and keep all the actual data on the server where there are no such size limits.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Cookies carry a name-value payload plus attributes for domain scoping and expiration. They're tightly constrained in size (<strong>4 KB max</strong>) and count (<strong>~50 per domain</strong>). These limits aren't limitations to work around — they're a signal that cookies are intended to carry <strong>references</strong> to session data, not the data itself.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 6 — COOKIES AS STORAGE: THE RISKS
+════════════════════════════════════════════════ -->
+<section id="cookie-limits">
+  <div class="container">
+    <div class="sec-eyebrow">Section 06</div>
+    <h2>The Reliability Problem: Why Cookies Make Poor Storage</h2>
+
+    <p>If you've ever built something that relies on a cookie being there when you need it, you may have learned the hard way: cookies are not reliable storage. They are exposed to the user and the environment in ways that most storage systems aren't.</p>
+
+    <p>Consider everything that can go wrong with a cookie. The user opens their browser settings and deletes all cookies — gone. They switch from Chrome to Safari — gone. They install a privacy extension that blocks or clears cookies — gone. A cross-site scripting (XSS) vulnerability in your app lets a malicious script read the cookie — stolen. A man-in-the-middle attack on an unencrypted connection intercepts the cookie — stolen.</p>
+
+    <p>Even without malice, cookies have a troubled history. For years, they were used for pervasive tracking across websites — following users from page to page, site to site, building profiles without consent. This history means that privacy-conscious users often block or clear cookies as a matter of routine. Users are suspicious of them for good reason.</p>
+
+    <div class="warn-box">
+      <span class="warn-label">Important Constraint</span>
+      <p>Because users can view, modify, corrupt, delete, or steal cookies at any time, they should only be used for <strong>data that can be safely lost or recovered</strong> — hints, preferences, and session tokens. Never store sensitive information (passwords, personal data, authorization tokens) directly in a cookie value without cryptographic protection.</p>
+    </div>
+
+    <p>The practical upshot is that cookies are best suited for one specific purpose: carrying a session token back and forth so the server can look up the real session data in a secure backend store. Everything else — the actual user data, preferences, permissions — lives server-side where the user can't touch it.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Cookies are <strong>exposed and fragile</strong>: users can delete, modify, or lose them, and attackers can steal them. Design your app to tolerate missing cookies gracefully, and never put sensitive data in a cookie value. Use cookies for what they're good at: carrying an opaque session token back to the server.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 7 — SESSION COOKIES IN PRACTICE
+════════════════════════════════════════════════ -->
+<section id="session-cookies">
+  <div class="container">
+    <div class="sec-eyebrow">Section 07</div>
+    <h2>Session Cookies in Practice: How Rails Solved It First</h2>
+
+    <p>Early web frameworks had to invent session management from scratch. Ruby on Rails set the pattern that most modern frameworks — including Express — have adopted in some form. Understanding how Rails approached it makes the Express solution feel familiar rather than arbitrary.</p>
+
+    <p>Rails gave developers a <code>session</code> object that behaved like a simple JavaScript object — you could read and write arbitrary data to it, and Rails handled all the HTTP plumbing transparently:</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Rails session — write to it like a hash; Rails handles the rest</div>
+      <pre><code><span class="cmt"># Store the authenticated user's ID in the session</span>
+session[:<span class="hl">user_id</span>] = <span class="str">"mendel"</span></code></pre>
+    </div>
+    <p class="code-note">One line of Ruby. Rails took care of packaging this into a cookie, signing it cryptographically, sending it with the response, reading it back on the next request, and making it available in the controller. The developer never touched an HTTP header directly.</p>
+
+    <p>Rails followed a consistent lifecycle for every request, which is the same lifecycle modern frameworks use today:</p>
+
+    <div class="flow-steps">
+      <div class="flow-step">
+        <h4>Check for a session cookie</h4>
+        <p>At the very start of each request, before any route handler runs, the framework looks for a session cookie in the request headers.</p>
+      </div>
+      <div class="flow-step">
+        <h4>Load or create the session</h4>
+        <p>If a valid session cookie is found, the framework loads the associated session data. If not — or if the cookie is invalid — it creates a brand-new empty session.</p>
+      </div>
+      <div class="flow-step">
+        <h4>Run your route handler</h4>
+        <p>Your application code runs with full access to the session object — read existing data, write new data, or clear it on logout.</p>
+      </div>
+      <div class="flow-step">
+        <h4>Save and send the cookie</h4>
+        <p>At the end of the request, the framework saves any session changes and ensures the session cookie is included in the response — creating one if it's a new session.</p>
+      </div>
+    </div>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Session middleware follows a consistent four-step lifecycle on every request: <strong>find the session cookie → load the session → run your handler → save and send the cookie</strong>. Your code only sees the session object — the framework handles all the HTTP mechanics transparently. This is the same pattern Rails pioneered and Express adopted.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 8 — SECURITY
+════════════════════════════════════════════════ -->
+<section id="security">
+  <div class="container">
+    <div class="sec-eyebrow">Section 08</div>
+    <h2>Session Security: Never Trust Cookie Data</h2>
+
+    <p>Because cookies live in the browser — a place the user controls — a critical security principle applies: <strong>never store sensitive data directly in a cookie value without protection</strong>. The data can be read, and it can be modified.</p>
+
+    <p>Consider what happens if an early developer naively stores session state directly in a cookie:</p>
+
+    <div class="code-wrap">
+      <div class="code-label">The dangerous anti-pattern — sensitive data stored naked in a cookie</div>
+      <pre><code><span class="cmt">// ❌ Never do this — both values are visible in the browser</span>
+session.user_id = <span class="str">"mendel"</span>;
+session.password = <span class="str">"foobar"</span>;  <span class="danger">// Catastrophically dangerous!</span></code></pre>
+    </div>
+    <p class="code-note">Anyone who opens their browser's developer tools can read these values in plain text. An attacker who steals the cookie (via XSS, network interception, or physical access) gets the password immediately. This is a foundational security mistake.</p>
+
+    <p>Cryptography provides two tools for making cookies safer. <strong>Encryption</strong> hides the content of the cookie from anyone who reads it — even if a cookie is stolen, the thief can't read the data without the server's secret key. <strong>Digital signing</strong> (often called a MAC or HMAC) doesn't hide the data, but detects if it's been tampered with — if the user modifies a signed cookie, the server knows and rejects it.</p>
+
+    <p>But even with cryptography, there's a cleaner architectural choice: don't put session data in the cookie at all. Store only an opaque session ID — a random, unforgeable token that means nothing on its own — and keep all the actual data on the server. The cookie is just a reference:</p>
+
+    <div class="code-wrap">
+      <div class="code-label">The right approach — an opaque session ID that means nothing without the server</div>
+      <pre><code><span class="cmt">// ✓ Correct — the cookie value is an opaque reference, not real data</span>
+Set-Cookie: <span class="hl">session</span>=<span class="str">0x4137fd6a</span>; Expires=Wed, 09 Jun 2012 10:18:14 GMT</code></pre>
+    </div>
+    <p class="code-note"><code>0x4137fd6a</code> is just a random-looking token. Even if someone steals it, they can't decode your user ID, permissions, or any other session data from it — that all lives on the server. The token still needs to be signed to prevent forgery.</p>
+
+    <p>This approach offers three security benefits: less data transmitted on every request, nothing sensitive exposed in the browser, and a session ID that can be invalidated server-side (on logout) even if the token isn't expired yet.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>Never store real data in cookies without cryptographic protection. The gold standard is to store only an <strong>opaque session ID</strong> in the cookie and keep all actual session data on the server. The session ID must be <strong>cryptographically signed</strong> so the server can detect tampering — and it can be invalidated on logout even before it expires.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 9 — STORAGE OPTIONS
+════════════════════════════════════════════════ -->
+<section id="storage-options">
+  <div class="container">
+    <div class="sec-eyebrow">Section 09</div>
+    <h2>Where to Store Session Data: Three Options</h2>
+
+    <p>Once you've decided to keep session data on the server rather than in the cookie, you need to choose a storage backend. There are three main options, each with a distinct performance and complexity profile. The right choice depends on your scale, infrastructure, and how long sessions need to live.</p>
+
+    <div style="overflow-x: auto;">
+      <table class="storage-table">
+        <thead>
+          <tr>
+            <th>Storage location</th>
+            <th>Speed</th>
+            <th>Advantages</th>
+            <th>Disadvantages</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Web server memory</td>
+            <td><span class="badge badge-fast">fastest</span></td>
+            <td>Zero network latency — data is right there in the process. Simplest to set up for development.</td>
+            <td>Sessions are lost when the server restarts. Doesn't work with multiple servers (load balancers route to different machines). Memory grows with active user count.</td>
+          </tr>
+          <tr>
+            <td>Database (e.g. MongoDB, PostgreSQL)</td>
+            <td><span class="badge badge-medium">medium</span></td>
+            <td>Shared across all servers. Survives server restarts. Works naturally with your existing data infrastructure.</td>
+            <td>A database round-trip on every single request adds latency. Databases are built for durability, not for small, frequently-read transient data — this may be overkill.</td>
+          </tr>
+          <tr>
+            <td>Specialized in-memory store (Redis, Memcache)</td>
+            <td><span class="badge badge-fast">fast</span></td>
+            <td>Designed exactly for this use case: fast, shared, short-lived data. Shared across all servers. Supports automatic expiration. Scales well.</td>
+            <td>Another piece of infrastructure to deploy, monitor, and maintain. Adds operational complexity to your stack.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>For most production applications, <strong>Redis</strong> is the standard choice for session storage. It's fast (data lives in memory), supports TTL-based expiration (sessions auto-delete after they expire), can be shared across many server instances, and has excellent client libraries for Node.js. <strong>Memcache</strong> is a similar option with a simpler feature set.</p>
+
+    <p>For development and small single-server deployments, in-process memory is fine. Just remember that every time you restart your dev server, all sessions are cleared — which means you'll be logged out.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>In-process memory is great for development but breaks in production — it doesn't survive server restarts and doesn't scale across multiple servers. A database works but adds latency. <strong>Redis or Memcache</strong> are the production-standard choices: fast, shared, scalable, and purpose-built for the short-lived, frequently-accessed nature of session data.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 10 — EXPRESS SESSION
+════════════════════════════════════════════════ -->
+<section id="express-session">
+  <div class="container">
+    <div class="sec-eyebrow">Section 10</div>
+    <h2>Express Session Middleware: From Concept to Code</h2>
+
+    <p>Express doesn't include session management in its core, but the <code>express-session</code> middleware package provides everything you need — and follows the same lifecycle we described in the Rails section. Setting it up takes just a few lines of code.</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Installing and wiring up express-session</div>
+      <pre><code><span class="kw">const</span> session = <span class="fn">require</span>(<span class="str">'express-session'</span>);
+
+<span class="cmt">// Mount the session middleware — must come before your route handlers</span>
+app.<span class="fn">use</span>(<span class="fn">session</span>({
+  secret: <span class="str">'yourSecretKey'</span>  <span class="cmt">// used to sign the session ID cookie cryptographically</span>
+}));
+
+<span class="cmt">// Now every route handler gets httpRequest.session for free</span>
+app.<span class="fn">get</span>(<span class="str">'/profile'</span>, <span class="kw">function</span> (httpRequest, httpResponse) {
+  <span class="cmt">// httpRequest.session is an object — read it, write it, it persists</span>
+});</code></pre>
+    </div>
+    <p class="code-note">The <code>secret</code> option is how <code>express-session</code> signs the session ID cookie to prevent forgery. In production, this should be a long, random string stored in an environment variable — never hardcoded in source code.</p>
+
+    <h3>Reading, writing, and destroying sessions</h3>
+
+    <p>Once the middleware is mounted, working with sessions in your route handlers is straightforward. The <code>httpRequest.session</code> object behaves like a plain JavaScript object — you can add properties, read them, and delete them. Changes are automatically persisted to the session store at the end of each request.</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Full session lifecycle — login, use, and logout</div>
+      <pre><code><span class="cmt">// ── Login handler ─────────────────────────────────────</span>
+app.<span class="fn">post</span>(<span class="str">'/login'</span>, <span class="kw">function</span>(req, res) {
+  <span class="cmt">// After verifying credentials, store the user ID in the session</span>
+  req.session.<span class="hl">user_id</span> = <span class="str">"mendel"</span>;
+  res.<span class="fn">redirect</span>(<span class="str">'/'</span>);
+});
+
+<span class="cmt">// ── Protected route ───────────────────────────────────</span>
+app.<span class="fn">get</span>(<span class="str">'/dashboard'</span>, <span class="kw">function</span>(req, res) {
+  <span class="kw">if</span> (!req.session.<span class="hl">user_id</span>) {
+    <span class="cmt">// No session — this user is not logged in</span>
+    <span class="kw">return</span> res.<span class="fn">redirect</span>(<span class="str">'/login'</span>);
+  }
+  <span class="cmt">// Session exists — we know who this is</span>
+  res.<span class="fn">render</span>(<span class="str">'dashboard'</span>, { userId: req.session.<span class="hl">user_id</span> });
+});
+
+<span class="cmt">// ── Logout handler ────────────────────────────────────</span>
+app.<span class="fn">post</span>(<span class="str">'/logout'</span>, <span class="kw">function</span>(req, res) {
+  <span class="cmt">// Destroy the session entirely — not just clear one field</span>
+  req.session.<span class="fn">destroy</span>(<span class="kw">function</span>(err) {
+    res.<span class="fn">redirect</span>(<span class="str">'/login'</span>);
+  });
+});</code></pre>
+    </div>
+    <p class="code-note">On logout, always call <code>session.destroy()</code> rather than just setting fields to null. This removes the session from the store entirely, invalidating the session ID even if someone has a copy of the cookie.</p>
+
+    <h3>Switching to a production session store</h3>
+
+    <p>By default, <code>express-session</code> stores sessions in Node.js process memory — which prints a warning in the console and is explicitly not recommended for production. The fix is to provide a <code>store</code> option pointing to a persistent backend. Here's how to hook it up to MongoDB via Mongoose:</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Using MongoDB as the session store via connect-mongo</div>
+      <pre><code><span class="kw">const</span> MongoStore = <span class="fn">require</span>(<span class="str">'connect-mongo'</span>)(express);
+
+expressApp.<span class="fn">use</span>(<span class="fn">session</span>({
+  secret: process.env.<span class="hl">SESSION_SECRET</span>,
+  store: <span class="kw">new</span> <span class="fn">MongoStore</span>({
+    mongooseConnection: mongoose.connection
+  })
+}));</code></pre>
+    </div>
+    <p class="code-note"><code>connect-mongo</code> uses the existing Mongoose database connection — no separate configuration needed. Sessions are stored as documents in MongoDB, survive server restarts, and can be shared across multiple server instances.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p><code>express-session</code> gives you a <code>req.session</code> object in every handler — write to it on login, read from it to check authentication, and call <code>session.destroy()</code> on logout. For production, always configure a persistent store like Redis or MongoDB — the default in-memory store is <strong>development-only</strong> and loses all sessions on restart.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 11 — WEB STORAGE API
+════════════════════════════════════════════════ -->
+<section id="web-storage">
+  <div class="container">
+    <div class="sec-eyebrow">Section 11</div>
+    <h2>The Modern Alternative: Web Storage API</h2>
+
+    <p>Cookies have been around since 1994. In the decades since, browsers have added a more capable and developer-friendly storage mechanism: the <strong>Web Storage API</strong>. It comes in two flavors — <code>sessionStorage</code> and <code>localStorage</code> — and addresses many of cookies' ergonomic shortcomings.</p>
+
+    <div class="storage-compare">
+      <div class="sc-cell">
+        <span class="sc-name">sessionStorage</span>
+        <h4>Per-tab, temporary storage</h4>
+        <p>Data lives only while the browser tab is open. Closing the tab clears it entirely. Useful for wizard-style multi-step flows where you don't want data persisting after the user leaves.</p>
+      </div>
+      <div class="sc-cell">
+        <span class="sc-name">localStorage</span>
+        <h4>Persistent, cross-session storage</h4>
+        <p>Data survives tab closures, browser restarts, and even reboots. Persists until explicitly cleared by JavaScript or the user. Useful for user preferences, cached data, and anything that should persist between visits.</p>
+      </div>
+    </div>
+
+    <p>Both APIs share the same simple key-value interface, making them easy to work with:</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Web Storage API — three equivalent ways to read and write</div>
+      <pre><code><span class="cmt">// Writing — dot notation, setItem(), and bracket notation all work</span>
+localStorage.<span class="hl">appSetting</span> = <span class="str">'dark-mode'</span>;
+localStorage.<span class="fn">setItem</span>(<span class="str">'appSetting'</span>, <span class="str">'dark-mode'</span>);
+sessionStorage[<span class="str">'wizardStep'</span>] = <span class="str">'3'</span>;
+
+<span class="cmt">// Reading</span>
+<span class="kw">const</span> setting = localStorage.<span class="fn">getItem</span>(<span class="str">'appSetting'</span>);
+<span class="kw">const</span> step    = sessionStorage[<span class="str">'wizardStep'</span>];
+
+<span class="cmt">// Removing a specific key</span>
+localStorage.<span class="fn">removeItem</span>(<span class="str">'appSetting'</span>);
+
+<span class="cmt">// Clearing everything</span>
+localStorage.<span class="fn">clear</span>();</code></pre>
+    </div>
+    <p class="code-note">Web Storage data stays in the browser — unlike cookies, it is <strong>never automatically sent to the server</strong>. If you want to include a token stored in <code>localStorage</code> in a request, you must read it with JavaScript and add it manually (typically as an HTTP header like <code>Authorization: Bearer &lt;token&gt;</code>).</p>
+
+    <p>Web Storage offers roughly <strong>10 MB</strong> of space per origin — dramatically more than cookies' 4 KB. But the same reliability concerns apply: users can clear it through their browser settings, it's origin-scoped (so it doesn't travel to other domains), and it's accessible to any JavaScript running on the same page — meaning an XSS vulnerability can steal it just as easily as a cookie.</p>
+
+    <blockquote>
+      <span class="bq-label">Key Takeaway</span>
+      <p>The Web Storage API (<code>localStorage</code> and <code>sessionStorage</code>) offers a clean key-value interface with far more capacity than cookies (~10 MB vs. 4 KB). The critical difference: <strong>Web Storage data is never sent to the server automatically</strong> — you must include it manually in requests. It shares cookies' reliability concerns and is equally vulnerable to XSS attacks.</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SUMMARY
+════════════════════════════════════════════════ -->
+<section id="summary">
+  <div class="container">
+    <div class="sec-eyebrow">Summary</div>
+    <h2>Five Things to Remember</h2>
+    <ul class="sum-list">
+
+      <li class="sum-item">
+        <span class="sum-num">1</span>
+        <div class="sum-body">
+          <h4>HTTP is stateless — you have to add identity yourself</h4>
+          <p>Every HTTP request is anonymous. The web server has no built-in memory of previous requests. Session state is the mechanism you layer on top to tie multiple requests together into a coherent, authenticated session — and building it correctly is the foundation of every web application that requires login.</p>
+        </div>
+      </li>
+
+      <li class="sum-item">
+        <span class="sum-num">2</span>
+        <div class="sum-body">
+          <h4>Cookies are messengers, not storage</h4>
+          <p>The right role for a cookie is to carry an opaque session ID between the browser and the server — nothing more. All real session data should live server-side. Cookies are exposed to the user, size-limited to 4 KB, and vulnerable to theft; they're terrible general-purpose storage but excellent lightweight messengers.</p>
+        </div>
+      </li>
+
+      <li class="sum-item">
+        <span class="sum-num">3</span>
+        <div class="sum-body">
+          <h4>Always sign session IDs cryptographically</h4>
+          <p>A session ID in a cookie is only as secure as its protection against forgery. Without cryptographic signing, any attacker can craft a cookie claiming any session ID and impersonate another user. <code>express-session</code>'s <code>secret</code> option does this automatically — treat it like a password and never commit it to source control.</p>
+        </div>
+      </li>
+
+      <li class="sum-item">
+        <span class="sum-num">4</span>
+        <div class="sum-body">
+          <h4>Use Redis or MongoDB for production session storage</h4>
+          <p>In-process memory is fine for development but fails in production: it doesn't survive restarts and doesn't scale across multiple servers. Redis is the standard production choice — fast, shared, and purpose-built for short-lived, frequently-accessed data. Always set a production store before going live.</p>
+        </div>
+      </li>
+
+      <li class="sum-item">
+        <span class="sum-num">5</span>
+        <div class="sum-body">
+          <h4>Web Storage is powerful but not automatic</h4>
+          <p><code>localStorage</code> and <code>sessionStorage</code> offer much more space than cookies and a cleaner API, but they share the same reliability concerns and are never sent to the server automatically. If you use Web Storage for authentication tokens, you're responsible for including them in every request you make — cookies handle this for free.</p>
+        </div>
+      </li>
+
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  CS142 · Web Applications · Stanford University · Mendel Rosenblum
+</footer>
+
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.nav-links a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
