@@ -37,7 +37,34 @@ mongoose.Promise = require("bluebird");
 const async = require("async");
 
 const express = require("express");
+const session = require("express-session");
+const bodyParser = require("body-parser");
+const multer = require("multer");
+
+
 const app = express();
+
+// Enables sessions: This middleware allows Express to manage user sessions across requests.
+// Required for login/logout: Without it, request.session.user_id wouldn't work in /admin/login or other handlers.
+// What it does:
+// Sets up session storage (in-memory by default).
+// Uses cookies to track sessions between requests.
+// Protects session data with the secret key.
+
+// Finally you need to add the express-session and body-parser middleware to express with the Express use like so:
+// where "secretKey" is the secret you use to cryptographically protect the session cookie. 
+// We will use the multer middleware in the photo upload code.
+app.use(session({
+  secret: "cs142Project7Secret",
+  resave: false,
+  saveUninitialized: false,
+}));
+
+app.use(bodyParser.json());
+
+// app.use(multer().array());
+
+
 
 // Load the Mongoose schema for User, Photo, and SchemaInfo
 // This line connects your code to the users collection in MongoDB.
@@ -58,6 +85,8 @@ mongoose.connect("mongodb://127.0.0.1/cs142project6", {
 // We have the express static module
 // (http://expressjs.com/en/starter/static-files.html) do all the work for us.
 app.use(express.static(__dirname));
+
+
 
 app.get("/", function (request, response) {
   response.send("Simple web server of files from " + __dirname);
@@ -178,6 +207,11 @@ app.get("/user/list", function (request, response) {
  * URL /user/:id - Returns the information for User (id).
  */
 app.get("/user/:id", function (request, response) {
+  if(!request.session.user_id) {
+    response.status(401).send("Unauthorized: Please log in to view user details.");
+    return;
+  }
+
   const id = request.params.id;
 
   User.findOne({ _id: id }, function (err, user) {
@@ -212,6 +246,63 @@ app.get("/user/:id", function (request, response) {
     // We got the user - return it in JSON format.
     response.status(200).send(userInfo);
   });
+});
+
+/**
+ * /admin/login router 
+ * 
+ * */
+
+app.post("/admin/login", function (request, response) { 
+  const { login_name, password } = request.body;
+  // ensure login_name and password are provided
+  if (!login_name || !password) {
+    response.status(400).send("Missing login_name or password");
+    return;
+  }
+
+  // ensure login_name exists in database
+  // login_name is the unique identifier for a user, so we search for a user with that login_name.
+  User.findOne({ login_name: login_name.toLowerCase() }, function (err, user) {
+    if (err) {
+      console.error("Error in /admin/login:", err);
+      response.status(500).send(JSON.stringify(err));
+      return;
+    }
+    if (!user) {
+      response.status(400).send("User not found");
+    }
+
+    // ensure password matches
+    // if (user.password !== password) {
+    //   response.status(400).send("Incorrect password");
+    //   return;
+    // }
+    
+    // Note the login register handler should ensure that there exists a user with the given login_name. 
+    // If so, it stores some information in the Express session where it can be checked by other request handlers that need to know whether a user is logged in. 
+    // set session user_id to logged in user's _id
+    request.session.user_id = user._id;
+
+    // login successful
+    console.log("Login successful");
+    // return the logged-in user data:
+    response.status(200).send({ _id: user._id, first_name: user.first_name });
+  });
+
+});
+
+
+// app logout router
+app.post("/admin/logout", function (request, response) {
+  if (!request.session.user_id) {
+    response.status(400).send("Not logged in");
+    return;
+  }
+  // clear session user_id
+  request.session.user_id = null;
+  console.log("Logout successful");
+  response.status(200).send("Logout successful");
 });
 
 /**

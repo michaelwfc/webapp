@@ -23,6 +23,7 @@ class UserDetail extends React.Component {
   }
 
   loadUserData() {
+    // Extract the userId from the URL parameters using this.props.match.params.userId
     const userId = this.props.match.params.userId;
     fetchModel(`/user/${userId}`)
       .then((result) => {

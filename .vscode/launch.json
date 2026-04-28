@@ -10,15 +10,42 @@
       "console": "integratedTerminal"
     },
     {
+      // $ node_modules/.bin/nodemon webServer.js
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Project7-Server",
+      "runtimeExecutable": "nodemon", // Assuming nodemon is installed globally
+      "runtimeArgs": ["webServer.js"],
+      "program": "${workspaceFolder}/cs142_projects/project7/webServer.js",
+      "cwd": "${workspaceFolder}/cs142_projects/project7",
+      "console": "integratedTerminal",
+      "restart": true,
+      "serverReadyAction": {
+        "pattern": "Listening at http://localhost:([0-9]+)",
+        "uriFormat": "http://localhost:%s",
+        "action": "openExternally"
+      }
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug Project7-Client",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/cs142_projects/project7",
+      "timeout": 30000
+    },
+    
+    {
       // npm test   → mocha serverApiTest.js
       "type": "node",
       "request": "launch",
-      "name": "Debug Project6-mocha",
+      "name": "Debug Project6-mocha-test",
       "program": "${workspaceFolder}/cs142_projects/project6/test/node_modules/mocha/bin/_mocha",
       "args": ["serverApiTest.js", "--timeout", "10000"],
       "cwd": "${workspaceFolder}/cs142_projects/project6/test",
       "console": "integratedTerminal"
     },
+
 
     {
       // $ node_modules/.bin/nodemon webServer.js
@@ -127,6 +154,10 @@
     }
   ],
   "compounds": [
+     {
+      "name": "Debug Project7",
+      "configurations": ["Debug Project7-Server", "Debug Project7-Client"]
+    },
     {
       "name": "Debug Project6",
       "configurations": ["Debug Project6-Server", "Debug Project6-Client"]

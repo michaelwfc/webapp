@@ -4,25 +4,6 @@ import { Link } from "react-router-dom";
 import fetchModel from "../../lib/fetchModelData";
 import "./styles.css";
 
-// Using .then() / .catch()
-// fetchModel("/user/list")
-//   .then(result => {
-//     console.log(result.data);  // the parsed JSON object
-//   })
-//   .catch(err => {
-//     console.log(err.status);     // e.g. 404
-//     console.log(err.statusText); // e.g. "Not Found"
-//   });
-// Or with async/await (cleaner)
-// async function loadUsers() {
-//   try {
-//     const result = await fetchModel("/user/list");
-//     console.log(result.data);
-//     return result.data;
-//   } catch (err) {
-//     console.log(err.status, err.statusText);
-//   }
-// }
 
 class UserList extends React.Component {
   constructor(props) {
