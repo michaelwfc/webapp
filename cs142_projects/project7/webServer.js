@@ -410,7 +410,49 @@ app.get("/photosOfUser/:id", function (request, response) {
   });
 });
 
+app.post("/commentsOfPhoto/:photoId", function (request, response) {
+  const photoId = request.params.photoId;
+  const { comment } = request.body;
 
+  if (!request.session.user_id) {
+    response.status(401).send("Unauthorized: Please log in to add a comment.");
+    return;
+  }
+
+  if (!comment || !comment.trim()) {
+    response.status(400).send("Comment cannot be empty");
+    return;
+  }
+
+  Photo.findById(photoId, function (err, photo) {
+    if (err) {
+      console.error("Error in /commentsOfPhoto/:photoId:", err);
+      response.status(500).send(JSON.stringify(err));
+      return;
+    }
+    if (!photo) {
+      response.status(400).send("Photo not found");
+      return;
+    }
+
+    // Add the new comment to the photo's comments array
+    photo.comments.push({
+      comment: comment,
+      user_id: request.session.user_id,
+      date_time: new Date(),
+    });
+
+    // Save the updated photo document
+    photo.save(function (err, updatedPhoto) {
+      if (err) {
+        console.error("Error saving comment in /commentsOfPhoto/:photoId:", err);
+        response.status(500).send(JSON.stringify(err));
+        return;
+      }
+      response.status(200).send("Comment added successfully");
+    });
+  });
+});
 
 const server = app.listen(3000, function () {
   const port = server.address().port;

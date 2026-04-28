@@ -1,6 +1,7 @@
 # Building Web Applications
 **CS142 Lecture Notes — Mendel Rosenblum**
 
+- [material-ui](https://mui.com/material-ui/)
 ---
 
 # 1. Introduction
@@ -150,8 +151,6 @@ Full annotated example for the Photo App:
 
 ---
 
----
-
 # 2. Material-UI
 
 ## Layout with Material-UI Grid
@@ -182,10 +181,11 @@ Use a grid to lay out your app structure:
 
 Much useful functionality is available for your app:
 
-- **Modals:** Menu, Popover, Dialogs, Selects, SnackBars
-- **Navigation:** Tabs, Bottom Navigation, Drawers
-- **Context Tracking:** AppBar, Stepper, Progress
-- **Other:** Paper, Autocomplete, Tooltips, Badges
+### **Modals:** Menu, Popover, Dialogs, Selects, SnackBars
+
+### **Navigation:** Tabs, Bottom Navigation, Drawers
+### **Context Tracking:** AppBar, Stepper, Progress
+### **Other:** Paper, Autocomplete, Tooltips, Badges
 
 ---
 

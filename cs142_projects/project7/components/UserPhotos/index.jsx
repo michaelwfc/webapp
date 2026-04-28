@@ -1,5 +1,5 @@
 import React from "react";
-import { Typography, Paper } from "@mui/material";
+import { Typography, Paper, Button, TextField,Dialog,DialogTitle,DialogContent,DialogActions } from "@mui/material";
 import { Link } from "react-router-dom";
 // import fetchModel from "../../lib/fetchModelData";
 import axios from "axios";
@@ -11,6 +11,9 @@ class UserPhotos extends React.Component {
     this.state = {
       photos: [],
       user: null,
+      commentDialogOpen: false,
+      activePhotoId: null,
+      newComment: "",
     };
     this._isMounted = false; // To track if the component is mounted
   }
@@ -104,6 +107,40 @@ class UserPhotos extends React.Component {
     return date.toDateString() + " " + date.toLocaleTimeString();
   }
 
+  openCommentDialog = (photoId) => {
+    this.setState({ openCommentDialog: true, activePhotoId: photoId });
+  }
+
+  closeCommentDialog = () => {
+    this.setState({ openCommentDialog: false, activePhotoId: null });
+  }
+  
+  submitComment = () => {
+    const userId = this.props.match.params.userId;
+
+    // get the newComent from TextField
+    const  newComment = this.state.newComment;
+    const activePhotoId = this.state.activePhotoId;
+
+    if(!newComment.trim()) {
+      console.warn("Comment is empty.");
+      return;
+    }
+
+    // Post the new comment to the server
+    // The server will handle adding the comment to the photo and associating it with the user.
+    // how can the UI update the comments section after posting a new comment?
+
+    axios.post(`/commentsOfPhoto/${activePhotoId}`, {
+        comment: newComment,
+      })
+      .then((response) => { 
+        // After successfully posting the comment, we need to refresh the photo data to show the new comment.
+        this.loadData(); // This will re-fetch the photos and user data, including the new comment.
+        this.closeCommentDialog(); // Close the dialog after submitting the comment.
+      });
+  }
+
   render() {
     const { photos, user } = this.state;
 
@@ -144,6 +181,29 @@ class UserPhotos extends React.Component {
                 ))}
               </div>
             )}
+            {/* add New Comment for each Photo*/}
+            <Button onClick={()=>this.openCommentDialog(photo._id)}>Add Comment</Button>
+            <Dialog open={this.state.openCommentDialog} onClose={this.closeCommentDialog}>
+              <DialogTitle>Add a New Comment</DialogTitle>
+              <DialogContent>
+                <TextField
+                  label="Comment"
+                  variant="outlined"
+                  fullWidth
+                  multiline
+                  rows={4}
+                  value={this.state.newComment}
+                  onChange={(e) => this.setState({ newComment: e.target.value })}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={this.closeCommentDialog}>Cancel</Button>
+                <Button onClick={this.submitComment} variant="contained" color="primary">
+                  Add Comment
+                </Button>
+              </DialogActions>
+            </Dialog>
+
           </Paper>
         ))}
       </div>
