@@ -11,7 +11,7 @@ const { createHash, randomBytes } = require('crypto');
 function makePasswordEntry(clearTextPassword) {
     const salt = randomBytes(8).toString("hex");
     const hash = createHash("sha1").update(clearTextPassword).update(salt).digest("hex");
-    return { salt, hash };
+    return {  hash ,salt};
 
 }
 

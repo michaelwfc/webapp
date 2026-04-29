@@ -343,7 +343,7 @@ app.post("/admin/register", function (request, response) {
       return;
     }
     // make password entry (hash + salt)
-    const { password_digest, salt } = makePasswordEntry(password);
+    const { hash: password_digest, salt } = makePasswordEntry(password);
 
     // Create new user
     const newUser = new User({

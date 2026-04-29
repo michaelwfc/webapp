@@ -119,6 +119,7 @@ class LoginRegister extends React.Component {
             this.props.history.push(`/users/${userId}`);
 
         } catch (err) {
+            // TODO: handle different error cases (e.g., network error vs. invalid credentials)
             this.setState({ error: err.message || 'Login failed' });
         }
     };
