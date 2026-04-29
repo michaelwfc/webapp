@@ -309,6 +309,72 @@ app.post("/admin/login", function (request, response) {
   });
 });
 
+// Admin register endpoint
+app.post("/admin/register", function (request, response) {
+  const { 
+    first_name, 
+    last_name, 
+    login_name, 
+    password,
+    location,
+    description,
+    occupation
+  } = request.body;
+
+  // Validate required fields
+  if (!first_name || !last_name || !login_name || !password) {
+    response.status(400).send("Missing required fields: first_name, last_name, login_name, and password are required");
+    return;
+  }
+
+  // Check if user with this login_name already exists
+  User.findOne({ login_name: login_name.toLowerCase() }, function (err, existingUser) {
+    if (err) {
+      console.error("Error in /admin/register:", err);
+      response.status(500).send(JSON.stringify(err));
+      return;
+    }
+
+    if (existingUser) {
+      response.status(400).send("User with this login name already exists");
+      return;
+    }
+
+    // Create new user
+    const newUser = new User({
+      first_name: first_name.trim(),
+      last_name: last_name.trim(),
+      login_name: login_name.toLowerCase().trim(),
+      location: location ? location.trim() : '',
+      description: description ? description.trim() : '',
+      occupation: occupation ? occupation.trim() : ''
+      // Note: In a real application, we would hash the password
+      // For this project, we're not storing passwords as per the schema
+    });
+
+    // Save the new user
+    newUser.save(function (err, savedUser) {
+      if (err) {
+        console.error("Error saving new user:", err);
+        response.status(500).send(JSON.stringify(err));
+        return;
+      }
+
+      // Set session user_id to the new user's _id
+      request.session.user_id = savedUser._id;
+
+      console.log("Registration successful");
+      // Return the newly created user data
+      response.status(200).send({ 
+        _id: savedUser._id, 
+        first_name: savedUser.first_name,
+        last_name: savedUser.last_name,
+        login_name: savedUser.login_name
+      });
+    });
+  });
+});
+
 // app logout router
 app.post("/admin/logout", function (request, response) {
   if (!request.session.user_id) {
