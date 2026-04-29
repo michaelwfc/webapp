@@ -19,6 +19,8 @@ mongoose.connect("mongodb://127.0.0.1/cs142project6", {
   useUnifiedTopology: true,
 });
 
+
+const { makePasswordEntry, doesPasswordMatch } = require("./cs142password");
 // Get the magic models we used in the previous projects.
 const cs142models = require("./modelData/photoApp.js").cs142models;
 
@@ -45,6 +47,11 @@ Promise.all(removePromises)
     const userModels = cs142models.userListModel();
     const mapFakeId2RealId = {};
     const userPromises = userModels.map(function (user) {
+
+      // makePasswordEntry generates a salt and hash for the given clear text password.
+      // In this example, we use a weak password "weak" for all users, but in a real application, you should use strong passwords and never store them in plain text.
+      const passwordEntry = makePasswordEntry("weak");
+
       return User.create({
         first_name: user.first_name,
         last_name: user.last_name,
@@ -52,7 +59,9 @@ Promise.all(removePromises)
         description: user.description,
         occupation: user.occupation,
         login_name: user.last_name.toLowerCase(),
-        password: "weak",
+        // password: "weak",
+        password_digest: passwordEntry.hash, // Store the hashed password
+        salt: passwordEntry.salt, // Store the salt used for hashing
       })
         .then(function (userObj) {
           // Set the unique ID of the object. We use the MongoDB generated _id

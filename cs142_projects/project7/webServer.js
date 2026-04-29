@@ -44,6 +44,8 @@ const multer = require("multer");
 
 const app = express();
 
+const { makePasswordEntry, doesPasswordMatch } = require("./cs142password");
+
 // Enables sessions: This middleware allows Express to manage user sessions across requests.
 // Required for login/logout: Without it, request.session.user_id wouldn't work in /admin/login or other handlers.
 // What it does:
@@ -289,13 +291,14 @@ app.post("/admin/login", function (request, response) {
     }
     if (!user) {
       response.status(400).send("User not found");
+      return;
     }
 
     // ensure password matches
-    // if (user.password !== password) {
-    //   response.status(400).send("Incorrect password");
-    //   return;
-    // }
+    if (!doesPasswordMatch( user.password_digest, user.salt, password)) {
+      response.status(400).send("Incorrect password");
+      return;
+    }
 
     // Note the login register handler should ensure that there exists a user with the given login_name.
     // If so, it stores some information in the Express session where it can be checked by other request handlers that need to know whether a user is logged in.
@@ -339,12 +342,18 @@ app.post("/admin/register", function (request, response) {
       response.status(400).send("User with this login name already exists");
       return;
     }
+    // make password entry (hash + salt)
+    const { password_digest, salt } = makePasswordEntry(password);
 
     // Create new user
     const newUser = new User({
       first_name: first_name.trim(),
       last_name: last_name.trim(),
       login_name: login_name.toLowerCase().trim(),
+      // save the password digest and salt instead of the plain text password
+      password_digest: password_digest,
+      salt: salt,
+
       location: location ? location.trim() : '',
       description: description ? description.trim() : '',
       occupation: occupation ? occupation.trim() : ''

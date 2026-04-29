@@ -12,7 +12,9 @@ const userSchema = new mongoose.Schema({
   description: String,
   occupation: String,
   login_name: String,
-  // password: String
+  // password: String, // In a real application, you should never store passwords in plain text. Use hashing and salting instead.
+  password_digest: String, // Store a hashed version of the password for security.
+  salt: String, // Store the salt used for hashing the password.
 });
 
 /**

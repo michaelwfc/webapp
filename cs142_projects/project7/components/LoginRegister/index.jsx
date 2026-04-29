@@ -90,14 +90,22 @@ class LoginRegister extends React.Component {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ login_name: login_name, password: password })
             });
+            
+            console.log("status:", response.status);
+            console.log("bodyUsed BEFORE text():", response.bodyUsed); // ← tells you if already read
 
+             
+            
             if (!response.ok) {
-                const text = await response.text();
+                console.log("entered error branch, response.status:", response.status);
+                // A Response body can only be read once. If you try to read it again (e.g., with response.text() or response.json()), it will throw an error because the stream has already been consumed.
+                // To handle this, you should read the body once and then use that data for both success and error handling.
+                const text = await response.text(); // ← this will fail if response.json() was already called
                 throw new Error(text || response.statusText);
             }
             
             // Get the user data from the response
-            const data = await response.json();
+            const data = await response.json(); 
             
             // Now receives loggedInUser as prop.
             // If login is successful, call the parent callback to update app state
