@@ -20,7 +20,7 @@ mongoose.connect("mongodb://127.0.0.1/cs142project6", {
 });
 
 
-const { makePasswordEntry, doesPasswordMatch } = require("./cs142password");
+const { makePasswordEntry } = require("./cs142password");
 // Get the magic models we used in the previous projects.
 const cs142models = require("./modelData/photoApp.js").cs142models;
 

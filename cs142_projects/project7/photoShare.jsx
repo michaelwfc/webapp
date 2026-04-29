@@ -34,7 +34,6 @@ import { HashRouter, Route, Switch, Redirect } from "react-router-dom";
 import "./styles/main.css";
 import TopBar from "./components/TopBar";
 import UserDetail from "./components/UserDetail";
-import UserList from "./components/UserList";
 import UserPhotos from "./components/UserPhotos";
 import LoginRegister from "./components/LoginRegister";
 
@@ -71,13 +70,11 @@ class PhotoShare extends React.Component {
             <Grid item sm={3}>
               <Paper className="cs142-main-grid-item">
                 {userIsLoggedIn ? (
-                  <>
                     <Route
                       // path="/users/:userId" — defines a pattern where :userId is a placeholder
                       path="/users/:userId"
                       render={(props) => <UserDetail {...props} />}
                     />
-                  </>
                 ) : (
                   <Typography variant="body1">
                     Please log in to view user details.
@@ -101,12 +98,10 @@ class PhotoShare extends React.Component {
                   />
 
                   {userIsLoggedIn ? (
-                    <>
                       <Route
                         path="/photos/:userId"
                         render={(props) => <UserPhotos {...props} />}
                       />
-                    </>
                   ) : (
                     <Redirect to="/admin/login" />
                   )}

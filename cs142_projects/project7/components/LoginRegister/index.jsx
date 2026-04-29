@@ -52,7 +52,6 @@ So if login returns `_id: "69ea..."`, the redirect goes to `/users/69ea...` whic
  * 
  */
 import React from 'react';
-import axios from 'axios';
 import { TextField, Button, Box, Paper, Typography } from '@mui/material';
 import { withRouter } from 'react-router-dom';
 

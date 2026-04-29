@@ -362,10 +362,10 @@ app.post("/admin/register", function (request, response) {
     });
 
     // Save the new user
-    newUser.save(function (err, savedUser) {
-      if (err) {
-        console.error("Error saving new user:", err);
-        response.status(500).send(JSON.stringify(err));
+    newUser.save(function (saveErr, savedUser) {
+      if (saveErr) {
+        console.error("Error saving new user:", saveErr);
+        response.status(500).send(JSON.stringify(saveErr));
         return;
       }
 
@@ -536,13 +536,13 @@ app.post("/commentsOfPhoto/:photoId", function (request, response) {
     });
 
     // Save the updated photo document
-    photo.save(function (err, updatedPhoto) {
-      if (err) {
+    photo.save(function (saveErr) {
+      if (saveErr) {
         console.error(
           "Error saving comment in /commentsOfPhoto/:photoId:",
-          err,
+          saveErr,
         );
-        response.status(500).send(JSON.stringify(err));
+        response.status(500).send(JSON.stringify(saveErr));
         return;
       }
       response.status(200).send("Comment added successfully");
@@ -588,9 +588,9 @@ app.post("/photos/new", function (request, response) {
     const timestamp = new Date().valueOf();
     const filename = "U" + String(timestamp) + request.file.originalname;
 
-    fs.writeFile("./images/" + filename, request.file.buffer, function (err) {
-      if (err) {
-        console.error("Error writing file:", err);
+    fs.writeFile("./images/" + filename, request.file.buffer, function (writeErr) {
+      if (writeErr) {
+        console.error("Error writing file:", writeErr);
         response.status(500).send("Error writing file.");
         return;
       }
@@ -600,10 +600,10 @@ app.post("/photos/new", function (request, response) {
         file_name: filename,
         date_time: timestamp,
         user_id: request.session.user_id,
-      }).then(function (photoObj) {
+      }).then(function () {
         response.status(200).send("Photo uploaded successfully");
-      }).catch(function (err) {
-        console.error("Error creating photo:", err);
+      }).catch(function (createErr) {
+        console.error("Error creating photo:", createErr);
         response.status(500).send("Error creating photo.");
       });
     });

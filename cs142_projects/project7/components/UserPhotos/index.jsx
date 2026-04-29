@@ -11,7 +11,6 @@ class UserPhotos extends React.Component {
     this.state = {
       photos: [],
       user: null,
-      commentDialogOpen: false,
       activePhotoId: null,
       newComment: "",
     };
@@ -109,15 +108,13 @@ class UserPhotos extends React.Component {
 
   openCommentDialog = (photoId) => {
     this.setState({ openCommentDialog: true, activePhotoId: photoId });
-  }
+  };
 
   closeCommentDialog = () => {
     this.setState({ openCommentDialog: false, activePhotoId: null });
-  }
+  };
   
   submitComment = () => {
-    const userId = this.props.match.params.userId;
-
     // get the newComent from TextField
     const  newComment = this.state.newComment;
     const activePhotoId = this.state.activePhotoId;
@@ -134,12 +131,12 @@ class UserPhotos extends React.Component {
     axios.post(`/commentsOfPhoto/${activePhotoId}`, {
         comment: newComment,
       })
-      .then((response) => { 
+      .then(() => { 
         // After successfully posting the comment, we need to refresh the photo data to show the new comment.
         this.loadData(); // This will re-fetch the photos and user data, including the new comment.
         this.closeCommentDialog(); // Close the dialog after submitting the comment.
       });
-  }
+  };
 
   render() {
     const { photos, user } = this.state;
