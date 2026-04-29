@@ -31,6 +31,7 @@
  *                      (JSON format).
  */
 
+const fs = require("fs");
 const mongoose = require("mongoose");
 mongoose.Promise = require("bluebird");
 
@@ -40,7 +41,6 @@ const express = require("express");
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const multer = require("multer");
-
 
 const app = express();
 
@@ -52,19 +52,39 @@ const app = express();
 // Protects session data with the secret key.
 
 // Finally you need to add the express-session and body-parser middleware to express with the Express use like so:
-// where "secretKey" is the secret you use to cryptographically protect the session cookie. 
+// where "secretKey" is the secret you use to cryptographically protect the session cookie.
 // We will use the multer middleware in the photo upload code.
-app.use(session({
-  secret: "cs142Project7Secret",
-  resave: false,
-  saveUninitialized: false,
-}));
+app.use(
+  session({
+    secret: "cs142Project7Secret",
+    resave: false,
+    saveUninitialized: false,
+  }),
+);
 
 app.use(bodyParser.json());
 
-// app.use(multer().array());
+const processFormBody = multer({ storage: multer.memoryStorage() }).single(
+  "uploadedphoto",
+);
 
+/** 
+ * Express using body-parser can not handle a POST request with form containing a file but can with a middleware named multer.
+ * processFormBody is a multer middleware that handles file uploads from HTML forms. 
+ * Insert the following line after the require of multer:
+ What it does:
+- Intercepts POST requests with form data containing a file
+- Looks for a form field named 'uploadedphoto'
+- Extracts the file and stores it in memory (not on disk yet)
+- Attaches file data to request.file object
 
+After processFormBody runs, you can access:
+- request.file.originalname — filename user uploaded
+- request.file.buffer — file contents (bytes)
+- request.file.mimetype — file type (e.g., 'image/jpeg')
+- request.file.size — file size in bytes
+
+*/
 
 // Load the Mongoose schema for User, Photo, and SchemaInfo
 // This line connects your code to the users collection in MongoDB.
@@ -75,7 +95,6 @@ const SchemaInfo = require("./schema/schemaInfo.js");
 // XXX - Your submission should work without this line. Comment out or delete
 // this line for tests and before submission!
 
-
 mongoose.set("strictQuery", false);
 mongoose.connect("mongodb://127.0.0.1/cs142project6", {
   useNewUrlParser: true,
@@ -85,8 +104,6 @@ mongoose.connect("mongodb://127.0.0.1/cs142project6", {
 // We have the express static module
 // (http://expressjs.com/en/starter/static-files.html) do all the work for us.
 app.use(express.static(__dirname));
-
-
 
 app.get("/", function (request, response) {
   response.send("Simple web server of files from " + __dirname);
@@ -180,7 +197,6 @@ app.get("/test/:p1", function (request, response) {
  * URL /user/list - Returns all the User objects.
  */
 app.get("/user/list", function (request, response) {
-
   User.find({}, function (err, users) {
     if (err) {
       // Query returned an error. We pass it back to the browser with an
@@ -192,12 +208,12 @@ app.get("/user/list", function (request, response) {
     // Query didn't return an error.
     // Now we build the array of objects with the information we want to
     // return.
-    // Updated the server (webServer.js): Changed the /user/list endpoint to return only 
+    // Updated the server (webServer.js): Changed the /user/list endpoint to return only
     // the required properties (_id, first_name, last_name) by mapping the user objects.
-    const userList = users.map(user => ({
+    const userList = users.map((user) => ({
       _id: user._id,
       first_name: user.first_name,
-      last_name: user.last_name
+      last_name: user.last_name,
     }));
     response.status(200).send(userList);
   });
@@ -207,8 +223,10 @@ app.get("/user/list", function (request, response) {
  * URL /user/:id - Returns the information for User (id).
  */
 app.get("/user/:id", function (request, response) {
-  if(!request.session.user_id) {
-    response.status(401).send("Unauthorized: Please log in to view user details.");
+  if (!request.session.user_id) {
+    response
+      .status(401)
+      .send("Unauthorized: Please log in to view user details.");
     return;
   }
 
@@ -249,11 +267,11 @@ app.get("/user/:id", function (request, response) {
 });
 
 /**
- * /admin/login router 
- * 
+ * /admin/login router
+ *
  * */
 
-app.post("/admin/login", function (request, response) { 
+app.post("/admin/login", function (request, response) {
   const { login_name, password } = request.body;
   // ensure login_name and password are provided
   if (!login_name || !password) {
@@ -278,9 +296,9 @@ app.post("/admin/login", function (request, response) {
     //   response.status(400).send("Incorrect password");
     //   return;
     // }
-    
-    // Note the login register handler should ensure that there exists a user with the given login_name. 
-    // If so, it stores some information in the Express session where it can be checked by other request handlers that need to know whether a user is logged in. 
+
+    // Note the login register handler should ensure that there exists a user with the given login_name.
+    // If so, it stores some information in the Express session where it can be checked by other request handlers that need to know whether a user is logged in.
     // set session user_id to logged in user's _id
     request.session.user_id = user._id;
 
@@ -289,9 +307,7 @@ app.post("/admin/login", function (request, response) {
     // return the logged-in user data:
     response.status(200).send({ _id: user._id, first_name: user.first_name });
   });
-
 });
-
 
 // app logout router
 app.post("/admin/logout", function (request, response) {
@@ -360,54 +376,56 @@ app.get("/photosOfUser/:id", function (request, response) {
   }
 
   Photo.find({ user_id: id })
-     
-     // Replace the user_id (which is just an ObjectId) with the actual User document.
-     // .populate() is basically a JOIN.
-    .populate("comments.user_id", "_id first_name last_name")  // ✅ populate user
-  
+
+    // Replace the user_id (which is just an ObjectId) with the actual User document.
+    // .populate() is basically a JOIN.
+    .populate("comments.user_id", "_id first_name last_name") // ✅ populate user
+
     // populate the user_id field in comments with the user's _id, first_name, and last_name
     // "comments.user_id": Go inside comments, find field user_id
     // "_id first_name last_name" : Only fetch these fields from User, controls exactly which fields appear:
     // The first_name and last_name come from the User collection via populate
     // “For each comment, replace user_id with the corresponding User object, but only include _id, first_name, and last_name.”
     .exec(function (err, photos) {
-    if (err) {
-      // Query returned an error. We pass it back to the browser with an
-      // Internal Service Error (500) error code.
-      console.error("Error in /photosOfUser/:id:", err);
-      response.status(500).send(JSON.stringify(err));
-      return;
-    }
-    // Query didn't return an error but didn't find the photos - This is a
-    // Bad Param error return.
-    if (photos.length === 0) {
-      console.log("Photos for user with _id:" + id + " not found.");
-      response.status(400).send("Not found");
-      return;
-    }
-    // We got the photos - return them in JSON format.
-    console.log("Photos of user with _id:" + id + " found:\n", JSON.stringify(photos, null, 2));
-    console.log(JSON.stringify(photos[0], null, 2));
+      if (err) {
+        // Query returned an error. We pass it back to the browser with an
+        // Internal Service Error (500) error code.
+        console.error("Error in /photosOfUser/:id:", err);
+        response.status(500).send(JSON.stringify(err));
+        return;
+      }
+      // Query didn't return an error but didn't find the photos - This is a
+      // Bad Param error return.
+      if (photos.length === 0) {
+        console.log("Photos for user with _id:" + id + " not found.");
+        response.status(400).send("Not found");
+        return;
+      }
+      // We got the photos - return them in JSON format.
+      console.log(
+        "Photos of user with _id:" + id + " found:\n",
+        JSON.stringify(photos, null, 2),
+      );
+      console.log(JSON.stringify(photos[0], null, 2));
 
-    // transform the photos to API model (rename user_id → user)
-    const transformedResults = photos.map((photo) => {
-      return {
-        _id: photo._id,
-        file_name: photo.file_name,
-        date_time: photo.date_time,
-        user_id: photo.user_id,
-        comments: photo.comments.map((comment) => (
-          {
+      // transform the photos to API model (rename user_id → user)
+      const transformedResults = photos.map((photo) => {
+        return {
+          _id: photo._id,
+          file_name: photo.file_name,
+          date_time: photo.date_time,
+          user_id: photo.user_id,
+          comments: photo.comments.map((comment) => ({
             _id: comment._id,
             user: comment.user_id, // rename user_id → user, populated user object
             comment: comment.comment,
             date_time: comment.date_time,
-          }))
-        };  
-    });
+          })),
+        };
+      });
 
-    response.status(200).send(transformedResults);
-  });
+      response.status(200).send(transformedResults);
+    });
 });
 
 app.post("/commentsOfPhoto/:photoId", function (request, response) {
@@ -445,11 +463,74 @@ app.post("/commentsOfPhoto/:photoId", function (request, response) {
     // Save the updated photo document
     photo.save(function (err, updatedPhoto) {
       if (err) {
-        console.error("Error saving comment in /commentsOfPhoto/:photoId:", err);
+        console.error(
+          "Error saving comment in /commentsOfPhoto/:photoId:",
+          err,
+        );
         response.status(500).send(JSON.stringify(err));
         return;
       }
       response.status(200).send("Comment added successfully");
+    });
+  });
+});
+
+app.post("/photos/new", function (request, response) {
+  if (!request.session.user_id) {
+    response
+      .status(401)
+      .send("Unauthorized: Please log in to view user details.");
+    return;
+  }
+
+  // Call the processFormBody middleware to handle the file upload and form parsing
+  /*
+   * processFormBody is a function we can use in our post request handler for /photos/new.
+   * processFormBody will look at the form for a field named "uploadedphoto" and pull the file out of it
+   * and place the information is a property named file on the request object.
+   *
+   * The following code gives you an idea of how to call it in your post request handler:
+   */
+  processFormBody(request, response, function (err) {
+    if (err || !request.file) {
+      response.status(400).send("File not found");
+      return;
+    }
+
+    // request.file has the following properties of interest:
+    //   fieldname    - Should be 'uploadedphoto' since that is what we sent
+    //   originalname - The name of the file the user uploaded
+    //   mimetype     - The mimetype of the image (e.g., 'image/jpeg',
+    //                  'image/png')
+    //   buffer       - A node Buffer containing the contents of the file
+    //   size         - The size of the file in bytes
+
+    // XXX - Do some validation here.
+
+    // We need to create the file in the directory "images" under an unique name.
+    // We make the original file name unique by adding a unique prefix with a
+    // timestamp.
+    const timestamp = new Date().valueOf();
+    const filename = "U" + String(timestamp) + request.file.originalname;
+
+    fs.writeFile("./images/" + filename, request.file.buffer, function (err) {
+      if (err) {
+        console.error("Error writing file:", err);
+        response.status(500).send("Error writing file.");
+        return;
+      }
+      // XXX - Once you have the file written into your images directory under the
+      // name filename you can create the Photo object in the database
+      Photo.create({
+        file_name: filename,
+        date_time: timestamp,
+        user_id: request.session.user_id,
+      }).then(function (photoObj) {
+        response.status(200).send("Photo uploaded successfully");
+      }).catch(function (err) {
+        console.error("Error creating photo:", err);
+        response.status(500).send("Error creating photo.");
+      });
     });
   });
 });

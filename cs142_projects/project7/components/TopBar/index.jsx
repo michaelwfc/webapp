@@ -1,4 +1,5 @@
 import React from "react";
+import axios from "axios";
 import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material";
 import { withRouter } from "react-router-dom";
 import fetchModel from "../../lib/fetchModelData";
@@ -57,13 +58,13 @@ class TopBar extends React.Component {
   // Handles logout by calling the /admin/logout API, updating app state, and redirecting to login.
   handleLogout = async () => {
     try {
-      const response = await fetch('/admin/logout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/admin/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
       });
 
       if (!response.ok) {
-        console.error('Logout failed');
+        console.error("Logout failed");
         return;
       }
 
@@ -73,9 +74,9 @@ class TopBar extends React.Component {
       }
 
       // Redirect to login page
-      this.props.history.push('/admin/login');
+      this.props.history.push("/admin/login");
     } catch (err) {
-      console.error('Error during logout:', err);
+      console.error("Error during logout:", err);
     }
   };
 
@@ -94,6 +95,23 @@ class TopBar extends React.Component {
     return "";
   }
 
+  /**
+   * Called when user presses the update button.
+   */
+  handleUploadButtonClicked = (e) => {
+    e.preventDefault();
+    if (this.uploadInput.files.length > 0) {
+      // Create a DOM form and add the file to it under the name uploadedphoto
+      const domForm = new FormData();
+      domForm.append("uploadedphoto", this.uploadInput.files[0]);
+      axios
+        .post("/photos/new", domForm)
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => console.log(`POST ERR: ${err}`));
+    }
+  };
 
   render() {
     const { loggedInUser } = this.props;
@@ -110,6 +128,35 @@ class TopBar extends React.Component {
             >
               {loggedInUser ? `Hi, ${loggedInUser.first_name}` : "Please Login"}
             </Typography>
+
+            {/* React supports using HTML's input with type="file" to have the user select files.
+            will get the browser to add an ugly button labeled "Choose File" that the user can push to select a local file. 
+            When the user selects a file this.uploadInput will contain the DOM FileList from the input element from which 
+            the DOM File can be taken and sent to the web server. 
+            You will need to also have a button that the user presses to actually submit the photo file to the server as decribed below.
+            */}
+            <Box
+              sx={{ display: "flex", alignItems: "center" }}
+              className="cs142-topbar-upload"
+            >
+              {
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={(domFileRef) => {
+                    this.uploadInput = domFileRef;
+                  }}
+                />
+              }
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={this.handleUploadButtonClicked}
+              >
+                Upload Photo
+              </Button>
+            </Box>
+
             {loggedInUser && (
               <Button color="inherit" onClick={this.handleLogout}>
                 Logout
