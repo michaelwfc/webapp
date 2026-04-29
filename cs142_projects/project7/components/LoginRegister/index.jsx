@@ -61,7 +61,7 @@ class LoginRegister extends React.Component {
         super(props);
         this.state = {
             // Login fields
-            username: '',
+            login_name: '',
             password: '',
             error: '',
             // Registration fields
@@ -77,16 +77,18 @@ class LoginRegister extends React.Component {
 
     handleLogin = async (event) => {
         event.preventDefault();
-        const { username, password } = this.state;
+        const { login_name, password } = this.state;
 
-        if (!username || !password) {
-            this.setState({ error: 'Please enter username and password.' });
+        if (!login_name || !password) {
+            this.setState({ error: 'Please enter login name and password.' });
             return;
         }
 
         try {
-            const response = await axios.post('/admin/login', {
-               data: { username, password },
+            const response = await fetch('/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login_name: login_name, password: password })
             });
 
             if (!response.ok) {
@@ -120,7 +122,7 @@ class LoginRegister extends React.Component {
         const { 
             firstName, 
             lastName, 
-            username, 
+            login_name, 
             password,
             location,
             description,
@@ -128,8 +130,8 @@ class LoginRegister extends React.Component {
         } = this.state;
 
         // Validate required fields
-        if (!firstName || !lastName || !username || !password) {
-            this.setState({ error: 'Please fill in all required fields: First Name, Last Name, Username, and Password.' });
+        if (!firstName || !lastName || !login_name || !password) {
+            this.setState({ error: 'Please fill in all required fields: First Name, Last Name, Login Name, and Password.' });
             return;
         }
 
@@ -140,7 +142,7 @@ class LoginRegister extends React.Component {
                 body: JSON.stringify({
                     first_name: firstName,
                     last_name: lastName,
-                    login_name: username,
+                    login_name: login_name,
                     password: password,
                     location: location,
                     description: description,
@@ -225,12 +227,12 @@ class LoginRegister extends React.Component {
                         </>
                     )}
                     <TextField
-                        id="username"
-                        label={isRegisterMode ? "Username *" : "Username"}
+                        id="login_name"
+                        label={isRegisterMode ? "Login Name *" : "Login Name"}
                         variant="outlined"
                         fullWidth //made inputs full-width
-                        value={this.state.username}
-                        onChange={(e) => this.setState({ username: e.target.value })}
+                        value={this.state.login_name}
+                        onChange={(e) => this.setState({ login_name: e.target.value })}
                     />
                     <TextField
                         id="password"
