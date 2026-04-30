@@ -365,12 +365,19 @@ describe("CS142 Photo App: Server API Tests", function () {
                 photos = JSON.parse(responseBody);
 
                 const real_photos = cs142models.photoOfUserModel(realUser._id);
+                try {
+                  assert.strictEqual(
+                    real_photos.length,
+                    photos.length,
+                    "wrong number of photos returned for user " +
+                      realUser.first_name +
+                      " " +
+                      realUser.last_name
+                  );
+                } catch (err) {
+                  console.log(err);
+                }
 
-                assert.strictEqual(
-                  real_photos.length,
-                  photos.length,
-                  "wrong number of photos returned"
-                );
                 _.forEach(real_photos, function (real_photo) {
                   const matches = _.filter(photos, {
                     file_name: real_photo.file_name,

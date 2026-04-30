@@ -10,6 +10,17 @@
       "console": "integratedTerminal"
     },
     {
+      // npm test   → mocha serverApiTest.js
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Project7-mocha-serverApiTest",
+      "program": "${workspaceFolder}/cs142_projects/project7/test/node_modules/mocha/bin/_mocha",
+      "args": ["serverApiTest.js", "--timeout", "10000"],
+      "cwd": "${workspaceFolder}/cs142_projects/project7/test",
+      "console": "integratedTerminal"
+    },
+
+    {
       // $ node_modules/.bin/nodemon webServer.js
       "type": "node",
       "request": "launch",
