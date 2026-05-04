@@ -1,8 +1,9 @@
 # create a good prompt to build a html tutorial based on markdown/PDF file
 
 ```
-You are an expert technical writer and frontend developer. Convert the following 
-Markdown or PDF into a comprehensive, well-structured ,beautiful, self-contained HTML tutorial page.
+You are an expert technical writer and frontend developer.
+First, Convert the following PDF into a comprehensive, well-structured ,beautiful, self-contained HTML tutorial page.
+Then, convert HTML tutorial page into markdown.
 
 This is for junior developers who know JavaScript but are new to Web appliaction development and backend concepts
 
